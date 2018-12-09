@@ -33,6 +33,10 @@ impl Entity {
 }
 
 /// The game state.  Uses a variant of the Entity-Component-System architecture.
+/// This struct provides many methods for querying and mutating entities.  These methods
+/// constitute a low-level interface for interacting with the world; e.g., `set_location()`
+/// will set the player's location, but that's all it does.  The game logic for entering a new
+/// room should be implemented elsewhere.
 pub struct World {
     pub clock: usize,
     pub entities: Vec<Entity>,
@@ -104,5 +108,10 @@ impl World {
             }
         }
         None
+    }
+
+    /// Sets the entity's location
+    pub fn set_location(&mut self, id: ID, loc: ID) {
+        self.entities[id].loc = Some(loc);
     }
 }

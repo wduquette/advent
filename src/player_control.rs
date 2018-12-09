@@ -42,10 +42,11 @@ pub fn system(world: &mut World, command: &str) {
 
 // User Commands
 
+/// Move the player in the given direction
 fn cmd_go(world: &mut World, dir: Dir) -> CmdResult {
     let here = world.loc(world.player);
     if let Some(dest) = world.follow(here, dir) {
-        set_player_location(world, dest);
+        world.set_location(world.player, dest);
         describe_player_location(world);
         Ok(())
     } else {
@@ -53,6 +54,7 @@ fn cmd_go(world: &mut World, dir: Dir) -> CmdResult {
     }
 }
 
+/// Display basic help, i.e., what commands are available.
 fn cmd_help(_world: &World) -> CmdResult {
     println!(
         "\
@@ -64,11 +66,13 @@ You know.  Like that.
     Ok(())
 }
 
+/// Re-describe the current location.
 fn cmd_look(world: &World) -> CmdResult {
     describe_player_location(world);
     Ok(())
 }
 
+/// Quit the game.
 fn cmd_quit(_world: &World) -> CmdResult {
     println!("Bye, then.");
     ::std::process::exit(0);
@@ -76,24 +80,42 @@ fn cmd_quit(_world: &World) -> CmdResult {
 
 // Debugging commands
 
+/// Dump information about the given entity, provided the ID string is valid.
 fn cmd_dump(world: &World, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
     debug::dump_entity(world, id);
     Ok(())
 }
 
+/// Dump information about all entities.
 fn cmd_dump_world(world: &World) -> CmdResult {
     debug::dump_world(world);
     Ok(())
 }
 
+/// List all of the available entities.
 fn cmd_list(world: &World) -> CmdResult {
     debug::list_world(world);
     Ok(())
 }
 
-// Tools
+//-------------------------------------------------------------------------
+// Actions
+//
+// These functions are used to implement the above commands.
 
+/// Describe the player's current location.
+/// TODO: This will become much more complicated once we have objects, etc.
+pub fn describe_player_location(world: &World) {
+    let loc = world.loc(world.player);
+
+    println!("{}\n{}\n", world.name(loc), world.prose(loc));
+}
+
+//-------------------------------------------------------------------------
+// Parsing Tools
+
+/// Parse a token as an entity ID, return an error result on failure.
 fn parse_id(world: &World, token: &str) -> Result<ID, String> {
     let id = match token.parse() {
         Ok(id) => id,
@@ -107,21 +129,4 @@ fn parse_id(world: &World, token: &str) -> Result<ID, String> {
     }
 
     Ok(id)
-}
-
-pub fn describe_player_location(world: &World) {
-    describe_location(world, world.loc(world.player));
-}
-
-fn describe_location(world: &World, loc: ID) {
-    let prose = world.entities[loc]
-        .prose
-        .as_ref()
-        .expect(&format!("Entity has no prose: {}", loc));
-
-    println!("{}\n{}\n", world.entities[loc].name, prose.text);
-}
-
-fn set_player_location(world: &mut World, dest: ID) {
-    world.entities[world.player].loc = Some(dest);
 }
