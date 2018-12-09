@@ -23,8 +23,13 @@ pub fn system(world: &mut World, command: &str) {
         &["west"] => cmd_go(world, West),
         &["help"] => cmd_help(world),
         &["look"] => cmd_look(world),
-        &["x", thing_arg] => cmd_examine(world, thing_arg),
-        &["examine", thing_arg] => cmd_examine(world, thing_arg),
+        &["i"] => cmd_inventory(world),
+        &["invent"] => cmd_inventory(world),
+        &["inventory"] => cmd_inventory(world),
+        &["x", name] => cmd_examine(world, name),
+        &["examine", name] => cmd_examine(world, name),
+        &["get", name] => cmd_get(world, name),
+        &["drop", name] => cmd_drop(world, name),
         &["exit"] => cmd_quit(world),
         &["quit"] => cmd_quit(world),
 
@@ -74,11 +79,56 @@ fn cmd_look(world: &World) -> CmdResult {
     Ok(())
 }
 
+/// Re-describe the current location.
+fn cmd_inventory(world: &World) -> CmdResult {
+    let pid = world.player;
+    let inv = &world.entities[pid].inventory.as_ref().unwrap();
+
+    if inv.things.len() == 0 {
+        println!("You aren't carrying anything.\n");
+    } else {
+        println!("You have: {}.\n", invent_list(world, pid));
+    }
+    Ok(())
+}
+
 /// Describe a thing in the current location.
 fn cmd_examine(world: &World, name: &str) -> CmdResult {
     if let Some(id) = find_visible_thing(world, name) {
         println!("{}\n", world.prose(id));
         Ok(())
+    } else {
+        Err("You don't see any such thing.".into())
+    }
+}
+
+/// Gets a thing from the location's inventory.
+fn cmd_get(world: &mut World, name: &str) -> CmdResult {
+    let loc = here(world);
+    if let Some(_) = find_in_inventory(world, world.player, name) {
+        Err("You already have it.".into())
+    } else if let Some(_) = find_in_scenery(world, loc, name) {
+        Err("You can't take that!".into())
+    } else if let Some(id) = find_in_inventory(world, loc, name) {
+        world.take_out(id, loc);
+        world.put_in(id, world.player);
+        println!("Taken.\n");
+        Ok(())
+    } else {
+        Err("You don't see any such thing.".into())
+    }
+}
+
+/// Drops a thing you're carrying
+fn cmd_drop(world: &mut World, name: &str) -> CmdResult {
+    let loc = here(world);
+    if let Some(id) = find_in_inventory(world, world.player, name) {
+        world.take_out(id, world.player);
+        world.put_in(id, loc);
+        println!("Dropped.\n");
+        Ok(())
+    } else if let Some(_) = find_visible_thing(world, name) {
+        Err("You aren't carrying that.".into())
     } else {
         Err("You don't see any such thing.".into())
     }
@@ -127,7 +177,7 @@ pub fn describe_player_location(world: &World) {
     // scenary; presumably that's in the description.)
     if let Some(inv) = &world.entities[loc].inventory {
         if inv.things.len() > 0 {
-            println!("You see: {}.\n", comma_list(world, &inv.things));
+            println!("You see: {}.\n", invent_list(world, loc));
         }
     }
 }
@@ -151,8 +201,13 @@ fn parse_id(world: &World, token: &str) -> Result<ID, String> {
     Ok(id)
 }
 
+/// Find a visible thing: something you're carrying, or that's here in this location.
 fn find_visible_thing(world: &World, name: &str) -> Option<ID> {
     let loc = here(world);
+
+    if let Some(id) = find_in_inventory(world, world.player, name) {
+        return Some(id);
+    }
 
     if let Some(id) = find_in_inventory(world, loc, name) {
         return Some(id);
@@ -166,7 +221,6 @@ fn find_visible_thing(world: &World, name: &str) -> Option<ID> {
 }
 
 fn find_in_inventory(world: &World, loc: ID, name: &str) -> Option<ID> {
-    // TODO: Can probably do this using some variant of filter.
     if let Some(inv) = &world.entities[loc].inventory {
         for id in &inv.things {
             if world.name(*id) == name {
@@ -179,9 +233,8 @@ fn find_in_inventory(world: &World, loc: ID, name: &str) -> Option<ID> {
 }
 
 fn find_in_scenery(world: &World, loc: ID, name: &str) -> Option<ID> {
-    // TODO: Can probably do this using some variant of filter.
     for id in 1..world.entities.len() {
-        if world.is_thing(id) && world.loc(id) == loc && world.name(id) == name {
+        if world.is_scenery(id) && world.loc(id) == loc && world.name(id) == name {
             return Some(id);
         }
     }
@@ -199,14 +252,17 @@ fn here(world: &World) -> ID {
 /// List the names of the entities, separated by commas.
 /// TODO: This could probably be done with map and some kind of join function.
 /// However, it seems that "join" is available in the nightly.
-fn comma_list(world: &World, ids: &[ID]) -> String {
+fn invent_list(world: &World, loc: ID) -> String {
     let mut list = String::new();
 
-    for id in ids {
-        if !list.is_empty() {
-            list.push_str(", ");
+    if let Some(inv) = &world.entities[loc].inventory {
+        for id in &inv.things {
+            if !list.is_empty() {
+                list.push_str(", ");
+            }
+            list.push_str(world.name(*id));
         }
-        list.push_str(world.name(*id));
+
     }
 
     list

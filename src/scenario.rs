@@ -28,7 +28,7 @@ pub fn build() -> World {
         "Bridge",
         "\
 The trail crosses a small stream here.  You can go east or west.
-        "
+        ",
     );
 
     // Links
@@ -36,8 +36,8 @@ The trail crosses a small stream here.  You can go east or west.
     connect(world, East, trail, West, bridge);
 
     // NEXT, make the things
-    let note = make_portable(world, "note", "It's illegible");
-    put_in(world, note, clearing);
+    let note = make_portable(world, "note", "It's illegible.");
+    world.put_in(note, clearing);
 
     make_scenery(
         world,
@@ -47,9 +47,8 @@ The trail crosses a small stream here.  You can go east or west.
 The stream comes from the north, down a little waterfall, and runs
 away under the bridge.  It looks surprisingly deep, considering
 how narrow it is.
-        "
+        ",
     );
-
 
     // Stories: Triggers that supply backstory to the player.
     make_story(
@@ -93,7 +92,7 @@ fn make_room(world: &mut World, name: &str, text: &str) -> ID {
     room.prose = Some(ProseComponent {
         text: text.trim().into(),
     });
-    room.links= Some(LinksComponent::new());
+    room.links = Some(LinksComponent::new());
     room.inventory = Some(InventoryComponent::new());
 
     rid
@@ -152,7 +151,9 @@ where
 /// Links are not bidirectional.  If you want links both ways, you
 /// have to add them.
 fn oneway(world: &mut World, dir: Dir, from: ID, to: ID) {
-    let links = &mut world.entities[from].links.as_mut()
+    let links = &mut world.entities[from]
+        .links
+        .as_mut()
         .expect(&format!("Entity has no link component: {}", from));
 
     links.map.insert(dir, to);
@@ -162,15 +163,4 @@ fn oneway(world: &mut World, dir: Dir, from: ID, to: ID) {
 fn connect(world: &mut World, from_dir: Dir, from: ID, to_dir: Dir, to: ID) {
     oneway(world, from_dir, from, to);
     oneway(world, to_dir, to, from);
-}
-
-/// Puts the thing in the container's inventory, and sets the thing's location.
-/// No op if the thing is already in the location.
-fn put_in(world: &mut World, thing: ID, container: ID) {
-    if let Some(inv) = &mut world.entities[container].inventory {
-        if !inv.things.contains(&thing) {
-            inv.things.push(thing);
-            world.entities[thing].loc = Some(container);
-        }
-    }
 }

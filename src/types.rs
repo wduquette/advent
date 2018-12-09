@@ -2,6 +2,7 @@
 
 use crate::world::*;
 use std::collections::hash_map::HashMap;
+use std::collections::hash_set::HashSet;
 
 /// The entity ID type: an integer.
 pub type ID = usize;
@@ -49,12 +50,12 @@ pub struct ThingComponent {
 /// An Inventory is a list of things contained with the current entity.
 #[derive(Debug)]
 pub struct InventoryComponent {
-    pub things: Vec<ID>,
+    pub things: HashSet<ID>,
 }
 
 impl InventoryComponent {
     pub fn new() -> InventoryComponent {
-        InventoryComponent { things: Vec::new(), }
+        InventoryComponent { things: HashSet::new() }
     }
 }
 

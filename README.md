@@ -5,10 +5,11 @@ using the ECS architecture.
 
 ## To Do
 
+* Review current code.
 * Extend the world.
-* Implement objects.
-* Implement inventories.
-  * The player has one, but objects can have them as well.
+* Add some puzzles.
+* Add more story.
+* Add winning condition.
 
 ## Questions
 
@@ -33,7 +34,7 @@ Probably entered commands should get pushed into a queue; and the
 player_control::system() should process commands until it hits an error
 or time has passed.
 
-Of course, once we add monsters/npcs it's possible that they can interrupt
+Of course, once we add monsters/NPCs it's possible that they can interrupt
 the command queue as well.
 
 ### Fancy Destinations
