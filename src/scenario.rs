@@ -29,11 +29,16 @@ pub fn build_world() -> World {
     link(world, West, trail, clearing);
 
     // Stories
-    make_story(world, "Story-1",|world| world.clock == 2, "\
+    make_story(
+        world,
+        "Story-1",
+        |world| world.clock == 2,
+        "\
 You don't know where you are.  You don't even know where you want to
 be.  All you know is that your feet are wet, your hands are dirty,
 and gosh, this doesn't look like anything like the toy aisle.
-    ");
+    ",
+    );
 
     // NEXT, initialize the player
     initialize_player(world, clearing);
@@ -45,8 +50,8 @@ and gosh, this doesn't look like anything like the toy aisle.
 fn initialize_player(world: &mut World, start: ID) {
     let pid = world.player;
 
+    world.entities[pid].name = "You".into();
     world.entities[pid].prose = Some(ProseComponent {
-        name: String::from("You"),
         description: String::from("You've got all the usual bits."),
     });
 
@@ -54,10 +59,10 @@ fn initialize_player(world: &mut World, start: ID) {
 }
 
 fn make_room(world: &mut World, name: &str, description: &str) -> ID {
-    let rid = world.make_entity();
+    let rid = world.alloc();
 
+    world.entities[rid].name = name.into();
     world.entities[rid].prose = Some(ProseComponent {
-        name: String::from(name),
         description: String::from(description),
     });
 
@@ -67,15 +72,16 @@ fn make_room(world: &mut World, name: &str, description: &str) -> ID {
 }
 
 fn make_story<F: 'static>(world: &mut World, name: &str, predicate: F, description: &str)
-    where F: Fn(&World) -> bool
+where
+    F: Fn(&World) -> bool,
 {
-    let tid = world.make_entity();
+    let tid = world.alloc();
+    world.entities[tid].name = format!("Trigger {}", name);
     world.entities[tid].prose = Some(ProseComponent {
-        name: format!("Trigger {}",name),
         description: String::from(description),
     });
 
-    world.entities[tid].trigger = Some(TriggerComponent{
+    world.entities[tid].trigger = Some(TriggerComponent {
         predicate: Box::new(predicate),
         action: Action::Print,
         once_only: true,

@@ -1,7 +1,7 @@
 //! Type definitions for this app.
 
-use std::collections::hash_map::HashMap;
 use crate::world::*;
+use std::collections::hash_map::HashMap;
 
 /// The entity ID type: an integer.
 pub type ID = usize;
@@ -18,7 +18,6 @@ pub enum Dir {
 
 /// Entity prose
 pub struct ProseComponent {
-    pub name: String,
     pub description: String,
 }
 
@@ -50,6 +49,7 @@ pub struct TriggerComponent {
 
 /// The entity type: a set of optional components
 pub struct Entity {
+    pub name: String,
     pub prose: Option<ProseComponent>,
     pub loc: Option<ID>,
     pub links: Option<LinksComponent>,
@@ -59,6 +59,7 @@ pub struct Entity {
 impl Entity {
     pub fn new() -> Entity {
         Entity {
+            name: "Entity".into(),
             prose: None,
             loc: None,
             links: None,

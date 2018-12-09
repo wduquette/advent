@@ -12,7 +12,7 @@ pub fn list_world(world: &World) {
 
 #[allow(dead_code)]
 pub fn list_entity(world: &World, id: ID) {
-    println!("Entity [{}] -- {}", id, name_or_na(world, id));
+    println!("Entity [{}] -- {}", id, name(world, id));
 }
 
 /// Dump info about all entities.
@@ -29,11 +29,11 @@ pub fn dump_entity(world: &World, id: ID) {
     list_entity(world, id);
 
     if let Some(loc) = world.entities[id].loc {
-        println!("  Location: [{}] -- {}", loc, name_or_na(world, loc));
+        println!("  Location: [{}] -- {}", loc, name(world, loc));
     }
 
     if let Some(links) = &world.entities[id].links {
-        for (dir,id) in &links.map {
+        for (dir, id) in &links.map {
             println!("  Link: {:?} to {}", dir, id);
         }
     }
@@ -48,15 +48,6 @@ pub fn dump_entity(world: &World, id: ID) {
 }
 
 #[allow(dead_code)]
-fn name(world: &World, id: ID) -> Option<&str> {
-    if let Some(p) = &world.entities[id].prose {
-        Some(&p.name)
-    } else {
-        None
-    }
-}
-
-#[allow(dead_code)]
-fn name_or_na(world: &World, id: ID) -> &str {
-    name(world, id).unwrap_or_else(|| "n/a")
+fn name(world: &World, id: ID) -> &str {
+    &world.entities[id].name
 }

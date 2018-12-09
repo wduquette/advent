@@ -1,7 +1,7 @@
 //! The game world
 use crate::types::*;
 
-/// The game state
+/// The game state.  Uses a variant of the Entity-Component-System architecture.
 pub struct World {
     pub clock: usize,
     pub entities: Vec<Entity>,
@@ -9,6 +9,10 @@ pub struct World {
 }
 
 impl World {
+    //--------------------------------------------------------------------------------------------
+    // Low-level Infrastructure
+
+    /// Creates a new instance of the World, with an empty entity for the player.
     pub fn new() -> World {
         let mut world = World {
             clock: 0,
@@ -17,17 +21,20 @@ impl World {
         };
 
         // Add the player entity, which must still be initialized.
-        world.make_entity();
+        world.alloc();
 
         world
     }
 
-    // Allocate an entity and return its ID
-    pub fn make_entity(&mut self) -> ID {
+    /// Allocate an entity and return its ID
+    pub fn alloc(&mut self) -> ID {
         let id = self.entities.len();
         self.entities.push(Entity::new());
         id
     }
+
+    //--------------------------------------------------------------------------------------------
+    // Helpers
 
     /// Retrieves the location of something that has a location.
     pub fn loc(&self, id: ID) -> ID {

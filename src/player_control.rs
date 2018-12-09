@@ -125,7 +125,9 @@ fn describe_location(world: &World, loc: ID) {
         .as_ref()
         .expect(&format!("Entity has no prose: {}", loc));
 
-    println!("{}\n{}\n", prose.name, prose.description);
+    println!("{}\n{}\n",
+        world.entities[loc].name, 
+        prose.description);
 }
 
 fn set_player_location(world: &mut World, dest: ID) {
