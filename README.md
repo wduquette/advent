@@ -6,6 +6,8 @@ using the ECS architecture.
 ## To Do
 
 * Review the code, looking for utilities to factor out or move.
+  * trigger_control.rs
+  * player_control.rs
 * Extend the world.
 * Implement objects.
 * Implement inventories.
