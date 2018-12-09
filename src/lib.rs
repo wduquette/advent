@@ -16,8 +16,8 @@ pub fn run() {
     print_introduction();
 
     // NEXT, create the game world.
-    let mut world_map: World = scenario::build_world();
-    let world = &mut world_map;
+    let mut the_world: World = scenario::build();
+    let world = &mut the_world;
 
     player_control::describe_player_location(world);
 

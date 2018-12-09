@@ -14,6 +14,10 @@ pub enum Dir {
     South,
     East,
     West,
+    Up,
+    Down,
+    In,
+    Out,
 }
 
 /// Entity prose
@@ -21,7 +25,7 @@ pub struct ProseComponent {
     pub text: String,
 }
 
-/// Inter-room LinksComponent
+/// Inter-room links
 pub struct LinksComponent {
     pub map: HashMap<Dir, ID>,
 }
@@ -40,30 +44,10 @@ pub enum Action {
     Print,
 }
 
+/// Game triggers: actions taken when a predicate is met, and probably never repeated.
 pub struct TriggerComponent {
     pub predicate: Box<Fn(&World) -> bool>,
     pub action: Action,
     pub once_only: bool,
     pub fired: bool,
-}
-
-/// The entity type: a set of optional components
-pub struct Entity {
-    pub name: String,
-    pub prose: Option<ProseComponent>,
-    pub loc: Option<ID>,
-    pub links: Option<LinksComponent>,
-    pub trigger: Option<TriggerComponent>,
-}
-
-impl Entity {
-    pub fn new() -> Entity {
-        Entity {
-            name: "Entity".into(),
-            prose: None,
-            loc: None,
-            links: None,
-            trigger: None,
-        }
-    }
 }

@@ -4,11 +4,11 @@ use crate::types::Dir::*;
 use crate::types::*;
 use crate::world::*;
 
-// Build the initial state of the game world.
-pub fn build_world() -> World {
+/// Build the initial state of the game world.
+pub fn build() -> World {
     // FIRST, make the empty world
-    let mut world_map = World::new();
-    let world = &mut world_map;
+    let mut the_world = World::new();
+    let world = &mut the_world;
 
     // NEXT, make the rooms.
 
@@ -44,7 +44,7 @@ and gosh, this doesn't look like anything like the toy aisle.
     initialize_player(world, clearing);
 
     // NEXT, return the world.
-    world_map
+    the_world
 }
 
 fn initialize_player(world: &mut World, start: ID) {
@@ -78,7 +78,7 @@ where
     let tid = world.alloc();
     world.entities[tid].name = format!("Trigger {}", name);
     world.entities[tid].prose = Some(ProseComponent {
-        text: String::from(text),
+        text: text.trim().into(),
     });
 
     world.entities[tid].trigger = Some(TriggerComponent {

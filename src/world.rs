@@ -1,6 +1,37 @@
 //! The game world
 use crate::types::*;
 
+/// The entity type: a set of optional components
+pub struct Entity {
+    // The entity's name.  All entities have a name, if only for debugging.
+    pub name: String,
+
+    // Many entities have prose, i.e., a room's basic description.
+    pub prose: Option<ProseComponent>,
+
+    // Some entities (e.g., the player) have a location.
+    pub loc: Option<ID>,
+
+    // Rooms link to other rooms in a variety of directions
+    pub links: Option<LinksComponent>,
+
+    // Some entities are triggers, actions to be taken when a condition is met.
+    pub trigger: Option<TriggerComponent>,
+}
+
+impl Entity {
+    /// Create an empty entity.
+    pub fn new() -> Entity {
+        Entity {
+            name: "Entity".into(),
+            prose: None,
+            loc: None,
+            links: None,
+            trigger: None,
+        }
+    }
+}
+
 /// The game state.  Uses a variant of the Entity-Component-System architecture.
 pub struct World {
     pub clock: usize,
@@ -36,7 +67,13 @@ impl World {
     //--------------------------------------------------------------------------------------------
     // Helpers
 
+    /// Returns the name of the entity with the given ID.
+    pub fn name(&self, id: ID) -> &str {
+        &self.entities[id].name
+    }
+
     /// Retrieves the location of something that has a location.
+    /// Panics if it doesn't.
     pub fn loc(&self, id: ID) -> ID {
         self.entities[id]
             .loc
