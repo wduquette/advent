@@ -10,18 +10,26 @@ type CmdResult = Result<(), String>;
 pub fn system(world: &mut World, command: &str) {
     let tokens: Vec<&str> = command.split_whitespace().collect();
 
-    let result = match tokens[0] {
-        "n" => cmd_go_dir(world, &tokens, North),
-        "s" => cmd_go_dir(world, &tokens, South),
-        "e" => cmd_go_dir(world, &tokens, East),
-        "w" => cmd_go_dir(world, &tokens, West),
-        "help" => cmd_help(world, &tokens),
-        "look" => cmd_look(world, &tokens),
-        "quit" => cmd_quit(world, &tokens),
+    let result = match tokens.as_slice() {
+        &["n"] => cmd_go(world, North),
+        &["north"] => cmd_go(world, North),
+        &["s"] => cmd_go(world, South),
+        &["south"] => cmd_go(world, South),
+        &["e"] => cmd_go(world, East),
+        &["east"] => cmd_go(world, East),
+        &["w"] => cmd_go(world, West),
+        &["west"] => cmd_go(world, West),
+        &["help"] => cmd_help(world),
+        &["look"] => cmd_look(world),
+        &["exit"] => cmd_quit(world),
+        &["quit"] => cmd_quit(world),
 
         // Debugging
-        "dump" => cmd_dump(world, &tokens),
-        "list" => cmd_list(world, &tokens),
+        &["dump", id_arg] => cmd_dump(world, id_arg),
+        &["dump"] => cmd_dump_world(world),
+        &["list"] => cmd_list(world),
+
+        // Error
         _ => Err("I don't understand.".into()),
     };
 
@@ -32,8 +40,7 @@ pub fn system(world: &mut World, command: &str) {
 
 // User Commands
 
-fn cmd_go_dir(world: &mut World, tokens: &[&str], dir: Dir) -> CmdResult {
-    require_args(tokens, 0, 0)?;
+fn cmd_go(world: &mut World, dir: Dir) -> CmdResult {
     let here = world.loc(world.player);
     if let Some(dest) = world.follow(here, dir) {
         set_player_location(world, dest);
@@ -44,7 +51,7 @@ fn cmd_go_dir(world: &mut World, tokens: &[&str], dir: Dir) -> CmdResult {
     }
 }
 
-fn cmd_help(_world: &World, _tokens: &[&str]) -> CmdResult {
+fn cmd_help(_world: &World) -> CmdResult {
     println!(
         "\
 You've got the usual commands: n, s, e, w, look, get, drop, quit.
@@ -55,50 +62,35 @@ You know.  Like that.
     Ok(())
 }
 
-fn cmd_look(world: &World, tokens: &[&str]) -> CmdResult {
-    require_args(tokens, 0, 0)?;
+fn cmd_look(world: &World) -> CmdResult {
     describe_player_location(world);
     Ok(())
 }
 
-fn cmd_quit(_world: &World, _tokens: &[&str]) -> CmdResult {
+fn cmd_quit(_world: &World) -> CmdResult {
     println!("Bye, then.");
     ::std::process::exit(0);
 }
 
 // Debugging commands
 
-fn cmd_dump(world: &World, tokens: &[&str]) -> CmdResult {
-    require_args(tokens, 0, 1)?;
-
-    // FIRST, handle general case
-    if tokens.len() == 1 {
-        debug::dump_world(world);
-        return Ok(());
-    }
-
-    // NEXT, get the entity ID
-    let id = parse_id(world, tokens[1])?;
+fn cmd_dump(world: &World, id_arg: &str) -> CmdResult {
+    let id = parse_id(world, id_arg)?;
     debug::dump_entity(world, id);
     Ok(())
 }
 
-fn cmd_list(world: &World, _tokens: &[&str]) -> CmdResult {
+fn cmd_dump_world(world: &World) -> CmdResult {
+    debug::dump_world(world);
+    Ok(())
+}
+
+fn cmd_list(world: &World) -> CmdResult {
     debug::list_world(world);
     Ok(())
 }
 
 // Tools
-
-fn require_args(tokens: &[&str], min: usize, max: usize) -> CmdResult {
-    let n = tokens.len() - 1;
-
-    if n < min || n > max {
-        Err("I don't understand".into())
-    } else {
-        Ok(())
-    }
-}
 
 fn parse_id(world: &World, token: &str) -> Result<ID, String> {
     let id = match token.parse() {
