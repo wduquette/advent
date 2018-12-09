@@ -13,8 +13,26 @@ using the ECS architecture.
 * Implement inventories.
   * The player has one, but objects can have them as well.
 
+## Ideas for the Future
 
-## Ideas
+### Commands with duration
+
+At present the clock increments for each user input, regardless of what it
+is.  Ideally, different commands should have different durations.  Errors
+should have no duration.  Some commands, like checking your inventory,
+should have no duration as well.  In principle, it's possible that some
+commands should take longer than one turn.
+
+### Multiple Commands
+
+A command line can have multiple commands separated by periods.  Since
+commands should have durations, we need to manage that carefully.
+Probably entered commands should get pushed into a queue; and the
+player_control::system() should process commands until it hits an error
+or time has passed.
+
+Of course, once we add monsters/npcs it's possible that they can interrupt
+the command queue as well.
 
 ### Fancy Destinations
 

@@ -5,8 +5,10 @@ use crate::types::Dir::*;
 use crate::types::*;
 use crate::world::*;
 
+/// An error result
 type CmdResult = Result<(), String>;
 
+/// The Player Control system.  Processes player commands.
 pub fn system(world: &mut World, command: &str) {
     let tokens: Vec<&str> = command.split_whitespace().collect();
 

@@ -72,6 +72,21 @@ impl World {
         &self.entities[id].name
     }
 
+    /// Determines whether the entity is a trigger or not
+    pub fn is_trigger(&self, id: ID) -> bool {
+        self.entities[id].trigger.is_some()
+    }
+
+    /// Gets the entity's prose.  Panics if none.
+    pub fn prose(&self, id: ID) -> &str {
+        let prose = self.entities[id]
+            .prose
+            .as_ref()
+            .expect(&format!("Entity has no prose: {}", id));
+
+        &prose.text
+    }
+
     /// Retrieves the location of something that has a location.
     /// Panics if it doesn't.
     pub fn loc(&self, id: ID) -> ID {
