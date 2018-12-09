@@ -28,7 +28,7 @@ pub fn build() -> World {
     link(world, East, clearing, trail);
     link(world, West, trail, clearing);
 
-    // Stories
+    // Stories: Triggers that supply backstory to the player.
     make_story(
         world,
         "Story-1",
@@ -47,23 +47,26 @@ and gosh, this doesn't look like anything like the toy aisle.
     the_world
 }
 
+/// Initializes the player's details
 fn initialize_player(world: &mut World, start: ID) {
     let pid = world.player;
 
     world.entities[pid].name = "You".into();
     world.entities[pid].prose = Some(ProseComponent {
-        text: String::from("You've got all the usual bits."),
+        text: "You've got all the usual bits.".into(),
     });
 
     world.entities[pid].loc = Some(start);
 }
 
+/// Makes a room with the given name and prose, and an empty set of links.
+/// Returns the room's ID.
 fn make_room(world: &mut World, name: &str, text: &str) -> ID {
     let rid = world.alloc();
 
     world.entities[rid].name = name.into();
     world.entities[rid].prose = Some(ProseComponent {
-        text: String::from(text),
+        text: text.into(),
     });
 
     world.entities[rid].links = Some(LinksComponent::new());
@@ -71,6 +74,8 @@ fn make_room(world: &mut World, name: &str, text: &str) -> ID {
     rid
 }
 
+/// Adds a bit of backstory to be revealed when the conditions are right.
+/// Backstory will appear only once.
 fn make_story<F: 'static>(world: &mut World, name: &str, predicate: F, text: &str)
 where
     F: Fn(&World) -> bool,
@@ -89,8 +94,12 @@ where
     });
 }
 
+/// Links one room to another in the given direction.
+/// Links are not bidirectional.  If you want links both ways, you
+/// have to add them.
 fn link(world: &mut World, dir: Dir, from: ID, to: ID) {
-    if let Some(links) = &mut world.entities[from].links {
-        links.map.insert(dir, to);
-    }
+    let links = &mut world.entities[from].links.as_mut()
+        .expect(&format!("Entity has no link component: {}", from));
+
+    links.map.insert(dir, to);
 }
