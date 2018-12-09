@@ -101,6 +101,7 @@ enum Behavior {
     Fight(run_threshold),
     ...
 }
+```
 
 ### Commands with duration
 
