@@ -3,6 +3,7 @@
 use crate::debug;
 use crate::types::Dir::*;
 use crate::types::*;
+use crate::world::*;
 
 type CmdResult = Result<(), String>;
 

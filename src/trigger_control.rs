@@ -1,6 +1,7 @@
 //! Trigger Control System
 
 use crate::types::*;
+use crate::world::*;
 
 pub fn system(world: &mut World) {
     for tid in 1..world.entities.len() {

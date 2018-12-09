@@ -1,6 +1,7 @@
 //! Debugging tools module
 
 use crate::types::*;
+use crate::world::*;
 
 #[allow(dead_code)]
 pub fn list_world(world: &World) {

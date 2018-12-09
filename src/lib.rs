@@ -6,8 +6,9 @@ mod player_control;
 mod scenario;
 mod trigger_control;
 mod types;
+mod world;
 
-use crate::types::*;
+use crate::world::*;
 
 /// Runs the program.
 pub fn run() {
@@ -30,7 +31,7 @@ pub fn run() {
 
         // NEXT, handle triggered events
         trigger_control::system(world);
-        
+
         // NEXT, Increment the clock
         // TODO: Probably don't want to do this here.  Some commands should
         // take time, and some shouldn't.  This should probably be in the

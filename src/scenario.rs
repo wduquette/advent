@@ -2,6 +2,7 @@
 
 use crate::types::Dir::*;
 use crate::types::*;
+use crate::world::*;
 
 // Build the initial state of the game world.
 pub fn build_world() -> World {
