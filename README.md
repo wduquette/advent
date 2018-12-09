@@ -1,4 +1,4 @@
-# Advent in Rust
+# Bonaventure: A simple text adventure in Rust
 
 A simple text adventure, written as a way to learn the Rust language,
 using the ECS architecture.
