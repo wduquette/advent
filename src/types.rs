@@ -18,7 +18,7 @@ pub enum Dir {
 
 /// Entity prose
 pub struct ProseComponent {
-    pub description: String,
+    pub text: String,
 }
 
 /// Inter-room LinksComponent

@@ -22,7 +22,7 @@ fn should_fire(world: &World, tid: ID) -> bool {
 fn process_trigger(world: &mut World, tid: ID) {
     match &world.entities[tid].trigger.as_ref().unwrap().action {
         Action::Print => {
-            print_description(world, tid);
+            print_text(world, tid);
         }
     }
 
@@ -38,12 +38,12 @@ fn mark_fired(world: &mut World, tid: ID) {
     }
 }
 
-fn print_description(world: &World, loc: ID) {
+fn print_text(world: &World, loc: ID) {
     // TODO: Need helper.
     let prose = world.entities[loc]
         .prose
         .as_ref()
         .expect(&format!("Entity has no prose: {}", loc));
 
-    println!("{}\n", prose.description);
+    println!("{}\n", prose.text);
 }

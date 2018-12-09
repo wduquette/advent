@@ -52,18 +52,18 @@ fn initialize_player(world: &mut World, start: ID) {
 
     world.entities[pid].name = "You".into();
     world.entities[pid].prose = Some(ProseComponent {
-        description: String::from("You've got all the usual bits."),
+        text: String::from("You've got all the usual bits."),
     });
 
     world.entities[pid].loc = Some(start);
 }
 
-fn make_room(world: &mut World, name: &str, description: &str) -> ID {
+fn make_room(world: &mut World, name: &str, text: &str) -> ID {
     let rid = world.alloc();
 
     world.entities[rid].name = name.into();
     world.entities[rid].prose = Some(ProseComponent {
-        description: String::from(description),
+        text: String::from(text),
     });
 
     world.entities[rid].links = Some(LinksComponent::new());
@@ -71,14 +71,14 @@ fn make_room(world: &mut World, name: &str, description: &str) -> ID {
     rid
 }
 
-fn make_story<F: 'static>(world: &mut World, name: &str, predicate: F, description: &str)
+fn make_story<F: 'static>(world: &mut World, name: &str, predicate: F, text: &str)
 where
     F: Fn(&World) -> bool,
 {
     let tid = world.alloc();
     world.entities[tid].name = format!("Trigger {}", name);
     world.entities[tid].prose = Some(ProseComponent {
-        description: String::from(description),
+        text: String::from(text),
     });
 
     world.entities[tid].trigger = Some(TriggerComponent {
