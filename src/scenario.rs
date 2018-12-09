@@ -59,7 +59,7 @@ how narrow it is.
         "\
 You don't know where you are.  You don't even know where you want to
 be.  All you know is that your feet are wet, your hands are dirty,
-and gosh, this doesn't look like anything like the toy aisle.
+and gosh, this doesn't look anything like the toy aisle.
     ",
     );
 

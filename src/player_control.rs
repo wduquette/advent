@@ -23,6 +23,8 @@ pub fn system(world: &mut World, command: &str) {
         &["west"] => cmd_go(world, West),
         &["help"] => cmd_help(world),
         &["look"] => cmd_look(world),
+        &["x", thing_arg] => cmd_examine(world, thing_arg),
+        &["examine", thing_arg] => cmd_examine(world, thing_arg),
         &["exit"] => cmd_quit(world),
         &["quit"] => cmd_quit(world),
 
@@ -70,6 +72,16 @@ You know.  Like that.
 fn cmd_look(world: &World) -> CmdResult {
     describe_player_location(world);
     Ok(())
+}
+
+/// Describe a thing in the current location.
+fn cmd_examine(world: &World, name: &str) -> CmdResult {
+    if let Some(id) = find_visible_thing(world, name) {
+        println!("{}\n", world.prose(id));
+        Ok(())
+    } else {
+        Err("You don't see any such thing.".into())
+    }
 }
 
 /// Quit the game.
@@ -137,6 +149,48 @@ fn parse_id(world: &World, token: &str) -> Result<ID, String> {
     }
 
     Ok(id)
+}
+
+fn find_visible_thing(world: &World, name: &str) -> Option<ID> {
+    let loc = here(world);
+
+    if let Some(id) = find_in_inventory(world, loc, name) {
+        return Some(id);
+    }
+
+    if let Some(id) = find_in_scenery(world, loc, name) {
+        return Some(id);
+    }
+
+    None
+}
+
+fn find_in_inventory(world: &World, loc: ID, name: &str) -> Option<ID> {
+    // TODO: Can probably do this using some variant of filter.
+    if let Some(inv) = &world.entities[loc].inventory {
+        for id in &inv.things {
+            if world.name(*id) == name {
+                return Some(*id);
+            }
+        }
+    }
+
+    None
+}
+
+fn find_in_scenery(world: &World, loc: ID, name: &str) -> Option<ID> {
+    // TODO: Can probably do this using some variant of filter.
+    for id in 1..world.entities.len() {
+        if world.is_thing(id) && world.loc(id) == loc && world.name(id) == name {
+            return Some(id);
+        }
+    }
+
+    None
+}
+
+fn here(world: &World) -> ID {
+    world.loc(world.player)
 }
 
 //-------------------------------------------------------------------------
