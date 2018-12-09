@@ -105,11 +105,19 @@ fn cmd_list(world: &World) -> CmdResult {
 // These functions are used to implement the above commands.
 
 /// Describe the player's current location.
-/// TODO: This will become much more complicated once we have objects, etc.
 pub fn describe_player_location(world: &World) {
     let loc = world.loc(world.player);
 
+    // FIRST, display the room's description
     println!("{}\n{}\n", world.name(loc), world.prose(loc));
+
+    // NEXT, list any objects in the room's inventory.  (We don't list
+    // scenary; presumably that's in the description.)
+    if let Some(inv) = &world.entities[loc].inventory {
+        if inv.things.len() > 0 {
+            println!("You see: {}.\n", comma_list(world, &inv.things));
+        }
+    }
 }
 
 //-------------------------------------------------------------------------
@@ -129,4 +137,23 @@ fn parse_id(world: &World, token: &str) -> Result<ID, String> {
     }
 
     Ok(id)
+}
+
+//-------------------------------------------------------------------------
+// Display Tools
+
+/// List the names of the entities, separated by commas.
+/// TODO: This could probably be done with map and some kind of join function.
+/// However, it seems that "join" is available in the nightly.
+fn comma_list(world: &World, ids: &[ID]) -> String {
+    let mut list = String::new();
+
+    for id in ids {
+        if !list.is_empty() {
+            list.push_str(", ");
+        }
+        list.push_str(world.name(*id));
+    }
+
+    list
 }
