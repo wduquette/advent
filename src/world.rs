@@ -15,6 +15,12 @@ pub struct Entity {
     // Rooms link to other rooms in a variety of directions
     pub links: Option<LinksComponent>,
 
+    // Some entities are Things and have Thing details.
+    pub thing: Option<ThingComponent>,
+
+    // Some entities can own/contain Things.
+    pub inventory: Option<InventoryComponent>,
+
     // Some entities are triggers, actions to be taken when a condition is met.
     pub trigger: Option<TriggerComponent>,
 }
@@ -27,6 +33,8 @@ impl Entity {
             prose: None,
             loc: None,
             links: None,
+            thing: None,
+            inventory: None,
             trigger: None,
         }
     }
@@ -79,6 +87,20 @@ impl World {
     /// Determines whether the entity is a trigger or not
     pub fn is_trigger(&self, id: ID) -> bool {
         self.entities[id].trigger.is_some()
+    }
+
+    // Determines whether the entity is a room or not, i.e., a place the player can be.
+    pub fn is_room(&self, id: ID) -> bool {
+        let ent = &self.entities[id];
+
+        ent.prose.is_some() && ent.links.is_some() && ent.inventory.is_some()
+    }
+
+    // Determines whether the entity is a thing or not, i.e., an object that can
+    // be in a room and that the user can interact with.
+    pub fn is_thing(&self, id: ID) -> bool {
+        let ent = &self.entities[id];
+        ent.thing.is_some() && ent.prose.is_some()
     }
 
     /// Gets the entity's prose.  Panics if none.

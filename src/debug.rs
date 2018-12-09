@@ -40,6 +40,16 @@ pub fn dump_entity(world: &World, id: ID) {
         }
     }
 
+    if let Some(thing) = &world.entities[id].thing {
+        println!("  Thing: {:?}", thing);
+    }
+
+    if let Some(inventory) = &world.entities[id].inventory {
+        for tid in &inventory.things {
+            println!("  Contains: [{}] {}", *tid, world.name(*tid));
+        }
+    }
+
     if let Some(trigger) = &world.entities[id].trigger {
         println!("  Trigger Action: {:?}", trigger.action);
     }

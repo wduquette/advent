@@ -5,13 +5,15 @@ using the ECS architecture.
 
 ## To Do
 
-* Review the code, looking for utilities to factor out or move.
-  * trigger_control.rs
-  * player_control.rs
 * Extend the world.
 * Implement objects.
 * Implement inventories.
   * The player has one, but objects can have them as well.
+
+## Questions
+
+* Should the player be contained in a location's inventory?
+  * For multiple players, probably.  For a single player game, probably not.
 
 ## Ideas for the Future
 

@@ -38,6 +38,26 @@ impl LinksComponent {
     }
 }
 
+/// A Thing is something that can be in a location and that the user can
+/// interact with.  This structure contains details about Things, i.e.,
+/// are they portable?
+#[derive(Debug)]
+pub struct ThingComponent {
+    pub portable: bool,
+}
+
+/// An Inventory is a list of things contained with the current entity.
+#[derive(Debug)]
+pub struct InventoryComponent {
+    pub things: Vec<ID>,
+}
+
+impl InventoryComponent {
+    pub fn new() -> InventoryComponent {
+        InventoryComponent { things: Vec::new(), }
+    }
+}
+
 /// Actions taken by triggers (and maybe other things)
 #[derive(Debug)]
 pub enum Action {
