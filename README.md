@@ -5,7 +5,12 @@ using the ECS architecture.
 
 ## To Do
 
-* Player only gets full room description on "look" and on first entry.
+* Add player conditions: a set of Enums, e.g., DirtyHands, describing
+  the state of the player.
+  * Add an "examine self" command, to display that to the user.
+* Add a condition set to ThingComponent, for conditions that can be
+  set on things: again, a set of Enums, e.g., Dirty.
+  * When the player touches something with dirty hands, it gets dirty.
 * Review current code.
 * Extend the world.
 * Add some puzzles.
