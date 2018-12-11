@@ -55,20 +55,35 @@ pub struct InventoryComponent {
 
 impl InventoryComponent {
     pub fn new() -> InventoryComponent {
-        InventoryComponent { things: HashSet::new() }
+        InventoryComponent {
+            things: HashSet::new(),
+        }
     }
 }
 
-/// Actions taken by triggers (and maybe other things)
+/// Actions taken by rules (and maybe other things)
 #[derive(Debug)]
 pub enum Action {
     Print,
 }
 
-/// Game triggers: actions taken when a predicate is met, and probably never repeated.
-pub struct TriggerComponent {
+/// Game rules: actions taken when a predicate is met, and probably never repeated.
+pub struct RuleComponent {
     pub predicate: Box<Fn(&World) -> bool>,
     pub action: Action,
     pub once_only: bool,
     pub fired: bool,
+}
+
+/// Player Component: Special data about the player
+pub struct PlayerComponent {
+    pub seen: HashSet<ID>,
+}
+
+impl PlayerComponent {
+    pub fn new() -> PlayerComponent {
+        PlayerComponent {
+            seen: HashSet::new(),
+        }
+    }
 }

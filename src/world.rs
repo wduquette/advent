@@ -21,8 +21,8 @@ pub struct Entity {
     // Some entities can own/contain Things.
     pub inventory: Option<InventoryComponent>,
 
-    // Some entities are triggers, actions to be taken when a condition is met.
-    pub trigger: Option<TriggerComponent>,
+    // Some entities are rules, actions to be taken when a condition is met.
+    pub rule: Option<RuleComponent>,
 }
 
 impl Entity {
@@ -35,7 +35,7 @@ impl Entity {
             links: None,
             thing: None,
             inventory: None,
-            trigger: None,
+            rule: None,
         }
     }
 }
@@ -48,7 +48,12 @@ impl Entity {
 pub struct World {
     pub clock: usize,
     pub entities: Vec<Entity>,
-    pub player: ID,
+
+    // The player's entity ID.
+    pub pid: ID,
+
+    // The player's ancillary data
+    pub player: PlayerComponent,
 }
 
 impl World {
@@ -60,7 +65,8 @@ impl World {
         let mut world = World {
             clock: 0,
             entities: Vec::new(),
-            player: 0,
+            pid: 0,
+            player: PlayerComponent::new(),
         };
 
         // Add the player entity, which must still be initialized.
@@ -84,9 +90,9 @@ impl World {
         &self.entities[id].name
     }
 
-    /// Determines whether the entity is a trigger or not
-    pub fn is_trigger(&self, id: ID) -> bool {
-        self.entities[id].trigger.is_some()
+    /// Determines whether the entity is a rule or not
+    pub fn is_rule(&self, id: ID) -> bool {
+        self.entities[id].rule.is_some()
     }
 
     // Determines whether the entity is a room or not, i.e., a place the player can be.

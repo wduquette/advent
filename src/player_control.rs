@@ -51,10 +51,12 @@ pub fn system(world: &mut World, command: &str) {
 
 /// Move the player in the given direction
 fn cmd_go(world: &mut World, dir: Dir) -> CmdResult {
-    let here = world.loc(world.player);
+    let here = world.loc(world.pid);
     if let Some(dest) = world.follow(here, dir) {
-        world.set_location(world.player, dest);
-        describe_player_location(world);
+        world.set_location(world.pid, dest);
+        let seen = world.player.seen.contains(&dest);
+        describe_player_location(world, seen);
+        world.player.seen.insert(dest);
         Ok(())
     } else {
         Err("You can't go that way.".into())
@@ -75,13 +77,13 @@ You know.  Like that.
 
 /// Re-describe the current location.
 fn cmd_look(world: &World) -> CmdResult {
-    describe_player_location(world);
+    describe_player_location(world, false);
     Ok(())
 }
 
 /// Re-describe the current location.
 fn cmd_inventory(world: &World) -> CmdResult {
-    let pid = world.player;
+    let pid = world.pid;
     let inv = &world.entities[pid].inventory.as_ref().unwrap();
 
     if inv.things.len() == 0 {
@@ -105,13 +107,13 @@ fn cmd_examine(world: &World, name: &str) -> CmdResult {
 /// Gets a thing from the location's inventory.
 fn cmd_get(world: &mut World, name: &str) -> CmdResult {
     let loc = here(world);
-    if let Some(_) = find_in_inventory(world, world.player, name) {
+    if let Some(_) = find_in_inventory(world, world.pid, name) {
         Err("You already have it.".into())
     } else if let Some(_) = find_in_scenery(world, loc, name) {
         Err("You can't take that!".into())
     } else if let Some(id) = find_in_inventory(world, loc, name) {
         world.take_out(id, loc);
-        world.put_in(id, world.player);
+        world.put_in(id, world.pid);
         println!("Taken.\n");
         Ok(())
     } else {
@@ -122,8 +124,8 @@ fn cmd_get(world: &mut World, name: &str) -> CmdResult {
 /// Drops a thing you're carrying
 fn cmd_drop(world: &mut World, name: &str) -> CmdResult {
     let loc = here(world);
-    if let Some(id) = find_in_inventory(world, world.player, name) {
-        world.take_out(id, world.player);
+    if let Some(id) = find_in_inventory(world, world.pid, name) {
+        world.take_out(id, world.pid);
         world.put_in(id, loc);
         println!("Dropped.\n");
         Ok(())
@@ -167,11 +169,15 @@ fn cmd_list(world: &World) -> CmdResult {
 // These functions are used to implement the above commands.
 
 /// Describe the player's current location.
-pub fn describe_player_location(world: &World) {
-    let loc = world.loc(world.player);
+pub fn describe_player_location(world: &World, brief: bool) {
+    let loc = world.loc(world.pid);
 
     // FIRST, display the room's description
-    println!("{}\n{}\n", world.name(loc), world.prose(loc));
+    if brief {
+        println!("{}\n", world.name(loc));
+    } else {
+        println!("{}\n{}\n", world.name(loc), world.prose(loc));
+    }
 
     // NEXT, list any objects in the room's inventory.  (We don't list
     // scenary; presumably that's in the description.)
@@ -205,7 +211,7 @@ fn parse_id(world: &World, token: &str) -> Result<ID, String> {
 fn find_visible_thing(world: &World, name: &str) -> Option<ID> {
     let loc = here(world);
 
-    if let Some(id) = find_in_inventory(world, world.player, name) {
+    if let Some(id) = find_in_inventory(world, world.pid, name) {
         return Some(id);
     }
 
@@ -243,7 +249,7 @@ fn find_in_scenery(world: &World, loc: ID, name: &str) -> Option<ID> {
 }
 
 fn here(world: &World) -> ID {
-    world.loc(world.player)
+    world.loc(world.pid)
 }
 
 //-------------------------------------------------------------------------
@@ -262,7 +268,6 @@ fn invent_list(world: &World, loc: ID) -> String {
             }
             list.push_str(world.name(*id));
         }
-
     }
 
     list

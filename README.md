@@ -53,7 +53,7 @@ and may also have the following components:
 * Details of things with which the player interacts (i.e., can he
   pick it up)
 * An inventory of entities contained within this entity
-* A Trigger: under certain conditions, do something automatically.
+* A Rule: under certain conditions, do something automatically.
 
 Thus,
 

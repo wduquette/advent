@@ -3,8 +3,8 @@
 mod console;
 mod debug;
 mod player_control;
+mod rule;
 mod scenario;
-mod trigger_control;
 mod types;
 mod world;
 
@@ -19,7 +19,7 @@ pub fn run() {
     let mut the_world: World = scenario::build();
     let world = &mut the_world;
 
-    player_control::describe_player_location(world);
+    player_control::describe_player_location(world, false);
 
     // NEXT, enter the game loop.
     loop {
@@ -29,8 +29,8 @@ pub fn run() {
         // NEXT, let the player do what he does.
         player_control::system(world, &cmd);
 
-        // NEXT, handle triggered events
-        trigger_control::system(world);
+        // NEXT, handle rules
+        rule::system(world);
 
         // NEXT, Increment the clock
         // TODO: Probably don't want to do this here.  Some commands should

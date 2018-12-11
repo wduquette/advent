@@ -50,7 +50,7 @@ how narrow it is.
         ",
     );
 
-    // Stories: Triggers that supply backstory to the player.
+    // Stories: Rules that supply backstory to the player.
     make_story(
         world,
         "Story-1",
@@ -71,7 +71,7 @@ and gosh, this doesn't look anything like the toy aisle.
 
 /// Initializes the player's details
 fn initialize_player(world: &mut World, start: ID) {
-    let pid = world.player;
+    let pid = world.pid;
     let player = &mut world.entities[pid];
 
     player.name = "You".into();
@@ -80,6 +80,8 @@ fn initialize_player(world: &mut World, start: ID) {
     });
     player.loc = Some(start);
     player.inventory = Some(InventoryComponent::new());
+
+    world.player.seen.insert(start);
 }
 
 /// Makes a room with the given name and prose, and an empty set of links.
@@ -134,12 +136,12 @@ where
     F: Fn(&World) -> bool,
 {
     let tid = world.alloc();
-    world.entities[tid].name = format!("Trigger {}", name);
+    world.entities[tid].name = format!("Rule {}", name);
     world.entities[tid].prose = Some(ProseComponent {
         text: text.trim().into(),
     });
 
-    world.entities[tid].trigger = Some(TriggerComponent {
+    world.entities[tid].rule = Some(RuleComponent {
         predicate: Box::new(predicate),
         action: Action::Print,
         once_only: true,

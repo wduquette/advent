@@ -50,8 +50,8 @@ pub fn dump_entity(world: &World, id: ID) {
         }
     }
 
-    if let Some(trigger) = &world.entities[id].trigger {
-        println!("  Trigger Action: {:?}", trigger.action);
+    if let Some(rule) = &world.entities[id].rule {
+        println!("  Rule Action: {:?}", rule.action);
     }
 
     if let Some(p) = &world.entities[id].prose {
