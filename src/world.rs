@@ -16,20 +16,20 @@ pub struct World {
     pub pid: ID,
 
     /// Various variables about the world.
-    pub attrs: HashSet<Attr>,
+    pub vars: HashSet<Var>,
 }
 
 impl World {
     //--------------------------------------------------------------------------------------------
     // Low-level Infrastructure
 
-    /// Creates a new instance of the World, with an empty entity for the player.
+    /// Creates a new instance of the World
     pub fn new() -> World {
         World {
             clock: 0,
             entities: Vec::new(),
             pid: 0,
-            attrs: HashSet::new(),
+            vars: HashSet::new(),
         }
     }
 
@@ -40,8 +40,28 @@ impl World {
         id
     }
 
+    /// Make an entity using the builder pattern.
     pub fn make(&mut self, name: &str) -> EntityBuilder {
         EntityBuilder::make(self, name)
+    }
+
+    //--------------------------------------------------------------------------------------------
+    // Variables
+
+    /// Set the Var
+    pub fn set(&mut self, var: Var) {
+        self.vars.insert(var);
+    }
+
+    /// Clear the attribute
+    #[allow(dead_code)]
+    pub fn clear(&mut self, var: &Var) {
+        self.vars.remove(var);
+    }
+
+    /// Is the variable set?
+    pub fn is(&self, var: &Var) -> bool {
+        self.vars.contains(var)
     }
 
     //--------------------------------------------------------------------------------------------

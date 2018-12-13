@@ -23,10 +23,16 @@ pub enum Dir {
 
 #[derive(PartialEq, Eq, Hash, Debug)]
 #[allow(dead_code)]
-/// An attribute of an entity
-pub enum Attr {
-    /// Has this location been seen?
+/// A game variable
+pub enum Var {
+    /// Has this entity been seen by the player?  Used mostly for locations.
     Seen(ID),
+
+    /// Does the player have dirty hands?
+    DirtyHands,
+
+    /// Does the location have clean water?
+    HasWater(ID),
 }
 
 /// Entity prose

@@ -1,6 +1,7 @@
 //! The Player Control System
 
 use crate::debug;
+use crate::types::Var::*;
 use crate::types::Dir::*;
 use crate::types::*;
 use crate::world::*;
@@ -11,6 +12,8 @@ type CmdResult = Result<(), String>;
 /// The Player Control system.  Processes player commands.
 pub fn system(world: &mut World, command: &str) {
     let tokens: Vec<&str> = command.split_whitespace().collect();
+
+    // TODO: Map synonyms, remove punctuation, before pattern matching
 
     let result = match tokens.as_slice() {
         ["n"] => cmd_go(world, &North),
@@ -26,10 +29,16 @@ pub fn system(world: &mut World, command: &str) {
         ["i"] => cmd_inventory(world),
         ["invent"] => cmd_inventory(world),
         ["inventory"] => cmd_inventory(world),
+        ["x", "self"] => cmd_examine_self(world),
+        ["x", "me"] => cmd_examine_self(world),
         ["x", name] => cmd_examine(world, name),
+        ["examine", "self"] => cmd_examine_self(world),
+        ["examine", "me"] => cmd_examine_self(world),
         ["examine", name] => cmd_examine(world, name),
         ["get", name] => cmd_get(world, name),
         ["drop", name] => cmd_drop(world, name),
+        ["wash", "hands"] => cmd_wash_hands(world),
+        ["wash", _] => Err("Whatever for?".into()),
         ["exit"] => cmd_quit(world),
         ["quit"] => cmd_quit(world),
 
@@ -54,9 +63,9 @@ fn cmd_go(world: &mut World, dir: &Dir) -> CmdResult {
     let here = world.loc(world.pid);
     if let Some(dest) = world.follow(here, &dir) {
         world.set_location(world.pid, dest);
-        let seen = world.attrs.contains(&Attr::Seen(dest));
+        let seen = world.is(&Seen(dest));
         describe_player_location(world, seen);
-        world.attrs.insert(Attr::Seen(dest));
+        world.set(Seen(dest));
         Ok(())
     } else {
         Err("You can't go that way.".into())
@@ -102,6 +111,42 @@ fn cmd_examine(world: &World, name: &str) -> CmdResult {
     } else {
         Err("You don't see any such thing.".into())
     }
+}
+
+/// Describe a thing in the current location.
+fn cmd_examine_self(world: &World) -> CmdResult {
+    let mut msg = String::new();
+
+    msg.push_str(world.prose(world.pid));
+
+    if world.is(&DirtyHands) {
+        msg.push_str(" Your hands are kind of dirty, though.");
+    } else {
+        msg.push_str(" Plus, they're clean bits!");
+    }
+    println!("{}\n", msg);
+
+    Ok(())
+}
+
+fn cmd_wash_hands(world: &mut World) -> CmdResult {
+    let loc = world.loc(world.pid);
+
+    if !world.is(&HasWater(loc)) {
+        return Err("That'd be a neat trick.".into());
+    }
+
+    let mut msg = String::new();
+    msg.push_str("You wash your hands in the water.");
+
+    if world.is(&DirtyHands) {
+        msg.push_str(" They look much cleaner.");
+        world.clear(&DirtyHands);
+    }
+
+    println!("{}\n", msg);
+
+    Ok(())
 }
 
 /// Gets a thing from the location's inventory.

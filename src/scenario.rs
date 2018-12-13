@@ -1,5 +1,6 @@
 //! Scenario definition
 
+use crate::types::Var::*;
 use crate::types::Dir::*;
 use crate::types::*;
 use crate::world::*;
@@ -30,6 +31,7 @@ pub fn build() -> World {
 The trail crosses a small stream here.  You can go east or west.
         ",
     );
+    world.set(HasWater(bridge));
 
     // Links
     connect(world, East, clearing, West, trail);
@@ -75,9 +77,11 @@ fn make_player(world: &mut World, start: ID) {
         .prose("You've got all the usual bits.")
         .location(start)
         .inventory()
+        .thing(false)
         .build();
 
-    world.attrs.insert(Attr::Seen(start));
+    world.set(Seen(start));
+    world.set(DirtyHands);
 }
 
 /// Makes a room with the given name and prose, and an empty set of links.
