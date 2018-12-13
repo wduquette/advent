@@ -75,6 +75,20 @@ pub struct RuleComponent {
     pub fired: bool,
 }
 
+impl RuleComponent {
+    pub fn new<F: 'static>(predicate: F, action: Action, once_only: bool) -> RuleComponent
+    where
+        F: Fn(&World) -> bool,
+    {
+        RuleComponent {
+            predicate: Box::new(predicate),
+            action,
+            once_only,
+            fired: false,
+        }
+    }
+}
+
 /// Player Component: Special data about the player
 pub struct PlayerComponent {
     pub seen: HashSet<ID>,

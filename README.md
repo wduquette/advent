@@ -6,12 +6,17 @@ using the ECS architecture.
 ## To Do
 
 * EntityBuilder
+* Consider making Some(ProseComponent) just Some(String).
 * Add player conditions: a set of Enums, e.g., DirtyHands, describing
   the state of the player.
   * Add an "examine self" command, to display that to the user.
 * Add a condition set to ThingComponent, for conditions that can be
   set on things: again, a set of Enums, e.g., Dirty.
   * When the player touches something with dirty hands, it gets dirty.
+  * Portable can be a similar one.
+  * Or, possibly, provide a Set of conditions, e.g., Portable(<id>),
+    Dirty(<id>).  Save the conditions and any data in the Set, rather
+    than in the components.
 * Review current code.
 * Extend the world.
 * Add some puzzles.

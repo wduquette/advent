@@ -2,6 +2,7 @@
 
 mod console;
 mod debug;
+mod entity;
 mod player_control;
 mod rule;
 mod scenario;
