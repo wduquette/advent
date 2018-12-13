@@ -15,8 +15,7 @@ pub fn list_world(world: &World) {
 /// List just the given entity
 fn list_entity(world: &World, id: ID) {
     if world.entities[id].name.is_some() {
-        println!("[{}] {} \"{}\"", id, world.entities[id].tag,
-            world.name(id));
+        println!("[{}] {} \"{}\"", id, world.entities[id].tag, world.name(id));
     } else {
         println!("[{}] {}", id, world.entities[id].tag);
     }

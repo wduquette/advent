@@ -36,7 +36,7 @@ pub enum Var {
 }
 
 /// Inter-room links
-pub type Links = HashMap<Dir,ID>;
+pub type Links = HashMap<Dir, ID>;
 
 /// A Thing is something that can be in a location and that the user can
 /// interact with.  This structure contains details about Things, i.e.,

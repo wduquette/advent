@@ -1,8 +1,8 @@
 //! The Player Control System
 
 use crate::debug;
-use crate::types::Var::*;
 use crate::types::Dir::*;
+use crate::types::Var::*;
 use crate::types::*;
 use crate::world::*;
 

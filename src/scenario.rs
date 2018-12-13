@@ -1,7 +1,7 @@
 //! Scenario definition
 
-use crate::types::Var::*;
 use crate::types::Dir::*;
+use crate::types::Var::*;
 use crate::types::*;
 use crate::world::*;
 
@@ -77,7 +77,8 @@ and gosh, this doesn't look anything like the toy aisle.
 
 /// Initializes the player's details
 fn make_player(world: &mut World, start: ID) {
-    world.pid = world.make("self")
+    world.pid = world
+        .make("self")
         .name("self")
         .prose("You've got all the usual bits.")
         .location(start)
@@ -92,7 +93,8 @@ fn make_player(world: &mut World, start: ID) {
 /// Makes a room with the given name and prose, and an empty set of links.
 /// Returns the room's ID.
 fn make_room(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
-    world.make(tag)
+    world
+        .make(tag)
         .name(name)
         .prose(text)
         .links()

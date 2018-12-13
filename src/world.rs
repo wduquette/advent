@@ -1,8 +1,8 @@
 //! The game world
-use std::collections::HashSet;
-use std::collections::HashMap;
 use crate::entity::*;
 use crate::types::*;
+use std::collections::HashMap;
+use std::collections::HashSet;
 
 /// The game state.  Uses a variant of the Entity-Component-System architecture.
 /// This struct provides many methods for querying and mutating entities.  These methods
@@ -14,7 +14,7 @@ pub struct World {
     pub entities: Vec<Entity>,
 
     /// The hash map
-    pub tag_map: HashMap<String,ID>,
+    pub tag_map: HashMap<String, ID>,
 
     /// Various variables about the world.
     pub vars: HashSet<Var>,
@@ -79,13 +79,19 @@ impl World {
     /// Looks up an entity's ID in the tag map.
     /// Panics if the entity is unknown.
     pub fn lookup(&self, tag: &str) -> ID {
-        *self.tag_map.get(tag).expect(&format!("Unknown tag: {}", tag))
+        *self
+            .tag_map
+            .get(tag)
+            .expect(&format!("Unknown tag: {}", tag))
     }
 
     /// Returns the name of the entity with the given ID.
     pub fn name(&self, id: ID) -> &str {
         // TODO: retrieve the entity's name once we have one.
-        &self.entities[id].name.as_ref().expect(&format!("Name missing: {}", id))
+        &self.entities[id]
+            .name
+            .as_ref()
+            .expect(&format!("Name missing: {}", id))
     }
 
     /// Determines whether the entity is a rule or not
@@ -124,7 +130,9 @@ impl World {
 
     /// Gets the entity's prose.  Panics if none.
     pub fn prose(&self, id: ID) -> &str {
-        &self.entities[id].prose.as_ref()
+        &self.entities[id]
+            .prose
+            .as_ref()
             .unwrap_or_else(|| panic!("Entity has no prose: {}", id))
     }
 
