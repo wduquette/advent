@@ -16,16 +16,19 @@ pub fn build() -> World {
     // Rooms
     let clearing = make_room(
         world,
+        "clearing-1",
         "Clearing",
         "A wide spot in the woods.  You can go east.",
     );
     let trail = make_room(
         world,
+        "trail-1",
         "Trail",
         "A trail from hither to yon.  You can go east or west.",
     );
     let bridge = make_room(
         world,
+        "bridge-1",
         "Bridge",
         "\
 The trail crosses a small stream here.  You can go east or west.
@@ -38,12 +41,13 @@ The trail crosses a small stream here.  You can go east or west.
     connect(world, East, trail, West, bridge);
 
     // NEXT, make the things
-    let note = make_portable(world, "note", "It's illegible.");
+    let note = make_portable(world, "note-1", "note", "It's illegible.");
     world.put_in(note, clearing);
 
     make_scenery(
         world,
         bridge,
+        "stream-1",
         "stream",
         "\
 The stream comes from the north, down a little waterfall, and runs
@@ -55,7 +59,7 @@ how narrow it is.
     // Stories: Rules that supply backstory to the player.
     make_story(
         world,
-        "Story-1",
+        "story-1",
         |world| world.clock == 2,
         "\
 You don't know where you are.  You don't even know where you want to
@@ -86,23 +90,30 @@ fn make_player(world: &mut World, start: ID) {
 
 /// Makes a room with the given name and prose, and an empty set of links.
 /// Returns the room's ID.
-fn make_room(world: &mut World, name: &str, text: &str) -> ID {
-    world.make(name).prose(text).links().inventory().build()
+fn make_room(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
+    world.make(tag)
+        .name(name)
+        .prose(text)
+        .links()
+        .inventory()
+        .build()
 }
 
 /// Makes a portable object, and returns its ID.
-fn make_portable(world: &mut World, name: &str, text: &str) -> ID {
+fn make_portable(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
     world
-        .make(name)
+        .make(tag)
+        .name(name)
         .prose(text)
         .thing(true) // TODO: Obscure; needs improvement.
         .build()
 }
 
 /// Makes a scenery object, and returns its ID.
-fn make_scenery(world: &mut World, loc: ID, name: &str, text: &str) -> ID {
+fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -> ID {
     world
-        .make(name)
+        .make(tag)
+        .name(name)
         .prose(text)
         .location(loc)
         .thing(false) // TODO: Obscure; needs improvement.
@@ -111,12 +122,12 @@ fn make_scenery(world: &mut World, loc: ID, name: &str, text: &str) -> ID {
 
 /// Adds a bit of backstory to be revealed when the conditions are right.
 /// Backstory will appear only once.
-fn make_story<F: 'static>(world: &mut World, name: &str, predicate: F, text: &str)
+fn make_story<F: 'static>(world: &mut World, tag: &str, predicate: F, text: &str)
 where
     F: Fn(&World) -> bool,
 {
     world
-        .make(&format!("Rule {}", name))
+        .make(tag)
         .prose(text)
         .rule(predicate, Action::Print, true)
         .build();

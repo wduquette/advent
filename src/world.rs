@@ -44,14 +44,14 @@ impl World {
     /// Add an entity and return its ID, saving it in the tag map.
     pub fn add_entity(&mut self, entity: Entity) -> ID {
         let id = self.entities.len();
-        self.tag_map.insert(entity.name.clone(), id);
+        self.tag_map.insert(entity.tag.clone(), id);
         self.entities.push(entity);
         id
     }
 
     /// Make an entity using the builder pattern.
-    pub fn make(&mut self, name: &str) -> EntityBuilder {
-        EntityBuilder::make(self, name)
+    pub fn make(&mut self, tag: &str) -> EntityBuilder {
+        EntityBuilder::make(self, tag)
     }
 
     //--------------------------------------------------------------------------------------------
@@ -84,7 +84,8 @@ impl World {
 
     /// Returns the name of the entity with the given ID.
     pub fn name(&self, id: ID) -> &str {
-        &self.entities[id].name
+        // TODO: retrieve the entity's name once we have one.
+        &self.entities[id].name.as_ref().expect(&format!("Name missing: {}", id))
     }
 
     /// Determines whether the entity is a rule or not

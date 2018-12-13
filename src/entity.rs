@@ -5,8 +5,12 @@ use crate::world::World;
 
 /// The entity type: a set of optional components defining an entity in the game.
 pub struct Entity {
-    // The entity's name.  All entities have a name, if only for debugging.
-    pub name: String,
+    // The entity's tag, used for identification and lookups.
+    // All entities have a tag.
+    pub tag: String,
+
+    // Many entities have names for display.
+    pub name: Option<String>,
 
     // Many entities have prose, i.e., a room's basic description.
     pub prose: Option<ProseComponent>,
@@ -29,7 +33,8 @@ pub struct Entity {
 
 pub struct EntityBuilder<'a> {
     pub world: &'a mut World,
-    pub name: String,
+    pub tag: String,
+    pub name: Option<String>,
     pub prose: Option<ProseComponent>,
     pub loc: Option<ID>,
     pub links: Option<LinksComponent>,
@@ -39,10 +44,11 @@ pub struct EntityBuilder<'a> {
 }
 
 impl<'a> EntityBuilder<'a> {
-    pub fn make<'b>(world: &'b mut World, name: &str) -> EntityBuilder<'b> {
+    pub fn make<'b>(world: &'b mut World, tag: &str) -> EntityBuilder<'b> {
         EntityBuilder {
             world: world,
-            name: name.to_string(),
+            tag: tag.to_string(),
+            name: None,
             prose: None,
             loc: None,
             links: None,
@@ -50,6 +56,11 @@ impl<'a> EntityBuilder<'a> {
             inventory: None,
             rule: None,
         }
+    }
+
+    pub fn name(mut self, name: &str) -> EntityBuilder<'a> {
+        self.name = Some(name.into());
+        self
     }
 
     pub fn prose(mut self, text: &str) -> EntityBuilder<'a> {
@@ -94,6 +105,7 @@ impl<'a> EntityBuilder<'a> {
 
     pub fn build(self) -> ID {
         self.world.add_entity(Entity {
+            tag: self.tag,
             name: self.name,
             prose: self.prose,
             loc: self.loc,

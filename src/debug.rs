@@ -14,7 +14,12 @@ pub fn list_world(world: &World) {
 #[allow(dead_code)]
 /// List just the given entity
 fn list_entity(world: &World, id: ID) {
-    println!("[{}] {}", id, world.name(id));
+    if world.entities[id].name.is_some() {
+        println!("[{}] {} \"{}\"", id, world.entities[id].tag,
+            world.name(id));
+    } else {
+        println!("[{}] {}", id, world.entities[id].tag);
+    }
 }
 
 #[allow(dead_code)]
