@@ -1,5 +1,6 @@
 //! The game world
 use std::collections::HashSet;
+use std::collections::HashMap;
 use crate::entity::*;
 use crate::types::*;
 
@@ -9,14 +10,20 @@ use crate::types::*;
 /// will set the player's location, but that's all it does.  The game logic for entering a new
 /// room should be implemented elsewhere.
 pub struct World {
-    pub clock: usize,
+    // The entity vector
     pub entities: Vec<Entity>,
 
-    // The player's entity ID.
-    pub pid: ID,
+    /// The hash map
+    pub tag_map: HashMap<String,ID>,
 
     /// Various variables about the world.
     pub vars: HashSet<Var>,
+
+    // The game clock
+    pub clock: usize,
+
+    // The player's entity ID.
+    pub pid: ID,
 }
 
 impl World {
@@ -26,16 +33,18 @@ impl World {
     /// Creates a new instance of the World
     pub fn new() -> World {
         World {
-            clock: 0,
             entities: Vec::new(),
-            pid: 0,
+            tag_map: HashMap::new(),
             vars: HashSet::new(),
+            clock: 0,
+            pid: 0,
         }
     }
 
-    /// Add an entity and return its ID
+    /// Add an entity and return its ID, saving it in the tag map.
     pub fn add_entity(&mut self, entity: Entity) -> ID {
         let id = self.entities.len();
+        self.tag_map.insert(entity.name.clone(), id);
         self.entities.push(entity);
         id
     }
@@ -66,6 +75,12 @@ impl World {
 
     //--------------------------------------------------------------------------------------------
     // Helpers
+
+    /// Looks up an entity's ID in the tag map.
+    /// Panics if the entity is unknown.
+    pub fn lookup(&self, tag: &str) -> ID {
+        *self.tag_map.get(tag).expect(&format!("Unknown tag: {}", tag))
+    }
 
     /// Returns the name of the entity with the given ID.
     pub fn name(&self, id: ID) -> &str {
