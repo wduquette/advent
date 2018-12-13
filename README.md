@@ -5,16 +5,13 @@ using the ECS architecture.
 
 ## To Do
 
-* Add player conditions: a set of Enums, e.g., DirtyHands, describing
-  the state of the player.
-  * Add an "examine self" command, to display that to the user.
-* Add a condition set to ThingComponent, for conditions that can be
-  set on things: again, a set of Enums, e.g., Dirty.
-  * When the player touches something with dirty hands, it gets dirty.
-  * Portable can be a similar one.
-  * Or, possibly, provide a Set of conditions, e.g., Portable(<id>),
-    Dirty(<id>).  Save the conditions and any data in the Set, rather
-    than in the components.
+* Add dictionary: preferred words with synonyms.
+* Convert input from user's words to preferred words before pattern
+  matching.
+* Rename RuleComponent to Rule
+* Rename ThingComponent to ThingInfo
+* Add puzzle to make water flow
+* Get note dirty and illegible.
 * Review current code.
 * Extend the world.
 * Add some puzzles.
@@ -53,9 +50,11 @@ There are also a couple of debugging commands.
 
 ## The Internals
 
-The game world consists of a vector of "entities".  Each entity has a name,
-and may also have the following components:
+The game world consists of a vector of "entities".  Each entity has a tag,
+which is used for debugging, and can also be used to look up the entity's
+ID; entities may also have the following components:
 
+* A name, for display
 * A descriptive text string
 * A location (for when it is contained in another entity)
 * A set of links to other entities (i.e., the trail is East of the clearing)
@@ -148,3 +147,9 @@ enum Dest {
 Here, `Go` means just link there; `DeadEnd` means you can't go that way,
 but there's a special message; `Guarded` means you can only go there if
 a predicate condition is met, and you'll get a `DeadEnd` message otherwise.
+
+### Book/Note Content
+
+A "Thing" can have additional prose, as the ID of a prose-only component,
+e.g., so you can examine a book and then read it.  Alternatively, just
+add another text component, description vs. prose.
