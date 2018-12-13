@@ -140,7 +140,7 @@ impl World {
     /// location if any.
     pub fn follow(&self, loc: ID, dir: &Dir) -> Option<ID> {
         if let Some(links) = &self.entities[loc].links {
-            if let Some(dest) = links.map.get(&dir) {
+            if let Some(dest) = links.get(&dir) {
                 return Some(*dest);
             }
         }

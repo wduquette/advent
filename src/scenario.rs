@@ -142,7 +142,7 @@ fn oneway(world: &mut World, dir: Dir, from: ID, to: ID) {
         .as_mut()
         .unwrap_or_else(|| panic!("Entity has no link component: {}", from));
 
-    links.map.insert(dir, to);
+    links.insert(dir, to);
 }
 
 /// Establishes a bidirectional link between two rooms.

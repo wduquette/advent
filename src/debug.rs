@@ -40,7 +40,7 @@ pub fn dump_entity(world: &World, id: ID) {
     }
 
     if let Some(links) = &world.entities[id].links {
-        for (dir, id) in &links.map {
+        for (dir, id) in links {
             println!("  Link: {:?} to {}", dir, id);
         }
     }
