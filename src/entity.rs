@@ -27,21 +27,6 @@ pub struct Entity {
     pub rule: Option<RuleComponent>,
 }
 
-impl Entity {
-    /// Create an empty entity.
-    pub fn new() -> Entity {
-        Entity {
-            name: "Entity".into(),
-            prose: None,
-            loc: None,
-            links: None,
-            thing: None,
-            inventory: None,
-            rule: None,
-        }
-    }
-}
-
 pub struct EntityBuilder<'a> {
     pub world: &'a mut World,
     pub name: String,

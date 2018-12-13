@@ -25,24 +25,12 @@ impl World {
 
     /// Creates a new instance of the World, with an empty entity for the player.
     pub fn new() -> World {
-        let mut world = World {
+        World {
             clock: 0,
             entities: Vec::new(),
             pid: 0,
             attrs: HashSet::new(),
-        };
-
-        // Add the player entity, which must still be initialized.
-        world.alloc();
-
-        world
-    }
-
-    /// Allocate an entity and return its ID
-    pub fn alloc(&mut self) -> ID {
-        let id = self.entities.len();
-        self.entities.push(Entity::new());
-        id
+        }
     }
 
     /// Add an entity and return its ID

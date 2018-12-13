@@ -62,24 +62,20 @@ and gosh, this doesn't look anything like the toy aisle.
     ",
     );
 
-    // NEXT, initialize the player
-    initialize_player(world, clearing);
+    // NEXT, Make the player
+    make_player(world, clearing);
 
     // NEXT, return the world.
     the_world
 }
 
 /// Initializes the player's details
-fn initialize_player(world: &mut World, start: ID) {
-    let pid = world.pid;
-    let player = &mut world.entities[pid];
-
-    player.name = "You".into();
-    player.prose = Some(ProseComponent {
-        text: "You've got all the usual bits.".into(),
-    });
-    player.loc = Some(start);
-    player.inventory = Some(InventoryComponent::new());
+fn make_player(world: &mut World, start: ID) {
+    world.pid = world.make("self")
+        .prose("You've got all the usual bits.")
+        .location(start)
+        .inventory()
+        .build();
 
     world.attrs.insert(Attr::Seen(start));
 }
