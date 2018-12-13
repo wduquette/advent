@@ -13,7 +13,7 @@ pub struct Entity {
     pub name: Option<String>,
 
     // Many entities have prose, i.e., a room's basic description.
-    pub prose: Option<ProseComponent>,
+    pub prose: Option<String>,
 
     // Some entities (e.g., the player) have a location.
     pub loc: Option<ID>,
@@ -35,7 +35,7 @@ pub struct EntityBuilder<'a> {
     pub world: &'a mut World,
     pub tag: String,
     pub name: Option<String>,
-    pub prose: Option<ProseComponent>,
+    pub prose: Option<String>,
     pub loc: Option<ID>,
     pub links: Option<LinksComponent>,
     pub thing: Option<ThingComponent>,
@@ -63,10 +63,8 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    pub fn prose(mut self, text: &str) -> EntityBuilder<'a> {
-        self.prose = Some(ProseComponent {
-            text: text.trim().into(),
-        });
+    pub fn prose(mut self, prose: &str) -> EntityBuilder<'a> {
+        self.prose = Some(prose.trim().into());
         self
     }
 

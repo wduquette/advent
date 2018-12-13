@@ -35,11 +35,6 @@ pub enum Var {
     HasWater(ID),
 }
 
-/// Entity prose
-pub struct ProseComponent {
-    pub text: String,
-}
-
 /// Inter-room links
 pub struct LinksComponent {
     pub map: HashMap<Dir, ID>,

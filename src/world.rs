@@ -124,12 +124,8 @@ impl World {
 
     /// Gets the entity's prose.  Panics if none.
     pub fn prose(&self, id: ID) -> &str {
-        let prose = self.entities[id]
-            .prose
-            .as_ref()
-            .unwrap_or_else(|| panic!("Entity has no prose: {}", id));
-
-        &prose.text
+        &self.entities[id].prose.as_ref()
+            .unwrap_or_else(|| panic!("Entity has no prose: {}", id))
     }
 
     /// Retrieves the location of something that has a location.
