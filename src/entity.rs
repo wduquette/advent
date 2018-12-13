@@ -68,7 +68,9 @@ impl<'a> EntityBuilder<'a> {
     }
 
     pub fn prose(mut self, text: &str) -> EntityBuilder<'a> {
-        self.prose = Some(ProseComponent { text: text.into() });
+        self.prose = Some(ProseComponent {
+            text: text.trim().into(),
+        });
         self
     }
 
@@ -77,7 +79,7 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    pub fn links(mut self, loc: ID) -> EntityBuilder<'a> {
+    pub fn links(mut self) -> EntityBuilder<'a> {
         self.links = Some(LinksComponent::new());
         self
     }
@@ -87,7 +89,7 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    pub fn inventory(mut self, loc: ID) -> EntityBuilder<'a> {
+    pub fn inventory(mut self) -> EntityBuilder<'a> {
         self.inventory = Some(InventoryComponent::new());
         self
     }

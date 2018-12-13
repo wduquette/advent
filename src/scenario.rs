@@ -87,46 +87,26 @@ fn initialize_player(world: &mut World, start: ID) {
 /// Makes a room with the given name and prose, and an empty set of links.
 /// Returns the room's ID.
 fn make_room(world: &mut World, name: &str, text: &str) -> ID {
-    let rid = world.alloc();
-    let room = &mut world.entities[rid];
-
-    room.name = name.into();
-    room.prose = Some(ProseComponent {
-        text: text.trim().into(),
-    });
-    room.links = Some(LinksComponent::new());
-    room.inventory = Some(InventoryComponent::new());
-
-    rid
+    world.make(name).prose(text).links().inventory().build()
 }
 
 /// Makes a portable object, and returns its ID.
 fn make_portable(world: &mut World, name: &str, text: &str) -> ID {
-    let id = world.alloc();
-    let thing = &mut world.entities[id];
-
-    thing.name = name.into();
-    thing.prose = Some(ProseComponent {
-        text: text.trim().into(),
-    });
-    thing.thing = Some(ThingComponent { portable: true });
-
-    id
+    world
+        .make(name)
+        .prose(text)
+        .thing(true) // TODO: Obscure; needs improvement.
+        .build()
 }
 
 /// Makes a scenery object, and returns its ID.
 fn make_scenery(world: &mut World, loc: ID, name: &str, text: &str) -> ID {
-    let id = world.alloc();
-    let thing = &mut world.entities[id];
-
-    thing.name = name.into();
-    thing.prose = Some(ProseComponent {
-        text: text.trim().into(),
-    });
-    thing.loc = Some(loc);
-    thing.thing = Some(ThingComponent { portable: false });
-
-    id
+    world
+        .make(name)
+        .prose(text)
+        .location(loc)
+        .thing(false) // TODO: Obscure; needs improvement.
+        .build()
 }
 
 /// Adds a bit of backstory to be revealed when the conditions are right.
@@ -135,18 +115,11 @@ fn make_story<F: 'static>(world: &mut World, name: &str, predicate: F, text: &st
 where
     F: Fn(&World) -> bool,
 {
-    let tid = world.alloc();
-    world.entities[tid].name = format!("Rule {}", name);
-    world.entities[tid].prose = Some(ProseComponent {
-        text: text.trim().into(),
-    });
-
-    world.entities[tid].rule = Some(RuleComponent {
-        predicate: Box::new(predicate),
-        action: Action::Print,
-        once_only: true,
-        fired: false,
-    });
+    world
+        .make(&format!("Rule {}", name))
+        .prose(text)
+        .rule(predicate, Action::Print, true)
+        .build();
 }
 
 /// Links one room to another in the given direction.

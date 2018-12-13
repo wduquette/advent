@@ -5,7 +5,6 @@ using the ECS architecture.
 
 ## To Do
 
-* EntityBuilder
 * Consider making Some(ProseComponent) just Some(String).
 * Add player conditions: a set of Enums, e.g., DirtyHands, describing
   the state of the player.
