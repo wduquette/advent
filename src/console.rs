@@ -6,7 +6,7 @@ use std::io::prelude::*;
 /// Outputs the standard command prompt to stdout.
 pub fn prompt(prompt: &str) {
     print!("{} ", prompt);
-    io::stdout().flush().ok().expect("Could not flush stdout");
+    io::stdout().flush().expect("Could not flush stdout");
 }
 
 /// Reads a trimmed, lowercase line of input from stdin and returns

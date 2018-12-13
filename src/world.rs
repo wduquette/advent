@@ -129,7 +129,7 @@ impl World {
         let prose = self.entities[id]
             .prose
             .as_ref()
-            .expect(&format!("Entity has no prose: {}", id));
+            .unwrap_or_else(|| panic!("Entity has no prose: {}", id));
 
         &prose.text
     }
@@ -139,12 +139,12 @@ impl World {
     pub fn loc(&self, id: ID) -> ID {
         self.entities[id]
             .loc
-            .expect(&format!("Entity has no location: {}", id))
+            .unwrap_or_else(|| panic!("Entity has no location: {}", id))
     }
 
     /// Tries to follow a link in the given direction; returns the linked
     /// location if any.
-    pub fn follow(&self, loc: ID, dir: Dir) -> Option<ID> {
+    pub fn follow(&self, loc: ID, dir: &Dir) -> Option<ID> {
         if let Some(links) = &self.entities[loc].links {
             if let Some(dest) = links.map.get(&dir) {
                 return Some(*dest);

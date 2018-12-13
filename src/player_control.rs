@@ -13,30 +13,30 @@ pub fn system(world: &mut World, command: &str) {
     let tokens: Vec<&str> = command.split_whitespace().collect();
 
     let result = match tokens.as_slice() {
-        &["n"] => cmd_go(world, North),
-        &["north"] => cmd_go(world, North),
-        &["s"] => cmd_go(world, South),
-        &["south"] => cmd_go(world, South),
-        &["e"] => cmd_go(world, East),
-        &["east"] => cmd_go(world, East),
-        &["w"] => cmd_go(world, West),
-        &["west"] => cmd_go(world, West),
-        &["help"] => cmd_help(world),
-        &["look"] => cmd_look(world),
-        &["i"] => cmd_inventory(world),
-        &["invent"] => cmd_inventory(world),
-        &["inventory"] => cmd_inventory(world),
-        &["x", name] => cmd_examine(world, name),
-        &["examine", name] => cmd_examine(world, name),
-        &["get", name] => cmd_get(world, name),
-        &["drop", name] => cmd_drop(world, name),
-        &["exit"] => cmd_quit(world),
-        &["quit"] => cmd_quit(world),
+        ["n"] => cmd_go(world, &North),
+        ["north"] => cmd_go(world, &North),
+        ["s"] => cmd_go(world, &South),
+        ["south"] => cmd_go(world, &South),
+        ["e"] => cmd_go(world, &East),
+        ["east"] => cmd_go(world, &East),
+        ["w"] => cmd_go(world, &West),
+        ["west"] => cmd_go(world, &West),
+        ["help"] => cmd_help(world),
+        ["look"] => cmd_look(world),
+        ["i"] => cmd_inventory(world),
+        ["invent"] => cmd_inventory(world),
+        ["inventory"] => cmd_inventory(world),
+        ["x", name] => cmd_examine(world, name),
+        ["examine", name] => cmd_examine(world, name),
+        ["get", name] => cmd_get(world, name),
+        ["drop", name] => cmd_drop(world, name),
+        ["exit"] => cmd_quit(world),
+        ["quit"] => cmd_quit(world),
 
         // Debugging
-        &["dump", id_arg] => cmd_dump(world, id_arg),
-        &["dump"] => cmd_dump_world(world),
-        &["list"] => cmd_list(world),
+        ["dump", id_arg] => cmd_dump(world, id_arg),
+        ["dump"] => cmd_dump_world(world),
+        ["list"] => cmd_list(world),
 
         // Error
         _ => Err("I don't understand.".into()),
@@ -50,9 +50,9 @@ pub fn system(world: &mut World, command: &str) {
 // User Commands
 
 /// Move the player in the given direction
-fn cmd_go(world: &mut World, dir: Dir) -> CmdResult {
+fn cmd_go(world: &mut World, dir: &Dir) -> CmdResult {
     let here = world.loc(world.pid);
-    if let Some(dest) = world.follow(here, dir) {
+    if let Some(dest) = world.follow(here, &dir) {
         world.set_location(world.pid, dest);
         let seen = world.player.seen.contains(&dest);
         describe_player_location(world, seen);
@@ -86,7 +86,7 @@ fn cmd_inventory(world: &World) -> CmdResult {
     let pid = world.pid;
     let inv = &world.entities[pid].inventory.as_ref().unwrap();
 
-    if inv.things.len() == 0 {
+    if inv.things.is_empty() {
         println!("You aren't carrying anything.\n");
     } else {
         println!("You have: {}.\n", invent_list(world, pid));
@@ -107,9 +107,9 @@ fn cmd_examine(world: &World, name: &str) -> CmdResult {
 /// Gets a thing from the location's inventory.
 fn cmd_get(world: &mut World, name: &str) -> CmdResult {
     let loc = here(world);
-    if let Some(_) = find_in_inventory(world, world.pid, name) {
+    if find_in_inventory(world, world.pid, name).is_some() {
         Err("You already have it.".into())
-    } else if let Some(_) = find_in_scenery(world, loc, name) {
+    } else if find_in_scenery(world, loc, name).is_some() {
         Err("You can't take that!".into())
     } else if let Some(id) = find_in_inventory(world, loc, name) {
         world.take_out(id, loc);
@@ -129,7 +129,7 @@ fn cmd_drop(world: &mut World, name: &str) -> CmdResult {
         world.put_in(id, loc);
         println!("Dropped.\n");
         Ok(())
-    } else if let Some(_) = find_visible_thing(world, name) {
+    } else if find_visible_thing(world, name).is_some() {
         Err("You aren't carrying that.".into())
     } else {
         Err("You don't see any such thing.".into())
@@ -182,7 +182,7 @@ pub fn describe_player_location(world: &World, brief: bool) {
     // NEXT, list any objects in the room's inventory.  (We don't list
     // scenary; presumably that's in the description.)
     if let Some(inv) = &world.entities[loc].inventory {
-        if inv.things.len() > 0 {
+        if !inv.things.is_empty() {
             println!("You see: {}.\n", invent_list(world, loc));
         }
     }

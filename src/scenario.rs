@@ -156,7 +156,7 @@ fn oneway(world: &mut World, dir: Dir, from: ID, to: ID) {
     let links = &mut world.entities[from]
         .links
         .as_mut()
-        .expect(&format!("Entity has no link component: {}", from));
+        .unwrap_or_else(|| panic!("Entity has no link component: {}", from));
 
     links.map.insert(dir, to);
 }

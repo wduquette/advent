@@ -5,6 +5,7 @@ using the ECS architecture.
 
 ## To Do
 
+* EntityBuilder
 * Add player conditions: a set of Enums, e.g., DirtyHands, describing
   the state of the player.
   * Add an "examine self" command, to display that to the user.
