@@ -156,8 +156,8 @@ impl World {
     /// No op if the thing is already in the location.
     pub fn put_in(&mut self, thing: ID, container: ID) {
         if let Some(inv) = &mut self.entities[container].inventory {
-            if !inv.things.contains(&thing) {
-                inv.things.insert(thing);
+            if !inv.contains(&thing) {
+                inv.insert(thing);
                 self.entities[thing].loc = Some(container);
             }
         }
@@ -166,8 +166,8 @@ impl World {
     /// Takes the thing out of the container's inventory, and clears the thing's location.
     pub fn take_out(&mut self, thing: ID, container: ID) {
         if let Some(inv) = &mut self.entities[container].inventory {
-            if inv.things.contains(&thing) {
-                inv.things.remove(&thing);
+            if inv.contains(&thing) {
+                inv.remove(&thing);
                 self.entities[thing].loc = None;
             }
         }

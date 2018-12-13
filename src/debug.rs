@@ -50,7 +50,7 @@ pub fn dump_entity(world: &World, id: ID) {
     }
 
     if let Some(inventory) = &world.entities[id].inventory {
-        for tid in &inventory.things {
+        for tid in inventory {
             println!("  Contains: [{}] {}", *tid, world.name(*tid));
         }
     }

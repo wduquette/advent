@@ -3,6 +3,7 @@
 use crate::types::*;
 use crate::world::World;
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 /// The entity type: a set of optional components defining an entity in the game.
 pub struct Entity {
@@ -26,7 +27,7 @@ pub struct Entity {
     pub thing: Option<ThingComponent>,
 
     // Some entities can own/contain Things.
-    pub inventory: Option<InventoryComponent>,
+    pub inventory: Option<Inventory>,
 
     // Some entities are rules, actions to be taken when a condition is met.
     pub rule: Option<RuleComponent>,
@@ -40,7 +41,7 @@ pub struct EntityBuilder<'a> {
     pub loc: Option<ID>,
     pub links: Option<Links>,
     pub thing: Option<ThingComponent>,
-    pub inventory: Option<InventoryComponent>,
+    pub inventory: Option<Inventory>,
     pub rule: Option<RuleComponent>,
 }
 
@@ -85,7 +86,7 @@ impl<'a> EntityBuilder<'a> {
     }
 
     pub fn inventory(mut self) -> EntityBuilder<'a> {
-        self.inventory = Some(InventoryComponent::new());
+        self.inventory = Some(HashSet::new());
         self
     }
 

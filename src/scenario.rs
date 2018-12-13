@@ -78,6 +78,7 @@ and gosh, this doesn't look anything like the toy aisle.
 /// Initializes the player's details
 fn make_player(world: &mut World, start: ID) {
     world.pid = world.make("self")
+        .name("self")
         .prose("You've got all the usual bits.")
         .location(start)
         .inventory()

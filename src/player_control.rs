@@ -95,7 +95,7 @@ fn cmd_inventory(world: &World) -> CmdResult {
     let pid = world.pid;
     let inv = &world.entities[pid].inventory.as_ref().unwrap();
 
-    if inv.things.is_empty() {
+    if inv.is_empty() {
         println!("You aren't carrying anything.\n");
     } else {
         println!("You have: {}.\n", invent_list(world, pid));
@@ -227,7 +227,7 @@ pub fn describe_player_location(world: &World, brief: bool) {
     // NEXT, list any objects in the room's inventory.  (We don't list
     // scenary; presumably that's in the description.)
     if let Some(inv) = &world.entities[loc].inventory {
-        if !inv.things.is_empty() {
+        if !inv.is_empty() {
             println!("You see: {}.\n", invent_list(world, loc));
         }
     }
@@ -273,7 +273,7 @@ fn find_visible_thing(world: &World, name: &str) -> Option<ID> {
 
 fn find_in_inventory(world: &World, loc: ID, name: &str) -> Option<ID> {
     if let Some(inv) = &world.entities[loc].inventory {
-        for id in &inv.things {
+        for id in inv {
             if world.name(*id) == name {
                 return Some(*id);
             }
@@ -307,7 +307,7 @@ fn invent_list(world: &World, loc: ID) -> String {
     let mut list = String::new();
 
     if let Some(inv) = &world.entities[loc].inventory {
-        for id in &inv.things {
+        for id in inv {
             if !list.is_empty() {
                 list.push_str(", ");
             }

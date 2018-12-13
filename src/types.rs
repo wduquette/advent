@@ -46,19 +46,8 @@ pub struct ThingComponent {
     pub portable: bool,
 }
 
-/// An Inventory is a list of things contained with the current entity.
-#[derive(Debug)]
-pub struct InventoryComponent {
-    pub things: HashSet<ID>,
-}
-
-impl InventoryComponent {
-    pub fn new() -> InventoryComponent {
-        InventoryComponent {
-            things: HashSet::new(),
-        }
-    }
-}
+/// An Inventory is the set of things contained with the current entity.
+pub type Inventory = HashSet<ID>;
 
 /// Actions taken by rules (and maybe other things)
 #[derive(Debug)]
