@@ -81,7 +81,7 @@ fn initialize_player(world: &mut World, start: ID) {
     player.loc = Some(start);
     player.inventory = Some(InventoryComponent::new());
 
-    world.player.seen.insert(start);
+    world.attrs.insert(Attr::Seen(start));
 }
 
 /// Makes a room with the given name and prose, and an empty set of links.

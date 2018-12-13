@@ -21,6 +21,14 @@ pub enum Dir {
     Out,
 }
 
+#[derive(PartialEq, Eq, Hash, Debug)]
+#[allow(dead_code)]
+/// An attribute of an entity
+pub enum Attr {
+    /// Has this location been seen?
+    Seen(ID),
+}
+
 /// Entity prose
 pub struct ProseComponent {
     pub text: String,
@@ -85,19 +93,6 @@ impl RuleComponent {
             action,
             once_only,
             fired: false,
-        }
-    }
-}
-
-/// Player Component: Special data about the player
-pub struct PlayerComponent {
-    pub seen: HashSet<ID>,
-}
-
-impl PlayerComponent {
-    pub fn new() -> PlayerComponent {
-        PlayerComponent {
-            seen: HashSet::new(),
         }
     }
 }

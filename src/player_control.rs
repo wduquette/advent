@@ -54,9 +54,9 @@ fn cmd_go(world: &mut World, dir: &Dir) -> CmdResult {
     let here = world.loc(world.pid);
     if let Some(dest) = world.follow(here, &dir) {
         world.set_location(world.pid, dest);
-        let seen = world.player.seen.contains(&dest);
+        let seen = world.attrs.contains(&Attr::Seen(dest));
         describe_player_location(world, seen);
-        world.player.seen.insert(dest);
+        world.attrs.insert(Attr::Seen(dest));
         Ok(())
     } else {
         Err("You can't go that way.".into())

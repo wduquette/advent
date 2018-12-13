@@ -1,45 +1,7 @@
 //! The game world
+use std::collections::HashSet;
 use crate::entity::*;
 use crate::types::*;
-
-// /// The entity type: a set of optional components
-// pub struct Entity {
-//     // The entity's name.  All entities have a name, if only for debugging.
-//     pub name: String,
-//
-//     // Many entities have prose, i.e., a room's basic description.
-//     pub prose: Option<ProseComponent>,
-//
-//     // Some entities (e.g., the player) have a location.
-//     pub loc: Option<ID>,
-//
-//     // Rooms link to other rooms in a variety of directions
-//     pub links: Option<LinksComponent>,
-//
-//     // Some entities are Things and have Thing details.
-//     pub thing: Option<ThingComponent>,
-//
-//     // Some entities can own/contain Things.
-//     pub inventory: Option<InventoryComponent>,
-//
-//     // Some entities are rules, actions to be taken when a condition is met.
-//     pub rule: Option<RuleComponent>,
-// }
-//
-// impl Entity {
-//     /// Create an empty entity.
-//     pub fn new() -> Entity {
-//         Entity {
-//             name: "Entity".into(),
-//             prose: None,
-//             loc: None,
-//             links: None,
-//             thing: None,
-//             inventory: None,
-//             rule: None,
-//         }
-//     }
-// }
 
 /// The game state.  Uses a variant of the Entity-Component-System architecture.
 /// This struct provides many methods for querying and mutating entities.  These methods
@@ -53,8 +15,8 @@ pub struct World {
     // The player's entity ID.
     pub pid: ID,
 
-    // The player's ancillary data
-    pub player: PlayerComponent,
+    /// Various variables about the world.
+    pub attrs: HashSet<Attr>,
 }
 
 impl World {
@@ -67,7 +29,7 @@ impl World {
             clock: 0,
             entities: Vec::new(),
             pid: 0,
-            player: PlayerComponent::new(),
+            attrs: HashSet::new(),
         };
 
         // Add the player entity, which must still be initialized.
