@@ -8,7 +8,7 @@ use std::collections::hash_set::HashSet;
 pub type ID = usize;
 
 /// Directions
-#[derive(PartialEq, Eq, Hash, Debug)]
+#[derive(PartialEq, Eq, Hash, Debug, Clone)]
 #[allow(dead_code)]
 pub enum Dir {
     North,

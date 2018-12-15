@@ -13,14 +13,12 @@ use crate::world::*;
 
 /// Runs the program.
 pub fn run() {
-    // FIRST, Print the introduction
-    print_introduction();
-
-    // NEXT, create the game world.
+    // FIRST, create the game world.
     let mut the_world: World = scenario::build();
     let world = &mut the_world;
 
-    player_control::describe_player_location(world, false);
+    // NEXT, Print the introduction
+    print_introduction(world);
 
     // NEXT, enter the game loop.
     loop {
@@ -41,6 +39,11 @@ pub fn run() {
     }
 }
 
-fn print_introduction() {
+fn print_introduction(world: &World) {
     println!("Welcome to Advent!\n");
+
+    let player = &world.entities[world.pid].as_player();
+    let room = &world.entities[player.loc].as_room();
+
+    player_control::describe_location(world, room, false);
 }

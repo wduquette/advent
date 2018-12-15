@@ -153,11 +153,6 @@ impl World {
         None
     }
 
-    /// Sets the entity's location
-    pub fn set_location(&mut self, id: ID, loc: ID) {
-        self.entities[id].loc = Some(loc);
-    }
-
     /// Puts the thing in the container's inventory, and sets the thing's location.
     /// No op if the thing is already in the location.
     pub fn put_in(&mut self, thing: ID, container: ID) {

@@ -5,8 +5,7 @@ using the ECS architecture.
 
 ## To Do
 
-* Consider helper classes, e.g., Room + Entity.is_room, Entity.as_room(),
-  World.save_room()
+* Define Full,Brief enum
 * Consider PropertyComponents (containing a HashSet<Var>).
 * Add dictionary: preferred words with synonyms.
 * Convert input from user's words to preferred words before pattern

@@ -5,35 +5,39 @@ use crate::types::Dir::*;
 use crate::types::Var::*;
 use crate::types::*;
 use crate::world::*;
+use crate::entity::Room;
+use crate::entity::Player;
 
 /// An error result
 type CmdResult = Result<(), String>;
 
 /// The Player Control system.  Processes player commands.
 pub fn system(world: &mut World, command: &str) {
+    let player = &mut world.entities[world.pid].as_player();
+
     let tokens: Vec<&str> = command.split_whitespace().collect();
 
     // TODO: Map synonyms, remove punctuation, before pattern matching
 
     let result = match tokens.as_slice() {
-        ["n"] => cmd_go(world, &North),
-        ["north"] => cmd_go(world, &North),
-        ["s"] => cmd_go(world, &South),
-        ["south"] => cmd_go(world, &South),
-        ["e"] => cmd_go(world, &East),
-        ["east"] => cmd_go(world, &East),
-        ["w"] => cmd_go(world, &West),
-        ["west"] => cmd_go(world, &West),
-        ["help"] => cmd_help(world),
-        ["look"] => cmd_look(world),
-        ["i"] => cmd_inventory(world),
-        ["invent"] => cmd_inventory(world),
-        ["inventory"] => cmd_inventory(world),
-        ["x", "self"] => cmd_examine_self(world),
-        ["x", "me"] => cmd_examine_self(world),
+        ["n"] => cmd_go(world, player, &North),
+        ["north"] => cmd_go(world, player, &North),
+        ["s"] => cmd_go(world, player, &South),
+        ["south"] => cmd_go(world, player, &South),
+        ["e"] => cmd_go(world, player, &East),
+        ["east"] => cmd_go(world, player, &East),
+        ["w"] => cmd_go(world, player, &West),
+        ["west"] => cmd_go(world, player, &West),
+        ["help"] => cmd_help(),
+        ["look"] => cmd_look(world, player),
+        ["i"] => cmd_inventory(world, player),
+        ["invent"] => cmd_inventory(world, player),
+        ["inventory"] => cmd_inventory(world, player),
+        ["x", "self"] => cmd_examine_self(world, player),
+        ["x", "me"] => cmd_examine_self(world, player),
         ["x", name] => cmd_examine(world, name),
-        ["examine", "self"] => cmd_examine_self(world),
-        ["examine", "me"] => cmd_examine_self(world),
+        ["examine", "self"] => cmd_examine_self(world, player),
+        ["examine", "me"] => cmd_examine_self(world, player),
         ["examine", name] => cmd_examine(world, name),
         ["get", name] => cmd_get(world, name),
         ["drop", name] => cmd_drop(world, name),
@@ -51,21 +55,31 @@ pub fn system(world: &mut World, command: &str) {
         _ => Err("I don't understand.".into()),
     };
 
+    // NEXT, handle the result
     if let Err(msg) = result {
         println!("{}\n", msg);
+    } else {
+        player.save(world);
     }
 }
 
 // User Commands
 
 /// Move the player in the given direction
-fn cmd_go(world: &mut World, dir: &Dir) -> CmdResult {
-    let here = world.loc(world.pid);
-    if let Some(dest) = world.follow(here, &dir) {
-        world.set_location(world.pid, dest);
-        let seen = world.is(&Seen(dest));
-        describe_player_location(world, seen);
-        world.set(Seen(dest));
+fn cmd_go(world: &mut World, player: &mut Player, dir: &Dir) -> CmdResult {
+    if let Some(dest) = world.follow(player.loc, &dir) {
+        let room = &world.entities[dest].as_room();
+        player.loc = dest;
+
+        let seen = world.is(&Seen(dest));  // TODO: should be player property
+
+        if seen {
+            describe_location(world, room, true);
+        } else {
+            describe_location(world, room, false);
+        }
+
+        world.set(Seen(dest));  // TODO: should be player property
         Ok(())
     } else {
         Err("You can't go that way.".into())
@@ -73,7 +87,7 @@ fn cmd_go(world: &mut World, dir: &Dir) -> CmdResult {
 }
 
 /// Display basic help, i.e., what commands are available.
-fn cmd_help(_world: &World) -> CmdResult {
+fn cmd_help() -> CmdResult {
     println!(
         "\
 You've got the usual commands: n, s, e, w, look, get, drop, quit.
@@ -85,20 +99,18 @@ You know.  Like that.
 }
 
 /// Re-describe the current location.
-fn cmd_look(world: &World) -> CmdResult {
-    describe_player_location(world, false);
+fn cmd_look(world: &World, player: &Player) -> CmdResult {
+    let room = &world.entities[player.loc].as_room();
+    describe_location(world, room, false);
     Ok(())
 }
 
 /// Re-describe the current location.
-fn cmd_inventory(world: &World) -> CmdResult {
-    let pid = world.pid;
-    let inv = &world.entities[pid].inventory.as_ref().unwrap();
-
-    if inv.is_empty() {
+fn cmd_inventory(world: &World, player: &Player) -> CmdResult {
+    if player.inventory.is_empty() {
         println!("You aren't carrying anything.\n");
     } else {
-        println!("You have: {}.\n", invent_list(world, pid));
+        println!("You have: {}.\n", invent_list(world, &player.inventory));
     }
     Ok(())
 }
@@ -114,10 +126,10 @@ fn cmd_examine(world: &World, name: &str) -> CmdResult {
 }
 
 /// Describe a thing in the current location.
-fn cmd_examine_self(world: &World) -> CmdResult {
+fn cmd_examine_self(world: &World, player: &Player) -> CmdResult {
     let mut msg = String::new();
 
-    msg.push_str(world.prose(world.pid));
+    msg.push_str(&player.prose);
 
     if world.is(&DirtyHands) {
         msg.push_str(" Your hands are kind of dirty, though.");
@@ -132,6 +144,7 @@ fn cmd_examine_self(world: &World) -> CmdResult {
 fn cmd_wash_hands(world: &mut World) -> CmdResult {
     let loc = world.loc(world.pid);
 
+    // TODO: Use room and property component
     if !world.is(&HasWater(loc)) {
         return Err("That'd be a neat trick.".into());
     }
@@ -213,23 +226,19 @@ fn cmd_list(world: &World) -> CmdResult {
 //
 // These functions are used to implement the above commands.
 
-/// Describe the player's current location.
-pub fn describe_player_location(world: &World, brief: bool) {
-    let loc = world.loc(world.pid);
-
+/// Describe the location.
+pub fn describe_location(world: &World, room: &Room, brief: bool) {
     // FIRST, display the room's description
     if brief {
-        println!("{}\n", world.name(loc));
+        println!("{}\n", room.name);
     } else {
-        println!("{}\n{}\n", world.name(loc), world.prose(loc));
+        println!("{}\n{}\n", room.name, room.prose);
     }
 
     // NEXT, list any objects in the room's inventory.  (We don't list
     // scenary; presumably that's in the description.)
-    if let Some(inv) = &world.entities[loc].inventory {
-        if !inv.is_empty() {
-            println!("You see: {}.\n", invent_list(world, loc));
-        }
+    if !room.inventory.is_empty() {
+        println!("You see: {}.\n", invent_list(world, &room.inventory));
     }
 }
 
@@ -303,16 +312,14 @@ fn here(world: &World) -> ID {
 /// List the names of the entities, separated by commas.
 /// TODO: This could probably be done with map and some kind of join function.
 /// However, it seems that "join" is available in the nightly.
-fn invent_list(world: &World, loc: ID) -> String {
+fn invent_list(world: &World, inventory: &Inventory) -> String {
     let mut list = String::new();
 
-    if let Some(inv) = &world.entities[loc].inventory {
-        for id in inv {
-            if !list.is_empty() {
-                list.push_str(", ");
-            }
-            list.push_str(world.name(*id));
+    for id in inventory {
+        if !list.is_empty() {
+            list.push_str(", ");
         }
+        list.push_str(world.name(*id));
     }
 
     list
