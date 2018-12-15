@@ -131,8 +131,8 @@ where
 {
     world
         .make(tag)
+        .rule(predicate, Action::PrintProse, true)
         .prose(text)
-        .rule(predicate, Action::Print, true)
         .build();
 }
 

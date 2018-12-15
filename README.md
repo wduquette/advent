@@ -5,11 +5,14 @@ using the ECS architecture.
 
 ## To Do
 
+* Entities should know their IDs; that way, as_room, etc., can easily
+  retain their IDs.
+* Consider helper classes, e.g., Room + Entity.is_room, Entity.as_room(),
+  World.save_room()
+* Consider PropertyComponents (containing a HashSet<Var>).
 * Add dictionary: preferred words with synonyms.
 * Convert input from user's words to preferred words before pattern
   matching.
-* Rename RuleComponent to Rule
-* Rename ThingComponent to ThingInfo
 * Add puzzle to make water flow
 * Get note dirty and illegible.
 * Review current code.

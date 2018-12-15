@@ -15,7 +15,7 @@ pub fn system(world: &mut World) {
 /// Execute the given rule
 fn fire_rule(world: &mut World, tid: ID) {
     match &world.entities[tid].rule.as_ref().unwrap().action {
-        Action::Print => {
+        Action::PrintProse => {
             println!("{}\n", world.prose(tid));
         }
     }

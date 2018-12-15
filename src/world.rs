@@ -42,9 +42,12 @@ impl World {
     }
 
     /// Add an entity and return its ID, saving it in the tag map.
-    pub fn add_entity(&mut self, entity: Entity) -> ID {
+    /// Sets the entity's ID field.
+    pub fn add_entity(&mut self, mut entity: Entity) -> ID {
         let id = self.entities.len();
+        entity.id = id;
         self.tag_map.insert(entity.tag.clone(), id);
+
         self.entities.push(entity);
         id
     }

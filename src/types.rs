@@ -52,7 +52,7 @@ pub type Inventory = HashSet<ID>;
 /// Actions taken by rules (and maybe other things)
 #[derive(Debug)]
 pub enum Action {
-    Print,
+    PrintProse,
 }
 
 /// Game rules: actions taken when a predicate is met, and probably never repeated.
