@@ -53,7 +53,7 @@ impl Entity {
 
     /// Is this entity a rule?
     pub fn is_rule(&self) -> bool {
-        self.rule.is_some() && self.prose.is_some()
+        self.rule.is_some()
     }
 
     pub fn as_rule(&self) -> Rule {
@@ -65,13 +65,18 @@ impl Entity {
             action: rule.action,
             once_only: rule.once_only,
             fired: rule.fired,
-            prose: self.prose.as_ref().unwrap().clone(),
         }
     }
 
     /// Does this entity have a prose component?
     pub fn is_prose(&self) -> bool {
         self.prose.is_some()
+    }
+
+    /// Return the entity's prose.
+    pub fn as_prose(&self) -> String {
+        assert!(self.is_prose(), "Not prose: [{}] {}", self.id, self.tag);
+        self.prose.as_ref().unwrap().clone()
     }
 }
 
@@ -85,7 +90,6 @@ pub struct Rule {
     pub action: Action,
     pub once_only: bool,
     pub fired: bool,
-    pub prose: String,
 }
 
 impl Rule {

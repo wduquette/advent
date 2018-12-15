@@ -52,7 +52,8 @@ pub type Inventory = HashSet<ID>;
 /// Actions taken by rules (and maybe other things)
 #[derive(Clone, Debug)]
 pub enum Action {
-    PrintProse,
+    /// Print the prose for the given ID.
+    PrintProse(ID),
 }
 
 /// A rule predicate

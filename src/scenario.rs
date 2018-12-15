@@ -125,11 +125,25 @@ fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -
 
 /// Adds a bit of backstory to be revealed when the conditions are right.
 /// Backstory will appear only once.
-fn make_story(world: &mut World, tag: &str, predicate: RulePred, text: &str) {
+fn make_story(world: &mut World, tag: &str, predicate: RulePred, story: &str) {
+    let id = make_prose(world, &format!("{}-{}", tag, "Prose"), story);
+    make_rule(world, &format!("{}-{}", tag, "Rule"), predicate, Action::PrintProse(id));
+}
+
+/// Adds a bit of prose to the scenario, for use by other entities.
+fn make_prose(world: &mut World, tag: &str, prose: &str) -> ID {
     world
         .make(tag)
-        .rule(predicate, Action::PrintProse, true)
-        .prose(text)
+        .prose(prose)
+        .build()
+}
+
+/// Adds a rule to the scenario, to be executed when the conditions are met.
+/// The rule will execute only once.
+fn make_rule(world: &mut World, tag: &str, predicate: RulePred, action: Action) {
+    world
+        .make(tag)
+        .rule(predicate, action, true)
         .build();
 }
 

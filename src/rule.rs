@@ -22,10 +22,10 @@ pub fn system(world: &mut World) {
 }
 
 /// Execute the given rule
-fn fire_rule(_world: &mut World, rule: &Rule) {
+fn fire_rule(world: &mut World, rule: &Rule) {
     match rule.action {
-        Action::PrintProse => {
-            println!("{}\n", rule.prose);
+        Action::PrintProse(id) => {
+            println!("{}\n", world.entities[id].as_prose());
         }
     }
 }
