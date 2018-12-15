@@ -85,7 +85,7 @@ impl World {
         *self
             .tag_map
             .get(tag)
-            .expect(&format!("Unknown tag: {}", tag))
+            .unwrap_or_else(|| panic!("Unknown tag: {}", tag))
     }
 
     /// Returns the name of the entity with the given ID.
@@ -94,12 +94,7 @@ impl World {
         &self.entities[id]
             .name
             .as_ref()
-            .expect(&format!("Name missing: {}", id))
-    }
-
-    /// Determines whether the entity is a rule or not
-    pub fn is_rule(&self, id: ID) -> bool {
-        self.entities[id].rule.is_some()
+            .unwrap_or_else(|| panic!("Name missing: {}", id))
     }
 
     // Determines whether the entity is a room or not, i.e., a place the player can be.

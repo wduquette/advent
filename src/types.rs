@@ -68,8 +68,7 @@ pub struct RuleComponent {
 }
 
 impl RuleComponent {
-    pub fn new(predicate: RulePred, action: Action, once_only: bool) -> RuleComponent
-    {
+    pub fn new(predicate: RulePred, action: Action, once_only: bool) -> RuleComponent {
         RuleComponent {
             predicate: predicate,
             action,

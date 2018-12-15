@@ -125,10 +125,7 @@ fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -
 
 /// Adds a bit of backstory to be revealed when the conditions are right.
 /// Backstory will appear only once.
-fn make_story(world: &mut World, tag: &str,
-    predicate: RulePred,
-    text: &str)
-{
+fn make_story(world: &mut World, tag: &str, predicate: RulePred, text: &str) {
     world
         .make(tag)
         .rule(predicate, Action::PrintProse, true)

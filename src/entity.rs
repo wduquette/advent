@@ -39,30 +39,32 @@ pub struct Entity {
 impl Entity {
     /// Can this entity function as a room?  I.e., a place the player can be?
     pub fn is_room(&self) -> bool {
-        self.name.is_some() &&
-        self.prose.is_some() &&
-        self.links.is_some() &&
-        self.inventory.is_some()
+        self.name.is_some()
+            && self.prose.is_some()
+            && self.links.is_some()
+            && self.inventory.is_some()
     }
 
     /// Can this entity function as a thing?  I.e., as a noun?
     /// Note: things may but need not have a description.
     pub fn is_thing(&self) -> bool {
-        self.name.is_some() &&
-        self.thing.is_some()
+        self.name.is_some() && self.thing.is_some()
     }
 
     /// Is this entity a rule?
     pub fn is_rule(&self) -> bool {
-        self.rule.is_some() &&
-        self.prose.is_some()
+        self.rule.is_some() && self.prose.is_some()
     }
 
     pub fn as_rule(&self) -> Rule {
         assert!(self.is_rule(), "Not a rule: [{}] {}", self.id, self.tag);
+        let rule = self.rule.as_ref().unwrap().clone();
         Rule {
             id: self.id,
-            rule: self.rule.as_ref().unwrap().clone(),
+            predicate: rule.predicate,
+            action: rule.action,
+            once_only: rule.once_only,
+            fired: rule.fired,
             prose: self.prose.as_ref().unwrap().clone(),
         }
     }
@@ -76,13 +78,20 @@ impl Entity {
 /// A view of the a Rule Entity
 pub struct Rule {
     pub id: ID,
-    pub rule: RuleComponent,
-    // TODO: Not sure what to do with this; not all rules will need prose.
-    // Make the prose an entity in itself?  Just a plain prose entity, referred to by
-    // ID?
+    pub predicate: RulePred,
+    pub action: Action,
+    pub once_only: bool,
+    pub fired: bool,
     pub prose: String,
 }
 
+impl Rule {
+    pub fn save(&self, world: &mut World) {
+        let mut ent = world.entities[self.id].rule.as_mut().unwrap();
+
+        ent.fired = self.fired;
+    }
+}
 
 //------------------------------------------------------------------------------------------------
 // Entity Builder
@@ -103,7 +112,6 @@ pub struct EntityBuilder<'a> {
     pub inventory: Option<Inventory>,
     pub rule: Option<RuleComponent>,
 }
-
 
 impl<'a> EntityBuilder<'a> {
     pub fn make<'b>(world: &'b mut World, tag: &str) -> EntityBuilder<'b> {

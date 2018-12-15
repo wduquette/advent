@@ -5,8 +5,6 @@ using the ECS architecture.
 
 ## To Do
 
-* Entities should know their IDs; that way, as_room, etc., can easily
-  retain their IDs.
 * Consider helper classes, e.g., Room + Entity.is_room, Entity.as_room(),
   World.save_room()
 * Consider PropertyComponents (containing a HashSet<Var>).
@@ -156,3 +154,18 @@ a predicate condition is met, and you'll get a `DeadEnd` message otherwise.
 A "Thing" can have additional prose, as the ID of a prose-only component,
 e.g., so you can examine a book and then read it.  Alternatively, just
 add another text component, description vs. prose.
+
+### Expression Syntax
+
+At present Rules take a closure |&World| -> bool as the predicate.  If
+I were reading the game from a scenario file, though, I'd need some
+kind of expression Syntax, probably translated to a syntax tree
+represented by enum values.  It could be useful anyway.
+
+### Action Syntax
+
+At present actions are used only by Rules, and there's only one Action:
+PrintProse.  If the scenario file can specify custom commands (e.g.,
+"wind clock") then we'll need some standard actions to implement them.
+We probably want to flesh out the Action enum, and define the standard
+commands in terms of Actions.
