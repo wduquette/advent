@@ -75,7 +75,10 @@ impl Entity {
     }
 }
 
-/// A view of the a Rule Entity
+//------------------------------------------------------------------------------------------------
+// Rule View
+
+/// Rule view: A view of a Rule Entity
 pub struct Rule {
     pub id: ID,
     pub predicate: RulePred,
@@ -86,6 +89,7 @@ pub struct Rule {
 }
 
 impl Rule {
+    /// Save the rule back to the world
     pub fn save(&self, world: &mut World) {
         let mut ent = world.entities[self.id].rule.as_mut().unwrap();
 
