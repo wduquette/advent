@@ -54,13 +54,33 @@ impl Entity {
 
     /// Is this entity a rule?
     pub fn is_rule(&self) -> bool {
-        self.rule.is_some()
+        self.rule.is_some() &&
+        self.prose.is_some()
+    }
+
+    pub fn as_rule(&self) -> Rule {
+        assert!(self.is_rule(), "Not a rule: [{}] {}", self.id, self.tag);
+        Rule {
+            id: self.id,
+            rule: self.rule.as_ref().unwrap().clone(),
+            prose: self.prose.as_ref().unwrap().clone(),
+        }
     }
 
     /// Does this entity have a prose component?
     pub fn is_prose(&self) -> bool {
         self.prose.is_some()
     }
+}
+
+/// A view of the a Rule Entity
+pub struct Rule {
+    pub id: ID,
+    pub rule: RuleComponent,
+    // TODO: Not sure what to do with this; not all rules will need prose.
+    // Make the prose an entity in itself?  Just a plain prose entity, referred to by
+    // ID?
+    pub prose: String,
 }
 
 
@@ -83,6 +103,7 @@ pub struct EntityBuilder<'a> {
     pub inventory: Option<Inventory>,
     pub rule: Option<RuleComponent>,
 }
+
 
 impl<'a> EntityBuilder<'a> {
     pub fn make<'b>(world: &'b mut World, tag: &str) -> EntityBuilder<'b> {
@@ -129,15 +150,12 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    pub fn rule<F: 'static>(
+    pub fn rule(
         mut self,
-        predicate: F,
+        predicate: RulePred,
         action: Action,
         once_only: bool,
-    ) -> EntityBuilder<'a>
-    where
-        F: Fn(&World) -> bool,
-    {
+    ) -> EntityBuilder<'a> {
         self.rule = Some(RuleComponent::new(predicate, action, once_only));
         self
     }

@@ -60,7 +60,7 @@ how narrow it is.
     make_story(
         world,
         "story-1",
-        |world| world.clock == 2,
+        &|world| world.clock == 2,
         "\
 You don't know where you are.  You don't even know where you want to
 be.  All you know is that your feet are wet, your hands are dirty,
@@ -125,9 +125,9 @@ fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -
 
 /// Adds a bit of backstory to be revealed when the conditions are right.
 /// Backstory will appear only once.
-fn make_story<F: 'static>(world: &mut World, tag: &str, predicate: F, text: &str)
-where
-    F: Fn(&World) -> bool,
+fn make_story(world: &mut World, tag: &str,
+    predicate: RulePred,
+    text: &str)
 {
     world
         .make(tag)

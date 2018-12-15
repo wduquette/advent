@@ -50,29 +50,42 @@ pub struct ThingComponent {
 pub type Inventory = HashSet<ID>;
 
 /// Actions taken by rules (and maybe other things)
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Action {
     PrintProse,
 }
 
+/// A rule predicate
+pub type RulePred = &'static Fn(&World) -> bool;
+
 /// Game rules: actions taken when a predicate is met, and probably never repeated.
 pub struct RuleComponent {
-    pub predicate: Box<Fn(&World) -> bool>,
+    // pub predicate: Box<dyn Fn(&World) -> bool>,
+    pub predicate: RulePred,
     pub action: Action,
     pub once_only: bool,
     pub fired: bool,
 }
 
 impl RuleComponent {
-    pub fn new<F: 'static>(predicate: F, action: Action, once_only: bool) -> RuleComponent
-    where
-        F: Fn(&World) -> bool,
+    pub fn new(predicate: RulePred, action: Action, once_only: bool) -> RuleComponent
     {
         RuleComponent {
-            predicate: Box::new(predicate),
+            predicate: predicate,
             action,
             once_only,
             fired: false,
+        }
+    }
+}
+
+impl Clone for RuleComponent {
+    fn clone(&self) -> RuleComponent {
+        RuleComponent {
+            predicate: self.predicate,
+            action: self.action.clone(),
+            once_only: self.once_only,
+            fired: self.fired,
         }
     }
 }
