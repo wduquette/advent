@@ -5,6 +5,10 @@ using the ECS architecture.
 
 ## To Do
 
+* Consider adding VarSet struct, with set, has, clear methods.
+* Consider replacing Player's Seen(ID) with Room's Seen
+  * Current approach might be better for multiplayer, but I'm not doing
+    multiplayer.
 * Consider providing a Inventory view, when that's all we care about.
 * Consider giving Room a scenery Inventory
 * Add dictionary: preferred words with synonyms.
