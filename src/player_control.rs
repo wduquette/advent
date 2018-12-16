@@ -1,6 +1,7 @@
 //! The Player Control System
 
 use crate::debug;
+use crate::types::Detail::*;
 use crate::types::Dir::*;
 use crate::types::Var::*;
 use crate::types::*;
@@ -20,14 +21,14 @@ pub fn system(world: &mut World, command: &str) {
     // TODO: Map synonyms, remove punctuation, before pattern matching
 
     let result = match tokens.as_slice() {
-        ["n"] => cmd_go(world, player, &North),
-        ["north"] => cmd_go(world, player, &North),
-        ["s"] => cmd_go(world, player, &South),
-        ["south"] => cmd_go(world, player, &South),
-        ["e"] => cmd_go(world, player, &East),
-        ["east"] => cmd_go(world, player, &East),
-        ["w"] => cmd_go(world, player, &West),
-        ["west"] => cmd_go(world, player, &West),
+        ["n"] => cmd_go(world, player, North),
+        ["north"] => cmd_go(world, player, North),
+        ["s"] => cmd_go(world, player, South),
+        ["south"] => cmd_go(world, player, South),
+        ["e"] => cmd_go(world, player, East),
+        ["east"] => cmd_go(world, player, East),
+        ["w"] => cmd_go(world, player, West),
+        ["west"] => cmd_go(world, player, West),
         ["help"] => cmd_help(),
         ["look"] => cmd_look(world, player),
         ["i"] => cmd_inventory(world, player),
@@ -66,17 +67,17 @@ pub fn system(world: &mut World, command: &str) {
 // User Commands
 
 /// Move the player in the given direction
-fn cmd_go(world: &mut World, player: &mut Player, dir: &Dir) -> CmdResult {
-    if let Some(dest) = world.follow(player.loc, &dir) {
+fn cmd_go(world: &mut World, player: &mut Player, dir: Dir) -> CmdResult {
+    if let Some(dest) = world.follow(player.loc, dir) {
         let room = &world.entities[dest].as_room();
         player.loc = dest;
 
         let seen = world.is(&Seen(dest));  // TODO: should be player property
 
         if seen {
-            describe_location(world, room, true);
+            describe_location(world, room, Full);
         } else {
-            describe_location(world, room, false);
+            describe_location(world, room, Brief);
         }
 
         world.set(Seen(dest));  // TODO: should be player property
@@ -101,7 +102,7 @@ You know.  Like that.
 /// Re-describe the current location.
 fn cmd_look(world: &World, player: &Player) -> CmdResult {
     let room = &world.entities[player.loc].as_room();
-    describe_location(world, room, false);
+    describe_location(world, room, Full);
     Ok(())
 }
 
@@ -227,12 +228,12 @@ fn cmd_list(world: &World) -> CmdResult {
 // These functions are used to implement the above commands.
 
 /// Describe the location.
-pub fn describe_location(world: &World, room: &Room, brief: bool) {
+pub fn describe_location(world: &World, room: &Room, detail: Detail) {
     // FIRST, display the room's description
-    if brief {
-        println!("{}\n", room.name);
-    } else {
+    if detail == Full {
         println!("{}\n{}\n", room.name, room.prose);
+    } else {
+        println!("{}\n", room.name);
     }
 
     // NEXT, list any objects in the room's inventory.  (We don't list

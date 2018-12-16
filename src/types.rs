@@ -7,8 +7,15 @@ use std::collections::hash_set::HashSet;
 /// The entity ID type: an integer.
 pub type ID = usize;
 
+/// Level of Detail
+#[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
+pub enum Detail {
+    Full,
+    Brief
+}
+
 /// Directions
-#[derive(PartialEq, Eq, Hash, Debug, Clone)]
+#[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
 #[allow(dead_code)]
 pub enum Dir {
     North,

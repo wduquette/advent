@@ -10,6 +10,7 @@ mod types;
 mod world;
 
 use crate::world::*;
+use crate::types::Detail;
 
 /// Runs the program.
 pub fn run() {
@@ -45,5 +46,5 @@ fn print_introduction(world: &World) {
     let player = &world.entities[world.pid].as_player();
     let room = &world.entities[player.loc].as_room();
 
-    player_control::describe_location(world, room, false);
+    player_control::describe_location(world, room, Detail::Full);
 }
