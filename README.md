@@ -5,6 +5,12 @@ using the ECS architecture.
 
 ## To Do
 
+* Consider dividing Vars into flags and variables proper.
+  * That way, CanRead(ID) could be replaced by HashMap<var,ID>.
+  * CanRead(ID) admits of many simultaneous CanRead(_) entries,
+    but we really only want one.
+  * However, if we have really variables, what values do we want?
+  * Is there a way to remove an enum from a set using a pattern?
 * Consider adding VarSet struct, with set, has, clear methods.
 * Consider replacing Player's Seen(ID) with Room's Seen
   * Current approach might be better for multiplayer, but I'm not doing

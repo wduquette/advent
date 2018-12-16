@@ -16,19 +16,23 @@ pub fn build() -> World {
 
     // NEXT, make the rooms.
 
-    // Rooms
+    //Room: Clearing
     let clearing = make_room(
         world,
         "clearing-1",
         "Clearing",
         "A wide spot in the woods.  You can go east.",
     );
+
+    // Room: Trail
     let trail = make_room(
         world,
         "trail-1",
         "Trail",
         "A trail from hither to yon.  You can go east or west.",
     );
+
+    // Room: Bridge
     let bridge = make_room(
         world,
         "bridge-1",
@@ -37,15 +41,8 @@ pub fn build() -> World {
 The trail crosses a small stream here.  You can go east or west.
         ",
     );
+
     world.set_var(bridge, HasWater);
-
-    // Links
-    connect(world, East, clearing, West, trail);
-    connect(world, East, trail, West, bridge);
-
-    // NEXT, make the things
-    let note = make_thing(world, NOTE, "note", "It's illegible.");
-    put_in(world, note, clearing);
 
     make_scenery(
         world,
@@ -58,6 +55,46 @@ away under the bridge.  It looks surprisingly deep, considering
 how narrow it is.
         ",
     );
+
+    // Links
+    connect(world, East, clearing, West, trail);
+    connect(world, East, trail, West, bridge);
+
+    // NEXT, make the things
+    // The note
+    let prose_clean_note = world
+        .make("prose-clean-note")
+        .prose("\
+Welcome, dear friend.  Your mission, should you choose to
+accept it, is to figure out how to get to the end of
+the trail.  You've already taken the first big
+step!
+         ")
+        .build();
+
+    let prose_dirty_note = world
+        .make("prose-dirty-note")
+        .prose("It's so dirty it's illegible.")
+        .build();
+
+    let note = world.make(NOTE)
+        .name("note")
+        .prose("A note, on plain paper.")
+        .var(CanRead(prose_clean_note))
+        .build();
+    put_in(world, note, clearing);
+
+    world
+        .make("rule-dirty-note")
+        .always(
+            &|world| player_gets_note_dirty(world),
+            vec![Action::PrintProse,
+                Action::SetVar(note, Dirty),
+                Action::ClearVar(note, CanRead(prose_clean_note)),
+                Action::SetVar(note, CanRead(prose_dirty_note))],
+        )
+        .prose("The dirt from your hands got all over the note.")
+        .build();
 
     // Stories: Rules that supply backstory to the player.
     world
@@ -72,16 +109,6 @@ and gosh, this doesn't look anything like the toy aisle.
         )
         .build();
 
-    // Logic Rules
-    world
-        .make("rule-dirty-note")
-        .always(
-            &|world| player_gets_note_dirty(world),
-            vec![Action::PrintProse, Action::SetVar(note, Dirty)],
-        )
-        .prose("The dirt from your hands got all over the note.")
-        .build();
-
     // NEXT, Make the player
     make_player(world, clearing);
 
@@ -93,7 +120,9 @@ fn player_gets_note_dirty(world: &World) -> bool {
     let player = world.player();
     let note = world.lookup(NOTE).as_thing();
 
-    player.vars.contains(&DirtyHands) && !note.vars.contains(&Dirty)
+    player.inventory.contains(&note.id) &&
+    player.vars.contains(&DirtyHands) &&
+    !note.vars.contains(&Dirty)
 }
 
 /// Initializes the player's details

@@ -31,6 +31,9 @@ fn fire_rule(world: &mut World, rule: &Rule) {
             Action::SetVar(id, var) => {
                 world.set_var(*id, *var);
             }
+            Action::ClearVar(id, var) => {
+                world.clear_var(*id, var);
+            }
         }
     }
 }
