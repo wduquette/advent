@@ -151,12 +151,9 @@ fn make_rule(world: &mut World, tag: &str, predicate: RulePred, action: Action) 
 /// Links are not bidirectional.  If you want links both ways, you
 /// have to add them.
 fn oneway(world: &mut World, dir: Dir, from: ID, to: ID) {
-    let links = &mut world.entities[from]
-        .links
-        .as_mut()
-        .unwrap_or_else(|| panic!("Entity has no link component: {}", from));
-
-    links.insert(dir, to);
+    let room = &mut world.get(from).as_room();
+    room.links.insert(dir, to);
+    room.save(world);
 }
 
 /// Establishes a bidirectional link between two rooms.

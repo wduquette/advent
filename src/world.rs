@@ -79,6 +79,12 @@ impl World {
     //--------------------------------------------------------------------------------------------
     // Helpers
 
+    /// Retrieve a reference to the given entity.  Usually used in tandom with an
+    /// "as_{whatsit}()" method.
+    pub fn get(&self, id: ID) -> &Entity {
+        &self.entities[id]
+    }
+
     /// Looks up an entity's ID in the tag map.
     /// Panics if the entity is unknown.
     pub fn lookup(&self, tag: &str) -> ID {
@@ -95,14 +101,6 @@ impl World {
             .name
             .as_ref()
             .unwrap_or_else(|| panic!("Name missing: {}", id))
-    }
-
-    // Determines whether the entity is a room or not, i.e., a place the player can be.
-    #[allow(dead_code)]
-    pub fn is_room(&self, id: ID) -> bool {
-        let ent = &self.entities[id];
-
-        ent.prose.is_some() && ent.links.is_some() && ent.inventory.is_some()
     }
 
     // Determines whether the entity is a thing or not, i.e., an object that can

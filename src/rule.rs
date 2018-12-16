@@ -25,7 +25,7 @@ pub fn system(world: &mut World) {
 fn fire_rule(world: &mut World, rule: &Rule) {
     match rule.action {
         Action::PrintProse(id) => {
-            println!("{}\n", world.entities[id].as_prose());
+            println!("{}\n", world.get(id).as_prose());
         }
     }
 }

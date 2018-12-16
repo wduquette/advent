@@ -14,7 +14,7 @@ type CmdResult = Result<(), String>;
 
 /// The Player Control system.  Processes player commands.
 pub fn system(world: &mut World, command: &str) {
-    let player = &mut world.entities[world.pid].as_player();
+    let player = &mut world.get(world.pid).as_player();
 
     let tokens: Vec<&str> = command.split_whitespace().collect();
 
@@ -69,7 +69,7 @@ pub fn system(world: &mut World, command: &str) {
 /// Move the player in the given direction
 fn cmd_go(world: &mut World, player: &mut Player, dir: Dir) -> CmdResult {
     if let Some(dest) = world.follow(player.loc, dir) {
-        let room = &world.entities[dest].as_room();
+        let room = &world.get(dest).as_room();
         player.loc = dest;
 
         let seen = world.is(&Seen(dest));  // TODO: should be player property
@@ -101,7 +101,7 @@ You know.  Like that.
 
 /// Re-describe the current location.
 fn cmd_look(world: &World, player: &Player) -> CmdResult {
-    let room = &world.entities[player.loc].as_room();
+    let room = &world.get(player.loc).as_room();
     describe_location(world, room, Full);
     Ok(())
 }

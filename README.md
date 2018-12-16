@@ -5,8 +5,11 @@ using the ECS architecture.
 
 ## To Do
 
-* Define Full,Brief enum
-* Consider PropertyComponents (containing a HashSet<Var>).
+* View structs should include tags.
+* Add VarComponent (containing a HashSet<Var>).
+* Replace current world.vars with the entity properties.
+* Add Thing helper
+  * Then update get and drop commands.
 * Add dictionary: preferred words with synonyms.
 * Convert input from user's words to preferred words before pattern
   matching.
@@ -32,7 +35,6 @@ the section where the author explains why OOP fails for game programming
 (which it does, as I've experienced myself in the past) and how ECS solves
 the same problems more cleanly.  It's a brilliant paper, and got
 me headed the right direction.
-
 
 As a text adventure, Bonaventure is (at present) dirt simple.  It doesn't
 have a fancy natural language parser; it has only a very few rooms
