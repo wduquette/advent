@@ -50,7 +50,7 @@ pub type Links = HashMap<Dir, ID>;
 /// are they portable?
 #[derive(Debug)]
 pub struct ThingComponent {
-    pub portable: bool,
+    pub scenery: bool,
 }
 
 /// An Inventory is the set of things contained with the current entity.

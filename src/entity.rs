@@ -45,6 +45,7 @@ impl Entity {
             && self.inventory.is_some()
     }
 
+    /// Retrieve a view of the entity as a Player
     pub fn as_player(&self) -> Player {
         assert!(self.is_player(), "Not a player: [{}] {}", self.id, self.tag);
         Player {
@@ -64,6 +65,7 @@ impl Entity {
             && self.inventory.is_some()
     }
 
+    /// Retrieve a view of the entity as a Room
     pub fn as_room(&self) -> Room {
         assert!(self.is_room(), "Not a room: [{}] {}", self.id, self.tag);
         Room {
@@ -81,11 +83,26 @@ impl Entity {
         self.name.is_some() && self.prose.is_some() && self.thing.is_some()
     }
 
+    /// Retrieve a view of the entity as a Thing
+    pub fn as_thing(&self) -> Thing {
+        assert!(self.is_thing(), "Not a thing: [{}] {}", self.id, self.tag);
+        let props = self.thing.as_ref().unwrap();
+        Thing {
+            id: self.id,
+            tag: self.tag.clone(),
+            name: self.name.as_ref().unwrap().clone(),
+            prose: self.prose.as_ref().unwrap().clone(),
+            scenery: props.scenery,
+            loc: self.loc.unwrap(),
+        }
+    }
+
     /// Is this entity a rule?
     pub fn is_rule(&self) -> bool {
         self.rule.is_some()
     }
 
+    /// Retrieve a view of the entity as a Rule
     pub fn as_rule(&self) -> Rule {
         assert!(self.is_rule(), "Not a rule: [{}] {}", self.id, self.tag);
         let rule = self.rule.as_ref().unwrap().clone();
@@ -154,6 +171,28 @@ impl Room {
     pub fn save(&mut self, world: &mut World) {
         world.entities[self.id].links = Some(self.links.clone());
         world.entities[self.id].inventory = Some(self.inventory.clone());
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+// Thing View
+
+/// Room view: A view of an entity as a Room
+pub struct Thing {
+    pub id: ID,
+    pub tag: String,
+    pub name: String,
+    pub prose: String,
+    pub scenery: bool,
+
+    // Saved
+    pub loc: ID,
+}
+
+impl Thing {
+    /// Save the room back to the world.  Replaces the location
+    pub fn save(&mut self, world: &mut World) {
+        world.entities[self.id].loc = Some(self.loc);
     }
 }
 
@@ -236,8 +275,9 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    pub fn thing(mut self, portable: bool) -> EntityBuilder<'a> {
-        self.thing = Some(ThingComponent { portable });
+    // TODO replace with a var method that adds a VarComponent and the var.
+    pub fn thing(mut self, scenery: bool) -> EntityBuilder<'a> {
+        self.thing = Some(ThingComponent { scenery });
         self
     }
 

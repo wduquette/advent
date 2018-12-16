@@ -105,12 +105,11 @@ impl World {
 
     // Determines whether the entity is scenery or not, i.e., an object that is in a
     // room and can't be moved.
-    #[allow(dead_code)]
     pub fn is_scenery(&self, id: ID) -> bool {
         let ent = &self.entities[id];
 
         if let Some(thing) = &ent.thing {
-            !thing.portable
+            thing.scenery
         } else {
             false
         }

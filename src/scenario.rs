@@ -41,7 +41,7 @@ The trail crosses a small stream here.  You can go east or west.
     connect(world, East, trail, West, bridge);
 
     // NEXT, make the things
-    let note = make_portable(world, "note-1", "note", "It's illegible.");
+    let note = make_thing(world, "note-1", "note", "It's illegible.");
     world.put_in(note, clearing);
 
     make_scenery(
@@ -103,12 +103,12 @@ fn make_room(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
 }
 
 /// Makes a portable object, and returns its ID.
-fn make_portable(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
+fn make_thing(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
     world
         .make(tag)
         .name(name)
         .prose(text)
-        .thing(true) // TODO: Obscure; needs improvement.
+        .thing(false) // TODO: Obscure; needs improvement.
         .build()
 }
 
@@ -119,7 +119,7 @@ fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -
         .name(name)
         .prose(text)
         .location(loc)
-        .thing(false) // TODO: Obscure; needs improvement.
+        .thing(true) // TODO: Obscure; needs improvement.
         .build()
 }
 

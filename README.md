@@ -5,11 +5,12 @@ using the ECS architecture.
 
 ## To Do
 
-* View structs should include tags.
-* Add VarComponent (containing a HashSet<Var>).
-* Replace current world.vars with the entity properties.
+* Consider giving Scenery a different view than Thing.
+* Consider giving Room a scenery Inventory
 * Add Thing helper
   * Then update get and drop commands.
+* Add VarComponent (containing a HashSet<Var>).
+* Replace current world.vars with the entity properties.
 * Add dictionary: preferred words with synonyms.
 * Convert input from user's words to preferred words before pattern
   matching.
