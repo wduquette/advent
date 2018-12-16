@@ -260,19 +260,7 @@ pub fn describe_location(world: &World, room: &Room, detail: Detail) {
 
     // NEXT, list any objects in the room's inventory.  (We don't list
     // scenary; presumably that's in the description.)
-    let mut list = String::new();
-
-    // TODO: Consider adding a predicate to invent_list
-    for id in &room.inventory {
-        let thing = world.get(*id).as_thing();
-
-        if !thing.scenery {
-            if !list.is_empty() {
-                list.push_str(", ");
-            }
-            list.push_str(world.name(*id));
-        }
-    }
+    let list = invent_list(world, &room.inventory);
 
     if !list.is_empty() {
         println!("You see: {}.\n", list);
@@ -330,17 +318,19 @@ fn find_visible_thing(world: &World, player: &Player, name: &str) -> Option<ID> 
 //-------------------------------------------------------------------------
 // Display Tools
 
-/// List the names of the entities, separated by commas.
-/// TODO: This could probably be done with map and some kind of join function.
-/// However, it seems that "join" is available in the nightly.
+/// List the names of the entities, separated by commas.  Omits scenery.
 fn invent_list(world: &World, inventory: &Inventory) -> String {
     let mut list = String::new();
 
     for id in inventory {
-        if !list.is_empty() {
-            list.push_str(", ");
+        let thing = world.get(*id).as_thing();
+
+        if !thing.scenery {
+            if !list.is_empty() {
+                list.push_str(", ");
+            }
+            list.push_str(world.name(*id));
         }
-        list.push_str(world.name(*id));
     }
 
     list

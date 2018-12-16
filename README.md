@@ -7,8 +7,6 @@ using the ECS architecture.
 
 * Consider giving Scenery a different view than Thing.
 * Consider giving Room a scenery Inventory
-* Add Thing helper
-  * Then update get and drop commands.
 * Add VarComponent (containing a HashSet<Var>).
 * Replace current world.vars with the entity properties.
 * Add dictionary: preferred words with synonyms.
