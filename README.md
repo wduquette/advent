@@ -64,18 +64,16 @@ ID; entities may also have the following components:
 * Details of things with which the player interacts (i.e., can he
   pick it up)
 * An inventory of entities contained within this entity
+* A variable set, for details that can change.
 * A Rule: under certain conditions, do something automatically.
 
 Thus,
 
-* The player has a name, a location, and an inventory.
-* A room has a name a description, links, and an inventory.
-* A thing has a name, a description, a location, is marked portable, and
-  is found in some other entity's inventory.
-* Scenery (an immobile thing) has a name, a description, a location, and
-  is marked non-portable.
-* A back-story element has a description and is printed when the conditions
-  are right (e.g., on the third turn)
+* The player has a name, a location, an inventory, and a variable set.
+* A room has a name, a description, links, an inventory, and a variable
+  set
+* A thing has a name, a description, a location, and a variable set.
+  * "Scenery" (i.e., things that are part of a room) have variable Scenery.
 
 The point is, these categories of things are not classes in the OOP sense.
 The Entity struct has Option<T> fields for each of the above components;
@@ -156,6 +154,8 @@ a predicate condition is met, and you'll get a `DeadEnd` message otherwise.
 A "Thing" can have additional prose, as the ID of a prose-only component,
 e.g., so you can examine a book and then read it.  Alternatively, just
 add another text component, description vs. prose.
+
+Or, give a book a variable Text(ID), where the ID is a prose component.
 
 ### Expression Syntax
 
