@@ -28,7 +28,7 @@ pub enum Dir {
     Out,
 }
 
-#[derive(PartialEq, Eq, Hash, Debug, Clone)]
+#[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
 #[allow(dead_code)]
 /// A game variable
 pub enum Var {

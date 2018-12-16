@@ -5,6 +5,9 @@ use crate::types::Var::*;
 use crate::types::*;
 use crate::world::*;
 
+// Important Constants
+const NOTE: &str = "note-1";
+
 /// Build the initial state of the game world.
 pub fn build() -> World {
     // FIRST, make the empty world
@@ -41,7 +44,7 @@ The trail crosses a small stream here.  You can go east or west.
     connect(world, East, trail, West, bridge);
 
     // NEXT, make the things
-    let note = make_thing(world, "note-1", "note", "It's illegible.");
+    let note = make_thing(world, NOTE, "note", "It's illegible.");
     put_in(world, note, clearing);
 
     make_scenery(
@@ -68,11 +71,29 @@ and gosh, this doesn't look anything like the toy aisle.
     ",
     );
 
+    // Logic Rules
+    let prose = make_prose(world, "dirty-note-Prose",
+        "The dirt from your hands got all over the note.");
+    world
+        .make("dirty-note-Rule")
+        .rule(&|world| player_gets_note_dirty(world),
+            Action::PrintProse(prose), false)
+        .build();
+
+
     // NEXT, Make the player
     make_player(world, clearing);
 
     // NEXT, return the world.
     the_world
+}
+
+fn player_gets_note_dirty(world: &World) -> bool {
+    let player = world.player();
+    let note = world.lookup(NOTE).as_thing();
+
+    player.vars.contains(&DirtyHands) &&
+    !note.vars.contains(&Dirty)
 }
 
 /// Initializes the player's details
