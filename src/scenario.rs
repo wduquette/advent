@@ -35,7 +35,7 @@ pub fn build() -> World {
         "Bridge",
         "\
 The trail crosses a small stream here.  You can go east or west.
-        "
+        ",
     );
     world.set_var(bridge, HasWater);
 
@@ -60,26 +60,27 @@ how narrow it is.
     );
 
     // Stories: Rules that supply backstory to the player.
-    make_story(
-        world,
-        "story-1",
-        &|world| world.clock == 2,
-        "\
+    world
+        .make("rule-story-1")
+        .once(&|world| world.clock == 2, vec![Action::PrintProse])
+        .prose(
+            "\
 You don't know where you are.  You don't even know where you want to
 be.  All you know is that your feet are wet, your hands are dirty,
 and gosh, this doesn't look anything like the toy aisle.
-    ",
-    );
-
-    // Logic Rules
-    let prose = make_prose(world, "dirty-note-Prose",
-        "The dirt from your hands got all over the note.");
-    world
-        .make("dirty-note-Rule")
-        .rule(&|world| player_gets_note_dirty(world),
-            Action::PrintProse(prose), false)
+        ",
+        )
         .build();
 
+    // Logic Rules
+    world
+        .make("rule-dirty-note")
+        .always(
+            &|world| player_gets_note_dirty(world),
+            vec![Action::PrintProse, Action::SetVar(note, Dirty)],
+        )
+        .prose("The dirt from your hands got all over the note.")
+        .build();
 
     // NEXT, Make the player
     make_player(world, clearing);
@@ -92,8 +93,7 @@ fn player_gets_note_dirty(world: &World) -> bool {
     let player = world.player();
     let note = world.lookup(NOTE).as_thing();
 
-    player.vars.contains(&DirtyHands) &&
-    !note.vars.contains(&Dirty)
+    player.vars.contains(&DirtyHands) && !note.vars.contains(&Dirty)
 }
 
 /// Initializes the player's details
@@ -124,50 +124,16 @@ fn make_room(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
 
 /// Makes a portable object, and returns its ID.
 fn make_thing(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
-    world
-        .make(tag)
-        .name(name)
-        .prose(text)
-        .vars()
-        .build()
+    world.make(tag).name(name).prose(text).vars().build()
 }
 
 /// Makes a scenery object, and returns its ID.
 fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -> ID {
-    let id = world
-        .make(tag)
-        .name(name)
-        .prose(text)
-        .var(Scenery)
-        .build();
+    let id = world.make(tag).name(name).prose(text).var(Scenery).build();
 
     put_in(world, id, loc);
 
     id
-}
-
-/// Adds a bit of backstory to be revealed when the conditions are right.
-/// Backstory will appear only once.
-fn make_story(world: &mut World, tag: &str, predicate: RulePred, story: &str) {
-    let id = make_prose(world, &format!("{}-{}", tag, "Prose"), story);
-    make_rule(world, &format!("{}-{}", tag, "Rule"), predicate, Action::PrintProse(id));
-}
-
-/// Adds a bit of prose to the scenario, for use by other entities.
-fn make_prose(world: &mut World, tag: &str, prose: &str) -> ID {
-    world
-        .make(tag)
-        .prose(prose)
-        .build()
-}
-
-/// Adds a rule to the scenario, to be executed when the conditions are met.
-/// The rule will execute only once.
-fn make_rule(world: &mut World, tag: &str, predicate: RulePred, action: Action) {
-    world
-        .make(tag)
-        .rule(predicate, action, true)
-        .build();
 }
 
 /// Links one room to another in the given direction.

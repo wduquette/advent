@@ -84,9 +84,7 @@ impl Entity {
 
     /// Can this entity function as a thing?  I.e., as a noun?
     pub fn is_thing(&self) -> bool {
-        self.name.is_some()
-            && self.prose.is_some()
-            && self.vars.is_some()
+        self.name.is_some() && self.prose.is_some() && self.vars.is_some()
     }
 
     /// Retrieve a view of the entity as a Thing
@@ -104,7 +102,7 @@ impl Entity {
 
     /// Is this entity a rule?
     pub fn is_rule(&self) -> bool {
-        self.rule.is_some()
+        self.rule.is_some() && self.prose.is_some()
     }
 
     /// Retrieve a view of the entity as a Rule
@@ -115,8 +113,9 @@ impl Entity {
             id: self.id,
             tag: self.tag.clone(),
             predicate: rule.predicate,
-            action: rule.action,
+            actions: rule.actions,
             once_only: rule.once_only,
+            prose: self.prose.as_ref().unwrap().clone(),
             fired: rule.fired,
         }
     }
@@ -212,10 +211,11 @@ impl Thing {
 /// Rule view: A view of an entity as a Rule
 pub struct Rule {
     pub id: ID,
-    pub tag:String,
+    pub tag: String,
     pub predicate: RulePred,
-    pub action: Action,
+    pub actions: Vec<Action>,
     pub once_only: bool,
+    pub prose: String,
 
     // Saved
     pub fired: bool,
@@ -307,13 +307,13 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    pub fn rule(
-        mut self,
-        predicate: RulePred,
-        action: Action,
-        once_only: bool,
-    ) -> EntityBuilder<'a> {
-        self.rule = Some(RuleComponent::new(predicate, action, once_only));
+    pub fn once(mut self, predicate: RulePred, actions: Vec<Action>) -> EntityBuilder<'a> {
+        self.rule = Some(RuleComponent::once(predicate, actions));
+        self
+    }
+
+    pub fn always(mut self, predicate: RulePred, actions: Vec<Action>) -> EntityBuilder<'a> {
+        self.rule = Some(RuleComponent::always(predicate, actions));
         self
     }
 

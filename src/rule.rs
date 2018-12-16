@@ -23,9 +23,14 @@ pub fn system(world: &mut World) {
 
 /// Execute the given rule
 fn fire_rule(world: &mut World, rule: &Rule) {
-    match rule.action {
-        Action::PrintProse(id) => {
-            println!("{}\n", world.get(id).as_prose());
+    for action in &rule.actions {
+        match action {
+            Action::PrintProse => {
+                println!("{}\n", rule.prose);
+            }
+            Action::SetVar(id, var) => {
+                world.set_var(*id, *var);
+            }
         }
     }
 }

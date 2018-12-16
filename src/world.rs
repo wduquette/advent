@@ -57,7 +57,7 @@ impl World {
 
     /// Set the variable on the entity
     pub fn set_var(&mut self, id: ID, var: Var) {
-        assert!(self.entities[id].vars.is_some(), "No var set: {}", id);
+        assert!(self.entities[id].vars.is_some(), "Entity has no vars: {}", id);
 
         // Consider adding as_var_set() to Entity
         if let Some(vars) = &mut self.entities[id].vars {
@@ -122,7 +122,6 @@ impl World {
             .unwrap_or_else(|| panic!("Name missing: {}", id))
     }
 
-
     /// Tries to follow a link in the given direction; returns the linked
     /// location if any.
     pub fn follow(&self, loc: ID, dir: Dir) -> Option<ID> {
@@ -133,5 +132,4 @@ impl World {
         }
         None
     }
-
 }

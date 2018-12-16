@@ -1,13 +1,13 @@
 //! The Player Control System
 
 use crate::debug;
+use crate::entity::Player;
+use crate::entity::Room;
 use crate::types::Detail::*;
 use crate::types::Dir::*;
 use crate::types::Var::*;
 use crate::types::*;
 use crate::world::*;
-use crate::entity::Room;
-use crate::entity::Player;
 
 /// An error result
 type CmdResult = Result<(), String>;
@@ -117,7 +117,6 @@ fn cmd_inventory(world: &World, player: &Player) -> CmdResult {
 /// Describe a thing in the current location.
 fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
     if let Some(id) = find_visible_thing(world, player, name) {
-
         println!("{}\n", world.get(id).as_prose());
         Ok(())
     } else {

@@ -11,7 +11,7 @@ pub type ID = usize;
 #[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
 pub enum Detail {
     Full,
-    Brief
+    Brief,
 }
 
 /// Directions
@@ -60,8 +60,11 @@ pub type Inventory = HashSet<ID>;
 /// Actions taken by rules (and maybe other things)
 #[derive(Clone, Debug)]
 pub enum Action {
-    /// Print the prose for the given ID.
-    PrintProse(ID),
+    /// Print the entity's prose
+    PrintProse,
+
+    /// Set the variable for the entity with the given ID
+    SetVar(ID, Var),
 }
 
 /// A rule predicate
@@ -71,17 +74,26 @@ pub type RulePred = &'static Fn(&World) -> bool;
 pub struct RuleComponent {
     // pub predicate: Box<dyn Fn(&World) -> bool>,
     pub predicate: RulePred,
-    pub action: Action,
+    pub actions: Vec<Action>,
     pub once_only: bool,
     pub fired: bool,
 }
 
 impl RuleComponent {
-    pub fn new(predicate: RulePred, action: Action, once_only: bool) -> RuleComponent {
+    pub fn once(predicate: RulePred, actions: Vec<Action>) -> RuleComponent {
         RuleComponent {
             predicate: predicate,
-            action,
-            once_only,
+            actions,
+            once_only: true,
+            fired: false,
+        }
+    }
+
+    pub fn always(predicate: RulePred, actions: Vec<Action>) -> RuleComponent {
+        RuleComponent {
+            predicate: predicate,
+            actions,
+            once_only: false,
             fired: false,
         }
     }
@@ -91,7 +103,7 @@ impl Clone for RuleComponent {
     fn clone(&self) -> RuleComponent {
         RuleComponent {
             predicate: self.predicate,
-            action: self.action.clone(),
+            actions: self.actions.clone(),
             once_only: self.once_only,
             fired: self.fired,
         }

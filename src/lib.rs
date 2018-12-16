@@ -9,8 +9,8 @@ mod scenario;
 mod types;
 mod world;
 
-use crate::world::*;
 use crate::types::Detail;
+use crate::world::*;
 
 /// Runs the program.
 pub fn run() {
