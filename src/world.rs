@@ -103,26 +103,6 @@ impl World {
             .unwrap_or_else(|| panic!("Name missing: {}", id))
     }
 
-    // Determines whether the entity is scenery or not, i.e., an object that is in a
-    // room and can't be moved.
-    pub fn is_scenery(&self, id: ID) -> bool {
-        let ent = &self.entities[id];
-
-        if let Some(thing) = &ent.thing {
-            thing.scenery
-        } else {
-            false
-        }
-    }
-
-    /// Gets the entity's prose.  Panics if none.
-    pub fn prose(&self, id: ID) -> &str {
-        &self.entities[id]
-            .prose
-            .as_ref()
-            .unwrap_or_else(|| panic!("Entity has no prose: {}", id))
-    }
-
     /// Retrieves the location of something that has a location.
     /// Panics if it doesn't.
     pub fn loc(&self, id: ID) -> ID {
@@ -142,24 +122,4 @@ impl World {
         None
     }
 
-    /// Puts the thing in the container's inventory, and sets the thing's location.
-    /// No op if the thing is already in the location.
-    pub fn put_in(&mut self, thing: ID, container: ID) {
-        if let Some(inv) = &mut self.entities[container].inventory {
-            if !inv.contains(&thing) {
-                inv.insert(thing);
-                self.entities[thing].loc = Some(container);
-            }
-        }
-    }
-
-    /// Takes the thing out of the container's inventory, and clears the thing's location.
-    pub fn take_out(&mut self, thing: ID, container: ID) {
-        if let Some(inv) = &mut self.entities[container].inventory {
-            if inv.contains(&thing) {
-                inv.remove(&thing);
-                self.entities[thing].loc = None;
-            }
-        }
-    }
 }

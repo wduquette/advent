@@ -36,12 +36,12 @@ pub fn system(world: &mut World, command: &str) {
         ["inventory"] => cmd_inventory(world, player),
         ["x", "self"] => cmd_examine_self(world, player),
         ["x", "me"] => cmd_examine_self(world, player),
-        ["x", name] => cmd_examine(world, name),
+        ["x", name] => cmd_examine(world, player, name),
         ["examine", "self"] => cmd_examine_self(world, player),
         ["examine", "me"] => cmd_examine_self(world, player),
-        ["examine", name] => cmd_examine(world, name),
-        ["get", name] => cmd_get(world, name),
-        ["drop", name] => cmd_drop(world, name),
+        ["examine", name] => cmd_examine(world, player, name),
+        ["get", name] => cmd_get(world, player, name),
+        ["drop", name] => cmd_drop(world, player, name),
         ["wash", "hands"] => cmd_wash_hands(world),
         ["wash", _] => Err("Whatever for?".into()),
         ["exit"] => cmd_quit(world),
@@ -117,9 +117,10 @@ fn cmd_inventory(world: &World, player: &Player) -> CmdResult {
 }
 
 /// Describe a thing in the current location.
-fn cmd_examine(world: &World, name: &str) -> CmdResult {
-    if let Some(id) = find_visible_thing(world, name) {
-        println!("{}\n", world.prose(id));
+fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
+    if let Some(id) = find_visible_thing(world, player, name) {
+
+        println!("{}\n", world.get(id).as_prose());
         Ok(())
     } else {
         Err("You don't see any such thing.".into())
@@ -164,15 +165,28 @@ fn cmd_wash_hands(world: &mut World) -> CmdResult {
 }
 
 /// Gets a thing from the location's inventory.
-fn cmd_get(world: &mut World, name: &str) -> CmdResult {
-    let loc = here(world);
-    if find_in_inventory(world, world.pid, name).is_some() {
-        Err("You already have it.".into())
-    } else if find_in_scenery(world, loc, name).is_some() {
-        Err("You can't take that!".into())
-    } else if let Some(id) = find_in_inventory(world, loc, name) {
-        world.take_out(id, loc);
-        world.put_in(id, world.pid);
+fn cmd_get(world: &mut World, player: &mut Player, name: &str) -> CmdResult {
+    let room = &mut world.get(player.loc).as_room();
+
+    // Does he already have it?
+    if find_in_inventory(world, &player.inventory, name).is_some() {
+        return Err("You already have it.".into());
+    }
+
+    if let Some(id) = find_in_inventory(world, &room.inventory, name) {
+        let thing = &mut world.get(id).as_thing();
+        if thing.scenery {
+            return Err("You can't take that!".into());
+        }
+
+        // Get the thing.
+        room.inventory.remove(&thing.id);
+        player.inventory.insert(thing.id);
+        thing.loc = player.id;
+
+        room.save(world);
+        thing.save(world);
+
         println!("Taken.\n");
         Ok(())
     } else {
@@ -181,14 +195,22 @@ fn cmd_get(world: &mut World, name: &str) -> CmdResult {
 }
 
 /// Drops a thing you're carrying
-fn cmd_drop(world: &mut World, name: &str) -> CmdResult {
-    let loc = here(world);
-    if let Some(id) = find_in_inventory(world, world.pid, name) {
-        world.take_out(id, world.pid);
-        world.put_in(id, loc);
+fn cmd_drop(world: &mut World, player: &mut Player, name: &str) -> CmdResult {
+    let room = &mut world.get(player.loc).as_room();
+
+    if let Some(id) = find_in_inventory(world, &player.inventory, name) {
+        let thing = &mut world.get(id).as_thing();
+
+        player.inventory.remove(&thing.id);
+        room.inventory.insert(thing.id);
+        thing.loc = room.id;
+
+        room.save(world);
+        thing.save(world);
+
         println!("Dropped.\n");
         Ok(())
-    } else if find_visible_thing(world, name).is_some() {
+    } else if find_in_inventory(world, &room.inventory, name).is_some() {
         Err("You aren't carrying that.".into())
     } else {
         Err("You don't see any such thing.".into())
@@ -238,8 +260,22 @@ pub fn describe_location(world: &World, room: &Room, detail: Detail) {
 
     // NEXT, list any objects in the room's inventory.  (We don't list
     // scenary; presumably that's in the description.)
-    if !room.inventory.is_empty() {
-        println!("You see: {}.\n", invent_list(world, &room.inventory));
+    let mut list = String::new();
+
+    // TODO: Consider adding a predicate to invent_list
+    for id in &room.inventory {
+        let thing = world.get(*id).as_thing();
+
+        if !thing.scenery {
+            if !list.is_empty() {
+                list.push_str(", ");
+            }
+            list.push_str(world.name(*id));
+        }
+    }
+
+    if !list.is_empty() {
+        println!("You see: {}.\n", list);
     }
 }
 
@@ -262,49 +298,33 @@ fn parse_id(world: &World, token: &str) -> Result<ID, String> {
     Ok(id)
 }
 
+/// Looks for a thing with the given name in the given inventory list.
+fn find_in_inventory(world: &World, inventory: &Inventory, name: &str) -> Option<ID> {
+    for id in inventory {
+        let thing = world.get(*id).as_thing();
+        if thing.name == name {
+            return Some(thing.id);
+        }
+    }
+
+    None
+}
+
 /// Find a visible thing: something you're carrying, or that's here in this location.
-fn find_visible_thing(world: &World, name: &str) -> Option<ID> {
-    let loc = here(world);
-
-    if let Some(id) = find_in_inventory(world, world.pid, name) {
+fn find_visible_thing(world: &World, player: &Player, name: &str) -> Option<ID> {
+    // FIRST, does the player have it?
+    if let Some(id) = find_in_inventory(world, &player.inventory, name) {
         return Some(id);
     }
 
-    if let Some(id) = find_in_inventory(world, loc, name) {
-        return Some(id);
-    }
+    // NEXT, is it in this room?
+    let room = &world.get(player.loc).as_room();
 
-    if let Some(id) = find_in_scenery(world, loc, name) {
+    if let Some(id) = find_in_inventory(world, &room.inventory, name) {
         return Some(id);
     }
 
     None
-}
-
-fn find_in_inventory(world: &World, loc: ID, name: &str) -> Option<ID> {
-    if let Some(inv) = &world.entities[loc].inventory {
-        for id in inv {
-            if world.name(*id) == name {
-                return Some(*id);
-            }
-        }
-    }
-
-    None
-}
-
-fn find_in_scenery(world: &World, loc: ID, name: &str) -> Option<ID> {
-    for id in 1..world.entities.len() {
-        if world.is_scenery(id) && world.loc(id) == loc && world.name(id) == name {
-            return Some(id);
-        }
-    }
-
-    None
-}
-
-fn here(world: &World) -> ID {
-    world.loc(world.pid)
 }
 
 //-------------------------------------------------------------------------

@@ -42,7 +42,7 @@ The trail crosses a small stream here.  You can go east or west.
 
     // NEXT, make the things
     let note = make_thing(world, "note-1", "note", "It's illegible.");
-    world.put_in(note, clearing);
+    put_in(world, note, clearing);
 
     make_scenery(
         world,
@@ -114,13 +114,16 @@ fn make_thing(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
 
 /// Makes a scenery object, and returns its ID.
 fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -> ID {
-    world
+    let id = world
         .make(tag)
         .name(name)
         .prose(text)
-        .location(loc)
         .thing(true) // TODO: Obscure; needs improvement.
-        .build()
+        .build();
+
+    put_in(world, id, loc);
+
+    id
 }
 
 /// Adds a bit of backstory to be revealed when the conditions are right.
@@ -160,4 +163,15 @@ fn oneway(world: &mut World, dir: Dir, from: ID, to: ID) {
 fn connect(world: &mut World, from_dir: Dir, from: ID, to_dir: Dir, to: ID) {
     oneway(world, from_dir, from, to);
     oneway(world, to_dir, to, from);
+}
+
+/// Puts the thing in the container's inventory, and sets the thing's location.
+/// No op if the thing is already in the location.
+pub fn put_in(world: &mut World, thing: ID, container: ID) {
+    if let Some(inv) = &mut world.entities[container].inventory {
+        if !inv.contains(&thing) {
+            inv.insert(thing);
+            world.entities[thing].loc = Some(container);
+        }
+    }
 }
