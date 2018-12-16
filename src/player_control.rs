@@ -42,7 +42,7 @@ pub fn system(world: &mut World, command: &str) {
         ["examine", name] => cmd_examine(world, player, name),
         ["get", name] => cmd_get(world, player, name),
         ["drop", name] => cmd_drop(world, player, name),
-        ["wash", "hands"] => cmd_wash_hands(world),
+        ["wash", "hands"] => cmd_wash_hands(world, player),
         ["wash", _] => Err("Whatever for?".into()),
         ["exit"] => cmd_quit(world),
         ["quit"] => cmd_quit(world),
@@ -72,15 +72,13 @@ fn cmd_go(world: &mut World, player: &mut Player, dir: Dir) -> CmdResult {
         let room = &world.get(dest).as_room();
         player.loc = dest;
 
-        let seen = world.is(&Seen(dest));  // TODO: should be player property
-
-        if !seen {
+        if !player.vars.contains(&Seen(dest)) {
             describe_location(world, room, Full);
         } else {
             describe_location(world, room, Brief);
         }
 
-        world.set(Seen(dest));  // TODO: should be player property
+        player.vars.insert(Seen(dest));
         Ok(())
     } else {
         Err("You can't go that way.".into())
@@ -128,12 +126,12 @@ fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
 }
 
 /// Describe a thing in the current location.
-fn cmd_examine_self(world: &World, player: &Player) -> CmdResult {
+fn cmd_examine_self(_world: &World, player: &Player) -> CmdResult {
     let mut msg = String::new();
 
     msg.push_str(&player.prose);
 
-    if world.is(&DirtyHands) {
+    if player.vars.contains(&DirtyHands) {
         msg.push_str(" Your hands are kind of dirty, though.");
     } else {
         msg.push_str(" Plus, they're clean bits!");
@@ -143,20 +141,19 @@ fn cmd_examine_self(world: &World, player: &Player) -> CmdResult {
     Ok(())
 }
 
-fn cmd_wash_hands(world: &mut World) -> CmdResult {
-    let loc = world.loc(world.pid);
+fn cmd_wash_hands(world: &mut World, player: &mut Player) -> CmdResult {
+    let room = world.get(player.loc).as_room();
 
-    // TODO: Use room and property component
-    if !world.is(&HasWater(loc)) {
+    if !room.vars.contains(&HasWater) {
         return Err("That'd be a neat trick.".into());
     }
 
     let mut msg = String::new();
     msg.push_str("You wash your hands in the water.");
 
-    if world.is(&DirtyHands) {
+    if player.vars.contains(&DirtyHands) {
         msg.push_str(" They look much cleaner.");
-        world.clear(&DirtyHands);
+        player.vars.remove(&DirtyHands);
     }
 
     println!("{}\n", msg);
@@ -175,7 +172,7 @@ fn cmd_get(world: &mut World, player: &mut Player, name: &str) -> CmdResult {
 
     if let Some(id) = find_in_inventory(world, &room.inventory, name) {
         let thing = &mut world.get(id).as_thing();
-        if thing.scenery {
+        if thing.vars.contains(&Scenery) {
             return Err("You can't take that!".into());
         }
 
@@ -325,7 +322,7 @@ fn invent_list(world: &World, inventory: &Inventory) -> String {
     for id in inventory {
         let thing = world.get(*id).as_thing();
 
-        if !thing.scenery {
+        if !thing.vars.contains(&Scenery) {
             if !list.is_empty() {
                 list.push_str(", ");
             }

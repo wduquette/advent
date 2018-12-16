@@ -26,11 +26,11 @@ pub struct Entity {
     // Rooms link to other rooms in a variety of directions
     pub links: Option<Links>,
 
-    // Some entities are Things and have Thing details.
-    pub thing: Option<ThingComponent>,
-
     // Some entities can own/contain Things.
     pub inventory: Option<Inventory>,
+
+    // Entity variable settings
+    pub vars: Option<VarSet>,
 
     // Some entities are rules, actions to be taken when a condition is met.
     pub rule: Option<RuleComponent>,
@@ -43,6 +43,7 @@ impl Entity {
             && self.prose.is_some()
             && self.loc.is_some()
             && self.inventory.is_some()
+            && self.vars.is_some()
     }
 
     /// Retrieve a view of the entity as a Player
@@ -55,6 +56,7 @@ impl Entity {
             prose: self.prose.as_ref().unwrap().clone(),
             loc: self.loc.unwrap(),
             inventory: self.inventory.as_ref().unwrap().clone(),
+            vars: self.vars.as_ref().unwrap().clone(),
         }
     }
     /// Can this entity function as a room?  I.e., a place the player can be?
@@ -63,6 +65,7 @@ impl Entity {
             && self.prose.is_some()
             && self.links.is_some()
             && self.inventory.is_some()
+            && self.vars.is_some()
     }
 
     /// Retrieve a view of the entity as a Room
@@ -75,25 +78,27 @@ impl Entity {
             prose: self.prose.as_ref().unwrap().clone(),
             links: self.links.as_ref().unwrap().clone(),
             inventory: self.inventory.as_ref().unwrap().clone(),
+            vars: self.vars.as_ref().unwrap().clone(),
         }
     }
 
     /// Can this entity function as a thing?  I.e., as a noun?
     pub fn is_thing(&self) -> bool {
-        self.name.is_some() && self.prose.is_some() && self.thing.is_some()
+        self.name.is_some()
+            && self.prose.is_some()
+            && self.vars.is_some()
     }
 
     /// Retrieve a view of the entity as a Thing
     pub fn as_thing(&self) -> Thing {
         assert!(self.is_thing(), "Not a thing: [{}] {}", self.id, self.tag);
-        let props = self.thing.as_ref().unwrap();
         Thing {
             id: self.id,
             tag: self.tag.clone(),
             name: self.name.as_ref().unwrap().clone(),
             prose: self.prose.as_ref().unwrap().clone(),
-            scenery: props.scenery,
             loc: self.loc.unwrap(),
+            vars: self.vars.as_ref().unwrap().clone(),
         }
     }
 
@@ -141,6 +146,7 @@ pub struct Player {
     // Saved
     pub loc: ID,
     pub inventory: Inventory,
+    pub vars: VarSet,
 }
 
 impl Player {
@@ -148,6 +154,7 @@ impl Player {
     pub fn save(&mut self, world: &mut World) {
         world.entities[self.id].loc = Some(self.loc);
         world.entities[self.id].inventory = Some(self.inventory.clone());
+        world.entities[self.id].vars = Some(self.vars.clone());
     }
 }
 
@@ -164,6 +171,7 @@ pub struct Room {
     // Saved
     pub links: Links,
     pub inventory: Inventory,
+    pub vars: VarSet,
 }
 
 impl Room {
@@ -171,6 +179,7 @@ impl Room {
     pub fn save(&mut self, world: &mut World) {
         world.entities[self.id].links = Some(self.links.clone());
         world.entities[self.id].inventory = Some(self.inventory.clone());
+        world.entities[self.id].vars = Some(self.vars.clone());
     }
 }
 
@@ -183,16 +192,17 @@ pub struct Thing {
     pub tag: String,
     pub name: String,
     pub prose: String,
-    pub scenery: bool,
 
     // Saved
     pub loc: ID,
+    pub vars: VarSet,
 }
 
 impl Thing {
     /// Save the room back to the world.  Replaces the location
     pub fn save(&mut self, world: &mut World) {
         world.entities[self.id].loc = Some(self.loc);
+        world.entities[self.id].vars = Some(self.vars.clone());
     }
 }
 
@@ -235,8 +245,8 @@ pub struct EntityBuilder<'a> {
     pub prose: Option<String>,
     pub loc: Option<ID>,
     pub links: Option<Links>,
-    pub thing: Option<ThingComponent>,
     pub inventory: Option<Inventory>,
+    pub vars: Option<VarSet>,
     pub rule: Option<RuleComponent>,
 }
 
@@ -249,8 +259,8 @@ impl<'a> EntityBuilder<'a> {
             prose: None,
             loc: None,
             links: None,
-            thing: None,
             inventory: None,
+            vars: None,
             rule: None,
         }
     }
@@ -275,14 +285,25 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    // TODO replace with a var method that adds a VarComponent and the var.
-    pub fn thing(mut self, scenery: bool) -> EntityBuilder<'a> {
-        self.thing = Some(ThingComponent { scenery });
+    /// Adds an inventory list to the entity.
+    pub fn inventory(mut self) -> EntityBuilder<'a> {
+        self.inventory = Some(HashSet::new());
         self
     }
 
-    pub fn inventory(mut self) -> EntityBuilder<'a> {
-        self.inventory = Some(HashSet::new());
+    /// Adds a variable set to the entity.
+    pub fn vars(mut self) -> EntityBuilder<'a> {
+        self.vars = Some(HashSet::new());
+        self
+    }
+
+    /// Adds a variable to the entity, creating the var set if needed.
+    pub fn var(mut self, var: Var) -> EntityBuilder<'a> {
+        if self.vars.is_none() {
+            self.vars = Some(HashSet::new());
+        }
+
+        self.vars.as_mut().unwrap().insert(var);
         self
     }
 
@@ -305,8 +326,8 @@ impl<'a> EntityBuilder<'a> {
             prose: self.prose,
             loc: self.loc,
             links: self.links,
-            thing: self.thing,
             inventory: self.inventory,
+            vars: self.vars,
             rule: self.rule,
         })
     }

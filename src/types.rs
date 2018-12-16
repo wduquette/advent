@@ -28,7 +28,7 @@ pub enum Dir {
     Out,
 }
 
-#[derive(PartialEq, Eq, Hash, Debug)]
+#[derive(PartialEq, Eq, Hash, Debug, Clone)]
 #[allow(dead_code)]
 /// A game variable
 pub enum Var {
@@ -39,19 +39,20 @@ pub enum Var {
     DirtyHands,
 
     /// Does the location have clean water?
-    HasWater(ID),
+    HasWater,
+
+    /// Is the thing Scenery?
+    Scenery,
+
+    /// Is the thing dirty?
+    Dirty,
 }
+
+/// A set of variable settings.
+pub type VarSet = HashSet<Var>;
 
 /// Inter-room links
 pub type Links = HashMap<Dir, ID>;
-
-/// A Thing is something that can be in a location and that the user can
-/// interact with.  This structure contains details about Things, i.e.,
-/// are they portable?
-#[derive(Debug)]
-pub struct ThingComponent {
-    pub scenery: bool,
-}
 
 /// An Inventory is the set of things contained with the current entity.
 pub type Inventory = HashSet<ID>;

@@ -5,10 +5,8 @@ using the ECS architecture.
 
 ## To Do
 
-* Consider giving Scenery a different view than Thing.
+* Consider providing a Inventory view, when that's all we care about.
 * Consider giving Room a scenery Inventory
-* Add VarComponent (containing a HashSet<Var>).
-* Replace current world.vars with the entity properties.
 * Add dictionary: preferred words with synonyms.
 * Convert input from user's words to preferred words before pattern
   matching.

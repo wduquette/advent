@@ -32,9 +32,9 @@ pub fn build() -> World {
         "Bridge",
         "\
 The trail crosses a small stream here.  You can go east or west.
-        ",
+        "
     );
-    world.set(HasWater(bridge));
+    world.set_var(bridge, HasWater);
 
     // Links
     connect(world, East, clearing, West, trail);
@@ -83,11 +83,9 @@ fn make_player(world: &mut World, start: ID) {
         .prose("You've got all the usual bits.")
         .location(start)
         .inventory()
-        .thing(false)
+        .var(DirtyHands)
+        .var(Seen(start))
         .build();
-
-    world.set(Seen(start));
-    world.set(DirtyHands);
 }
 
 /// Makes a room with the given name and prose, and an empty set of links.
@@ -99,6 +97,7 @@ fn make_room(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
         .prose(text)
         .links()
         .inventory()
+        .vars()
         .build()
 }
 
@@ -108,7 +107,7 @@ fn make_thing(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
         .make(tag)
         .name(name)
         .prose(text)
-        .thing(false) // TODO: Obscure; needs improvement.
+        .vars()
         .build()
 }
 
@@ -118,7 +117,7 @@ fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -
         .make(tag)
         .name(name)
         .prose(text)
-        .thing(true) // TODO: Obscure; needs improvement.
+        .var(Scenery)
         .build();
 
     put_in(world, id, loc);

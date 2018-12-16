@@ -44,8 +44,10 @@ pub fn dump_entity(world: &World, id: ID) {
         }
     }
 
-    if let Some(thing) = &world.entities[id].thing {
-        println!("  Thing: {:?}", thing);
+    if let Some(vars) = &world.entities[id].vars {
+        for var in vars {
+            println!("  Var: {:?}", var);
+        }
     }
 
     if let Some(inventory) = &world.entities[id].inventory {

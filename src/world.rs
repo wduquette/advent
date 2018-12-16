@@ -2,7 +2,6 @@
 use crate::entity::*;
 use crate::types::*;
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 /// The game state.  Uses a variant of the Entity-Component-System architecture.
 /// This struct provides many methods for querying and mutating entities.  These methods
@@ -15,9 +14,6 @@ pub struct World {
 
     /// The hash map
     pub tag_map: HashMap<String, ID>,
-
-    /// Various variables about the world.
-    pub vars: HashSet<Var>,
 
     // The game clock
     pub clock: usize,
@@ -35,7 +31,6 @@ impl World {
         World {
             entities: Vec::new(),
             tag_map: HashMap::new(),
-            vars: HashSet::new(),
             clock: 0,
             pid: 0,
         }
@@ -60,20 +55,32 @@ impl World {
     //--------------------------------------------------------------------------------------------
     // Variables
 
-    /// Set the Var
-    pub fn set(&mut self, var: Var) {
-        self.vars.insert(var);
+    /// Set the variable on the entity
+    pub fn set_var(&mut self, id: ID, var: Var) {
+        assert!(self.entities[id].vars.is_some(), "No var set: {}", id);
+
+        // Consider adding as_var_set() to Entity
+        if let Some(vars) = &mut self.entities[id].vars {
+            vars.insert(var);
+        }
     }
 
-    /// Clear the attribute
+    /// Clear the variable from the entity
     #[allow(dead_code)]
-    pub fn clear(&mut self, var: &Var) {
-        self.vars.remove(var);
+    pub fn clear_var(&mut self, id: ID, var: &Var) {
+        if let Some(vars) = &mut self.entities[id].vars {
+            vars.remove(var);
+        }
     }
 
-    /// Is the variable set?
-    pub fn is(&self, var: &Var) -> bool {
-        self.vars.contains(var)
+    /// Is the variable set on the entity?
+    #[allow(dead_code)]
+    pub fn has_var(&self, id: ID, var: &Var) -> bool {
+        if let Some(vars) = &self.entities[id].vars {
+            vars.contains(&var)
+        } else {
+            false
+        }
     }
 
     //--------------------------------------------------------------------------------------------
@@ -101,14 +108,6 @@ impl World {
             .name
             .as_ref()
             .unwrap_or_else(|| panic!("Name missing: {}", id))
-    }
-
-    /// Retrieves the location of something that has a location.
-    /// Panics if it doesn't.
-    pub fn loc(&self, id: ID) -> ID {
-        self.entities[id]
-            .loc
-            .unwrap_or_else(|| panic!("Entity has no location: {}", id))
     }
 
     /// Tries to follow a link in the given direction; returns the linked
