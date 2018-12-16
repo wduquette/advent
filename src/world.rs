@@ -103,14 +103,6 @@ impl World {
             .unwrap_or_else(|| panic!("Name missing: {}", id))
     }
 
-    // Determines whether the entity is a thing or not, i.e., an object that can
-    // be in a room and that the user can interact with.
-    #[allow(dead_code)]
-    pub fn is_thing(&self, id: ID) -> bool {
-        let ent = &self.entities[id];
-        ent.thing.is_some() && ent.prose.is_some()
-    }
-
     // Determines whether the entity is scenery or not, i.e., an object that is in a
     // room and can't be moved.
     #[allow(dead_code)]

@@ -49,6 +49,7 @@ impl Entity {
         assert!(self.is_player(), "Not a player: [{}] {}", self.id, self.tag);
         Player {
             id: self.id,
+            tag: self.tag.clone(),
             name: self.name.as_ref().unwrap().clone(),
             prose: self.prose.as_ref().unwrap().clone(),
             loc: self.loc.unwrap(),
@@ -67,6 +68,7 @@ impl Entity {
         assert!(self.is_room(), "Not a room: [{}] {}", self.id, self.tag);
         Room {
             id: self.id,
+            tag: self.tag.clone(),
             name: self.name.as_ref().unwrap().clone(),
             prose: self.prose.as_ref().unwrap().clone(),
             links: self.links.as_ref().unwrap().clone(),
@@ -75,9 +77,8 @@ impl Entity {
     }
 
     /// Can this entity function as a thing?  I.e., as a noun?
-    /// Note: things may but need not have a description.
     pub fn is_thing(&self) -> bool {
-        self.name.is_some() && self.thing.is_some()
+        self.name.is_some() && self.prose.is_some() && self.thing.is_some()
     }
 
     /// Is this entity a rule?
@@ -90,6 +91,7 @@ impl Entity {
         let rule = self.rule.as_ref().unwrap().clone();
         Rule {
             id: self.id,
+            tag: self.tag.clone(),
             predicate: rule.predicate,
             action: rule.action,
             once_only: rule.once_only,
@@ -115,8 +117,11 @@ impl Entity {
 /// Player view: A view of an entity as a Player
 pub struct Player {
     pub id: ID,
+    pub tag: String,
     pub name: String,
     pub prose: String,
+
+    // Saved
     pub loc: ID,
     pub inventory: Inventory,
 }
@@ -135,8 +140,11 @@ impl Player {
 /// Room view: A view of an entity as a Room
 pub struct Room {
     pub id: ID,
+    pub tag: String,
     pub name: String,
     pub prose: String,
+
+    // Saved
     pub links: Links,
     pub inventory: Inventory,
 }
@@ -155,9 +163,12 @@ impl Room {
 /// Rule view: A view of an entity as a Rule
 pub struct Rule {
     pub id: ID,
+    pub tag:String,
     pub predicate: RulePred,
     pub action: Action,
     pub once_only: bool,
+
+    // Saved
     pub fired: bool,
 }
 

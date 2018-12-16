@@ -74,7 +74,7 @@ fn cmd_go(world: &mut World, player: &mut Player, dir: Dir) -> CmdResult {
 
         let seen = world.is(&Seen(dest));  // TODO: should be player property
 
-        if seen {
+        if !seen {
             describe_location(world, room, Full);
         } else {
             describe_location(world, room, Brief);
