@@ -80,7 +80,6 @@ step!
     let note = world.make(NOTE)
         .name("note")
         .prose("A note, on plain paper.")
-        .var(CanRead(prose_clean_note))
         .build();
     put_in(world, note, clearing);
 
@@ -89,9 +88,7 @@ step!
         .always(
             &|world| player_gets_note_dirty(world),
             vec![Action::PrintProse,
-                Action::SetVar(note, Dirty),
-                Action::ClearVar(note, CanRead(prose_clean_note)),
-                Action::SetVar(note, CanRead(prose_dirty_note))],
+                Action::SetVar(note, Dirty)],
         )
         .prose("The dirt from your hands got all over the note.")
         .build();

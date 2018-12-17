@@ -46,9 +46,6 @@ pub enum Var {
 
     /// Is the thing dirty?
     Dirty,
-
-    /// Can the thing be read?  And if so, where does the prose come from?
-    CanRead(ID)
 }
 
 /// A set of variable settings.
