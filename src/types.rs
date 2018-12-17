@@ -4,6 +4,9 @@ use crate::world::*;
 use std::collections::hash_map::HashMap;
 use std::collections::hash_set::HashSet;
 
+//------------------------------------------------------------------------------------------------
+// Basic Types
+
 /// The entity ID type: an integer.
 pub type ID = usize;
 
@@ -28,6 +31,30 @@ pub enum Dir {
     Out,
 }
 
+/// Inter-room links
+pub type Links = HashMap<Dir, ID>;
+
+/// An Inventory is the set of things contained with the current entity.
+pub type Inventory = HashSet<ID>;
+
+//------------------------------------------------------------------------------------------------
+// Prose
+
+/// Prose for an object that's readable.
+#[derive(Debug, Clone)]
+pub struct ProseComponent {
+    /// The object's main string: used for signs, notes, and simple books
+    pub main: String,
+
+    /// Additional pages that you need to look up given their names.
+    pub pages: HashMap<String,String>,
+}
+
+
+
+//------------------------------------------------------------------------------------------------
+// Variables and Variable Sets
+
 #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
 #[allow(dead_code)]
 /// A game variable
@@ -51,31 +78,14 @@ pub enum Var {
 /// A set of variable settings.
 pub type VarSet = HashSet<Var>;
 
-/// Inter-room links
-pub type Links = HashMap<Dir, ID>;
-
-/// An Inventory is the set of things contained with the current entity.
-pub type Inventory = HashSet<ID>;
-
-/// Actions taken by rules (and maybe other things)
-#[derive(Clone, Debug)]
-pub enum Action {
-    /// Print the entity's visual
-    PrintVisual,
-
-    /// Set the variable for the entity with the given ID
-    SetVar(ID, Var),
-
-    /// Clear the given variable
-    ClearVar(ID, Var),
-}
+//------------------------------------------------------------------------------------------------
+// Rules and Actions
 
 /// A rule predicate
 pub type RulePred = &'static Fn(&World) -> bool;
 
 /// Game rules: actions taken when a predicate is met, and probably never repeated.
 pub struct RuleComponent {
-    // pub predicate: Box<dyn Fn(&World) -> bool>,
     pub predicate: RulePred,
     pub actions: Vec<Action>,
     pub once_only: bool,
@@ -111,4 +121,20 @@ impl Clone for RuleComponent {
             fired: self.fired,
         }
     }
+}
+
+/// Actions taken by rules (and maybe other things)
+#[derive(Clone, Debug)]
+pub enum Action {
+    /// Print the entity's visual
+    PrintVisual,
+
+    /// Set the variable for the entity with the given ID
+    SetVar(ID, Var),
+
+    /// Clear the given variable
+    ClearVar(ID, Var),
+
+    /// Set a thing's main prose
+    SetProse(ID, String),
 }

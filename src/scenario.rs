@@ -60,26 +60,16 @@ how narrow it is.
     connect(world, East, clearing, West, trail);
     connect(world, East, trail, West, bridge);
 
-    // NEXT, make the things
     // The note
-//     let visual_clean_note = world
-//         .make("visual-clean-note")
-//         .visual("\
-// Welcome, dear friend.  Your mission, should you choose to
-// accept it, is to figure out how to get to the end of
-// the trail.  You've already taken the first big
-// step!
-//          ")
-//         .build();
-//
-//     let visual_dirty_note = world
-//         .make("visual-dirty-note")
-//         .visual("It's so dirty it's illegible.")
-//         .build();
-
     let note = world.make(NOTE)
         .name("note")
         .visual("A note, on plain paper.")
+        .prose("\
+Welcome, dear friend.  Your mission, should you choose to
+accept it, is to figure out how to get to the end of
+the trail.  You've already taken the first big
+step!
+         ")
         .vars()
         .build();
     put_in(world, note, clearing);

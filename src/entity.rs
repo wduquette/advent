@@ -17,7 +17,7 @@ pub struct Entity {
     // Many entities have names for display.
     pub name: Option<String>,
 
-    // Many entities have visual, i.e., a room's basic description.
+    // Most entities have a visual, e.g., what a room or a thing looks like.
     pub visual: Option<String>,
 
     // Some entities (e.g., the player) have a location.
@@ -31,6 +31,9 @@ pub struct Entity {
 
     // Entity variable settings
     pub vars: Option<VarSet>,
+
+    // Prose, i.e., a book's content.
+    pub prose: Option<ProseComponent>,
 
     // Some entities are rules, actions to be taken when a condition is met.
     pub rule: Option<RuleComponent>,
@@ -82,6 +85,20 @@ impl Entity {
         }
     }
 
+    /// Does this entity have prose?
+    pub fn is_prose(&self) -> bool {
+        self.prose.is_some()
+    }
+
+    /// Retrieve a view of the entity as a Prose
+    pub fn as_prose(&self) -> Prose {
+        assert!(self.is_prose(), "Not prose: [{}] {}", self.id, self.tag);
+        Prose {
+            id: self.id,
+            tag: self.tag.clone(),
+            prose: self.prose.as_ref().unwrap().clone(),
+        }
+    }
     /// Can this entity function as a thing?  I.e., as a noun?
     pub fn is_thing(&self) -> bool {
         self.name.is_some() && self.visual.is_some() && self.vars.is_some()
@@ -154,6 +171,25 @@ impl Player {
         world.entities[self.id].loc = Some(self.loc);
         world.entities[self.id].inventory = Some(self.inventory.clone());
         world.entities[self.id].vars = Some(self.vars.clone());
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+// Prose View
+
+/// Prose view: a view of an entity as a collection of prose.
+pub struct Prose {
+    pub id: ID,
+    pub tag: String,
+
+    // Saved
+    pub prose: ProseComponent,
+}
+
+impl Prose {
+    /// Save the prose back to the world.  Replaces the main text.
+    pub fn save(&mut self, world: &mut World) {
+        world.entities[self.id].prose = Some(self.prose.clone());
     }
 }
 
@@ -247,6 +283,7 @@ pub struct EntityBuilder<'a> {
     pub links: Option<Links>,
     pub inventory: Option<Inventory>,
     pub vars: Option<VarSet>,
+    pub prose: Option<ProseComponent>,
     pub rule: Option<RuleComponent>,
 }
 
@@ -261,6 +298,7 @@ impl<'a> EntityBuilder<'a> {
             links: None,
             inventory: None,
             vars: None,
+            prose: None,
             rule: None,
         }
     }
@@ -307,11 +345,30 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
+    /// Adds a variable to the entity, creating the var set if needed.
+    pub fn prose(mut self, main: &str) -> EntityBuilder<'a> {
+        self.prose = Some(ProseComponent {
+            main: main.into(),
+            pages: HashMap::new(),
+        });
+        self
+    }
+
+    /// Adds a page to an existing prose component; the page can be looked up by its
+    /// index.
+    pub fn page(mut self, index: &str, text: &str) -> EntityBuilder<'a> {
+        assert!(self.prose.is_some(), "Can't add page, no prose component: {}", self.tag);
+        self.prose.as_mut().unwrap().pages.insert(index.into(), text.into());
+        self
+    }
+
+    /// Adds a rule that will fire at most once.
     pub fn once(mut self, predicate: RulePred, actions: Vec<Action>) -> EntityBuilder<'a> {
         self.rule = Some(RuleComponent::once(predicate, actions));
         self
     }
 
+    /// Adds a rule that will fire every time the predicate is met.
     pub fn always(mut self, predicate: RulePred, actions: Vec<Action>) -> EntityBuilder<'a> {
         self.rule = Some(RuleComponent::always(predicate, actions));
         self
@@ -328,6 +385,7 @@ impl<'a> EntityBuilder<'a> {
             links: self.links,
             inventory: self.inventory,
             vars: self.vars,
+            prose: self.prose,
             rule: self.rule,
         })
     }

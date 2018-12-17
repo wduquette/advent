@@ -5,7 +5,9 @@ using the ECS architecture.
 
 ## To Do
 
-* Provide a way to relate a thing to its readable text.
+* Add action to change an entity's prose
+* Add Prose to debug::dump_entity().
+* Add routine to wrap a block of prose.
 * Consider adding VarSet struct, with set, has, clear methods.
 * Consider replacing Player's Seen(ID) with Room's Seen
   * Current approach might be better for multiplayer, but I'm not doing
