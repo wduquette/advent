@@ -5,7 +5,12 @@ using the ECS architecture.
 
 ## To Do
 
-* Add action to change an entity's prose
+* Remove the "pages" field from the ProseComponent.
+  * We might want that, but it probably needs to be something special.
+* Instead of changing the note's prose, have two note objects.  Swap
+  the dirty one for the clean one.
+* Consider replacing the entities vector with a set of component hash
+  tables.
 * Add Prose to debug::dump_entity().
 * Add routine to wrap a block of prose.
 * Consider adding VarSet struct, with set, has, clear methods.
