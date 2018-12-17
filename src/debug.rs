@@ -62,7 +62,7 @@ pub fn dump_entity(world: &World, id: ID) {
         }
     }
 
-    if let Some(prose) = &world.entities[id].prose {
-        println!("  Prose: {}", prose);
+    if let Some(visual) = &world.entities[id].visual {
+        println!("  Visual: {}", visual);
     }
 }

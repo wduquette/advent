@@ -17,8 +17,8 @@ pub struct Entity {
     // Many entities have names for display.
     pub name: Option<String>,
 
-    // Many entities have prose, i.e., a room's basic description.
-    pub prose: Option<String>,
+    // Many entities have visual, i.e., a room's basic description.
+    pub visual: Option<String>,
 
     // Some entities (e.g., the player) have a location.
     pub loc: Option<ID>,
@@ -40,7 +40,7 @@ impl Entity {
     /// Can this entity function as a player?
     pub fn is_player(&self) -> bool {
         self.name.is_some()
-            && self.prose.is_some()
+            && self.visual.is_some()
             && self.loc.is_some()
             && self.inventory.is_some()
             && self.vars.is_some()
@@ -53,7 +53,7 @@ impl Entity {
             id: self.id,
             tag: self.tag.clone(),
             name: self.name.as_ref().unwrap().clone(),
-            prose: self.prose.as_ref().unwrap().clone(),
+            visual: self.visual.as_ref().unwrap().clone(),
             loc: self.loc.unwrap(),
             inventory: self.inventory.as_ref().unwrap().clone(),
             vars: self.vars.as_ref().unwrap().clone(),
@@ -62,7 +62,7 @@ impl Entity {
     /// Can this entity function as a room?  I.e., a place the player can be?
     pub fn is_room(&self) -> bool {
         self.name.is_some()
-            && self.prose.is_some()
+            && self.visual.is_some()
             && self.links.is_some()
             && self.inventory.is_some()
             && self.vars.is_some()
@@ -75,7 +75,7 @@ impl Entity {
             id: self.id,
             tag: self.tag.clone(),
             name: self.name.as_ref().unwrap().clone(),
-            prose: self.prose.as_ref().unwrap().clone(),
+            visual: self.visual.as_ref().unwrap().clone(),
             links: self.links.as_ref().unwrap().clone(),
             inventory: self.inventory.as_ref().unwrap().clone(),
             vars: self.vars.as_ref().unwrap().clone(),
@@ -84,7 +84,7 @@ impl Entity {
 
     /// Can this entity function as a thing?  I.e., as a noun?
     pub fn is_thing(&self) -> bool {
-        self.name.is_some() && self.prose.is_some() && self.vars.is_some()
+        self.name.is_some() && self.visual.is_some() && self.vars.is_some()
     }
 
     /// Retrieve a view of the entity as a Thing
@@ -94,7 +94,7 @@ impl Entity {
             id: self.id,
             tag: self.tag.clone(),
             name: self.name.as_ref().unwrap().clone(),
-            prose: self.prose.as_ref().unwrap().clone(),
+            visual: self.visual.as_ref().unwrap().clone(),
             loc: self.loc.unwrap(),
             vars: self.vars.as_ref().unwrap().clone(),
         }
@@ -102,7 +102,7 @@ impl Entity {
 
     /// Is this entity a rule?
     pub fn is_rule(&self) -> bool {
-        self.rule.is_some() && self.prose.is_some()
+        self.rule.is_some() && self.visual.is_some()
     }
 
     /// Retrieve a view of the entity as a Rule
@@ -115,20 +115,20 @@ impl Entity {
             predicate: rule.predicate,
             actions: rule.actions,
             once_only: rule.once_only,
-            prose: self.prose.as_ref().unwrap().clone(),
+            visual: self.visual.as_ref().unwrap().clone(),
             fired: rule.fired,
         }
     }
 
-    /// Does this entity have a prose component?
-    pub fn is_prose(&self) -> bool {
-        self.prose.is_some()
+    /// Does this entity have a visual component?
+    pub fn is_visual(&self) -> bool {
+        self.visual.is_some()
     }
 
-    /// Return the entity's prose.
-    pub fn as_prose(&self) -> String {
-        assert!(self.is_prose(), "Not prose: [{}] {}", self.id, self.tag);
-        self.prose.as_ref().unwrap().clone()
+    /// Return the entity's visual.
+    pub fn as_visual(&self) -> String {
+        assert!(self.is_visual(), "Not visual: [{}] {}", self.id, self.tag);
+        self.visual.as_ref().unwrap().clone()
     }
 }
 
@@ -140,7 +140,7 @@ pub struct Player {
     pub id: ID,
     pub tag: String,
     pub name: String,
-    pub prose: String,
+    pub visual: String,
 
     // Saved
     pub loc: ID,
@@ -165,7 +165,7 @@ pub struct Room {
     pub id: ID,
     pub tag: String,
     pub name: String,
-    pub prose: String,
+    pub visual: String,
 
     // Saved
     pub links: Links,
@@ -190,7 +190,7 @@ pub struct Thing {
     pub id: ID,
     pub tag: String,
     pub name: String,
-    pub prose: String,
+    pub visual: String,
 
     // Saved
     pub loc: ID,
@@ -215,7 +215,7 @@ pub struct Rule {
     pub predicate: RulePred,
     pub actions: Vec<Action>,
     pub once_only: bool,
-    pub prose: String,
+    pub visual: String,
 
     // Saved
     pub fired: bool,
@@ -242,7 +242,7 @@ pub struct EntityBuilder<'a> {
     pub world: &'a mut World,
     pub tag: String,
     pub name: Option<String>,
-    pub prose: Option<String>,
+    pub visual: Option<String>,
     pub loc: Option<ID>,
     pub links: Option<Links>,
     pub inventory: Option<Inventory>,
@@ -256,7 +256,7 @@ impl<'a> EntityBuilder<'a> {
             world: world,
             tag: tag.to_string(),
             name: None,
-            prose: None,
+            visual: None,
             loc: None,
             links: None,
             inventory: None,
@@ -270,8 +270,8 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    pub fn prose(mut self, prose: &str) -> EntityBuilder<'a> {
-        self.prose = Some(prose.trim().into());
+    pub fn visual(mut self, visual: &str) -> EntityBuilder<'a> {
+        self.visual = Some(visual.trim().into());
         self
     }
 
@@ -323,7 +323,7 @@ impl<'a> EntityBuilder<'a> {
             id: 0,
             tag: self.tag,
             name: self.name,
-            prose: self.prose,
+            visual: self.visual,
             loc: self.loc,
             links: self.links,
             inventory: self.inventory,

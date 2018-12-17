@@ -62,24 +62,25 @@ how narrow it is.
 
     // NEXT, make the things
     // The note
-    let prose_clean_note = world
-        .make("prose-clean-note")
-        .prose("\
-Welcome, dear friend.  Your mission, should you choose to
-accept it, is to figure out how to get to the end of
-the trail.  You've already taken the first big
-step!
-         ")
-        .build();
-
-    let prose_dirty_note = world
-        .make("prose-dirty-note")
-        .prose("It's so dirty it's illegible.")
-        .build();
+//     let visual_clean_note = world
+//         .make("visual-clean-note")
+//         .visual("\
+// Welcome, dear friend.  Your mission, should you choose to
+// accept it, is to figure out how to get to the end of
+// the trail.  You've already taken the first big
+// step!
+//          ")
+//         .build();
+//
+//     let visual_dirty_note = world
+//         .make("visual-dirty-note")
+//         .visual("It's so dirty it's illegible.")
+//         .build();
 
     let note = world.make(NOTE)
         .name("note")
-        .prose("A note, on plain paper.")
+        .visual("A note, on plain paper.")
+        .vars()
         .build();
     put_in(world, note, clearing);
 
@@ -87,17 +88,17 @@ step!
         .make("rule-dirty-note")
         .always(
             &|world| player_gets_note_dirty(world),
-            vec![Action::PrintProse,
+            vec![Action::PrintVisual,
                 Action::SetVar(note, Dirty)],
         )
-        .prose("The dirt from your hands got all over the note.")
+        .visual("The dirt from your hands got all over the note.")
         .build();
 
     // Stories: Rules that supply backstory to the player.
     world
         .make("rule-story-1")
-        .once(&|world| world.clock == 2, vec![Action::PrintProse])
-        .prose(
+        .once(&|world| world.clock == 2, vec![Action::PrintVisual])
+        .visual(
             "\
 You don't know where you are.  You don't even know where you want to
 be.  All you know is that your feet are wet, your hands are dirty,
@@ -127,7 +128,7 @@ fn make_player(world: &mut World, start: ID) {
     world.pid = world
         .make("self")
         .name("self")
-        .prose("You've got all the usual bits.")
+        .visual("You've got all the usual bits.")
         .location(start)
         .inventory()
         .var(DirtyHands)
@@ -135,13 +136,13 @@ fn make_player(world: &mut World, start: ID) {
         .build();
 }
 
-/// Makes a room with the given name and prose, and an empty set of links.
+/// Makes a room with the given name and visual, and an empty set of links.
 /// Returns the room's ID.
 fn make_room(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
     world
         .make(tag)
         .name(name)
-        .prose(text)
+        .visual(text)
         .links()
         .inventory()
         .vars()
@@ -150,12 +151,12 @@ fn make_room(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
 
 /// Makes a portable object, and returns its ID.
 fn make_thing(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
-    world.make(tag).name(name).prose(text).vars().build()
+    world.make(tag).name(name).visual(text).vars().build()
 }
 
 /// Makes a scenery object, and returns its ID.
 fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -> ID {
-    let id = world.make(tag).name(name).prose(text).var(Scenery).build();
+    let id = world.make(tag).name(name).visual(text).var(Scenery).build();
 
     put_in(world, id, loc);
 

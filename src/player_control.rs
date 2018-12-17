@@ -117,7 +117,7 @@ fn cmd_inventory(world: &World, player: &Player) -> CmdResult {
 /// Describe a thing in the current location.
 fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
     if let Some(id) = find_visible_thing(world, player, name) {
-        println!("{}\n", world.get(id).as_prose());
+        println!("{}\n", world.get(id).as_visual());
         Ok(())
     } else {
         Err("You don't see any such thing.".into())
@@ -128,7 +128,7 @@ fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
 fn cmd_examine_self(_world: &World, player: &Player) -> CmdResult {
     let mut msg = String::new();
 
-    msg.push_str(&player.prose);
+    msg.push_str(&player.visual);
 
     if player.vars.contains(&DirtyHands) {
         msg.push_str(" Your hands are kind of dirty, though.");
@@ -249,7 +249,7 @@ fn cmd_list(world: &World) -> CmdResult {
 pub fn describe_location(world: &World, room: &Room, detail: Detail) {
     // FIRST, display the room's description
     if detail == Full {
-        println!("{}\n{}\n", room.name, room.prose);
+        println!("{}\n{}\n", room.name, room.visual);
     } else {
         println!("{}\n", room.name);
     }

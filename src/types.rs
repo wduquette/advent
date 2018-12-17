@@ -60,8 +60,8 @@ pub type Inventory = HashSet<ID>;
 /// Actions taken by rules (and maybe other things)
 #[derive(Clone, Debug)]
 pub enum Action {
-    /// Print the entity's prose
-    PrintProse,
+    /// Print the entity's visual
+    PrintVisual,
 
     /// Set the variable for the entity with the given ID
     SetVar(ID, Var),
