@@ -108,15 +108,10 @@ impl Entity {
     }
 
     /// Retrieve a view of the entity as a Prose
-    pub fn as_prose(&self) -> Prose {
+    pub fn as_prose(&self) -> ProseView {
         assert!(self.is_prose(), "Not prose: [{}] {}", self.id, self.tag);
-        Prose {
-            id: self.id,
-            tag: self.tag.clone(),
-            prose: self.prose.as_ref().unwrap().clone(),
-        }
+        ProseView::from(self)
     }
-
 }
 
 //------------------------------------------------------------------------------------------------
@@ -274,7 +269,7 @@ impl RuleView {
 // Prose View
 
 /// Prose view: a view of an entity as a collection of prose.
-pub struct Prose {
+pub struct ProseView {
     pub id: ID,
     pub tag: String,
 
@@ -282,7 +277,16 @@ pub struct Prose {
     pub prose: ProseComponent,
 }
 
-impl Prose {
+impl ProseView {
+    /// Creates a ProseView for the Entity.  For use by Entity::as_prose().
+    fn from(this: &Entity) -> ProseView {
+        ProseView {
+            id: this.id,
+            tag: this.tag.clone(),
+            prose: this.prose.as_ref().unwrap().clone(),
+        }
+    }
+
     /// Save the prose back to the world.  Replaces the main text.
     pub fn save(&mut self, world: &mut World) {
         world.entities[self.id].prose = Some(self.prose.clone());
