@@ -50,17 +50,9 @@ impl Entity {
     }
 
     /// Retrieve a view of the entity as a Player
-    pub fn as_player(&self) -> Player {
+    pub fn as_player(&self) -> PlayerView {
         assert!(self.is_player(), "Not a player: [{}] {}", self.id, self.tag);
-        Player {
-            id: self.id,
-            tag: self.tag.clone(),
-            name: self.name.as_ref().unwrap().clone(),
-            visual: self.visual.as_ref().unwrap().clone(),
-            loc: self.loc.unwrap(),
-            inventory: self.inventory.as_ref().unwrap().clone(),
-            vars: self.vars.as_ref().unwrap().clone(),
-        }
+        PlayerView::from(self)
     }
     /// Can this entity function as a room?  I.e., a place the player can be?
     pub fn is_room(&self) -> bool {
@@ -72,17 +64,9 @@ impl Entity {
     }
 
     /// Retrieve a view of the entity as a Room
-    pub fn as_room(&self) -> Room {
+    pub fn as_room(&self) -> RoomView {
         assert!(self.is_room(), "Not a room: [{}] {}", self.id, self.tag);
-        Room {
-            id: self.id,
-            tag: self.tag.clone(),
-            name: self.name.as_ref().unwrap().clone(),
-            visual: self.visual.as_ref().unwrap().clone(),
-            links: self.links.as_ref().unwrap().clone(),
-            inventory: self.inventory.as_ref().unwrap().clone(),
-            vars: self.vars.as_ref().unwrap().clone(),
-        }
+        RoomView::from(self)
     }
 
     /// Does this entity have prose?
@@ -153,7 +137,7 @@ impl Entity {
 // Player View
 
 /// Player view: A view of an entity as a Player
-pub struct Player {
+pub struct PlayerView {
     pub id: ID,
     pub tag: String,
     pub name: String,
@@ -165,13 +149,65 @@ pub struct Player {
     pub vars: VarSet,
 }
 
-impl Player {
+impl PlayerView {
+    /// Creates a PlayerView for the Entity.  For use by Entity::as_player().
+    fn from(this: &Entity) -> PlayerView {
+        PlayerView {
+            id: this.id,
+            tag: this.tag.clone(),
+            name: this.name.as_ref().unwrap().clone(),
+            visual: this.visual.as_ref().unwrap().clone(),
+            loc: this.loc.unwrap(),
+            inventory: this.inventory.as_ref().unwrap().clone(),
+            vars: this.vars.as_ref().unwrap().clone(),
+        }
+    }
+
     /// Save the player back to the world.  Replaces the links and inventory.
     pub fn save(&mut self, world: &mut World) {
         world.entities[self.id].loc = Some(self.loc);
         world.entities[self.id].inventory = Some(self.inventory.clone());
         world.entities[self.id].vars = Some(self.vars.clone());
     }
+}
+
+//------------------------------------------------------------------------------------------------
+// Room View
+
+/// Room view: A view of an entity as a Room
+pub struct RoomView {
+    pub id: ID,
+    pub tag: String,
+    pub name: String,
+    pub visual: String,
+
+    // Saved
+    pub links: Links,
+    pub inventory: Inventory,
+    pub vars: VarSet,
+}
+
+impl RoomView {
+    /// Creates a RoomView for the Entity.  For use by Entity::as_room().
+    fn from(this: &Entity) -> RoomView {
+        RoomView {
+            id: this.id,
+            tag: this.tag.clone(),
+            name: this.name.as_ref().unwrap().clone(),
+            visual: this.visual.as_ref().unwrap().clone(),
+            links: this.links.as_ref().unwrap().clone(),
+            inventory: this.inventory.as_ref().unwrap().clone(),
+            vars: this.vars.as_ref().unwrap().clone(),
+        }
+    }
+
+    /// Save the room back to the world.  Replaces the links and inventory.
+    pub fn save(&mut self, world: &mut World) {
+        world.entities[self.id].links = Some(self.links.clone());
+        world.entities[self.id].inventory = Some(self.inventory.clone());
+        world.entities[self.id].vars = Some(self.vars.clone());
+    }
+
 }
 
 //------------------------------------------------------------------------------------------------
@@ -194,34 +230,9 @@ impl Prose {
 }
 
 //------------------------------------------------------------------------------------------------
-// Room View
-
-/// Room view: A view of an entity as a Room
-pub struct Room {
-    pub id: ID,
-    pub tag: String,
-    pub name: String,
-    pub visual: String,
-
-    // Saved
-    pub links: Links,
-    pub inventory: Inventory,
-    pub vars: VarSet,
-}
-
-impl Room {
-    /// Save the room back to the world.  Replaces the links and inventory.
-    pub fn save(&mut self, world: &mut World) {
-        world.entities[self.id].links = Some(self.links.clone());
-        world.entities[self.id].inventory = Some(self.inventory.clone());
-        world.entities[self.id].vars = Some(self.vars.clone());
-    }
-}
-
-//------------------------------------------------------------------------------------------------
 // Thing View
 
-/// Room view: A view of an entity as a Room
+/// Thing view: A view of an entity as a Thing
 pub struct Thing {
     pub id: ID,
     pub tag: String,

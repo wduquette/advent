@@ -1,8 +1,8 @@
 //! The Player Control System
 
 use crate::debug;
-use crate::entity::Player;
-use crate::entity::Room;
+use crate::entity::PlayerView;
+use crate::entity::RoomView;
 use crate::types::Detail::*;
 use crate::types::Dir::*;
 use crate::types::Var::*;
@@ -67,7 +67,7 @@ pub fn system(world: &mut World, command: &str) {
 // User Commands
 
 /// Move the player in the given direction
-fn cmd_go(world: &mut World, player: &mut Player, dir: Dir) -> CmdResult {
+fn cmd_go(world: &mut World, player: &mut PlayerView, dir: Dir) -> CmdResult {
     if let Some(dest) = world.follow(player.loc, dir) {
         let room = &world.get(dest).as_room();
         player.loc = dest;
@@ -98,14 +98,14 @@ You know.  Like that.
 }
 
 /// Re-describe the current location.
-fn cmd_look(world: &World, player: &Player) -> CmdResult {
+fn cmd_look(world: &World, player: &PlayerView) -> CmdResult {
     let room = &world.get(player.loc).as_room();
     describe_location(world, room, Full);
     Ok(())
 }
 
 /// Re-describe the current location.
-fn cmd_inventory(world: &World, player: &Player) -> CmdResult {
+fn cmd_inventory(world: &World, player: &PlayerView) -> CmdResult {
     if player.inventory.is_empty() {
         println!("You aren't carrying anything.\n");
     } else {
@@ -115,7 +115,7 @@ fn cmd_inventory(world: &World, player: &Player) -> CmdResult {
 }
 
 /// Describe a thing in the current location.
-fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
+fn cmd_examine(world: &World, player: &PlayerView, name: &str) -> CmdResult {
     if let Some(id) = find_visible_thing(world, player, name) {
         println!("{}\n", world.get(id).as_visual());
         Ok(())
@@ -125,7 +125,7 @@ fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
 }
 
 /// Describe a thing in the current location.
-fn cmd_examine_self(_world: &World, player: &Player) -> CmdResult {
+fn cmd_examine_self(_world: &World, player: &PlayerView) -> CmdResult {
     let mut msg = String::new();
 
     msg.push_str(&player.visual);
@@ -140,7 +140,7 @@ fn cmd_examine_self(_world: &World, player: &Player) -> CmdResult {
     Ok(())
 }
 
-fn cmd_wash_hands(world: &mut World, player: &mut Player) -> CmdResult {
+fn cmd_wash_hands(world: &mut World, player: &mut PlayerView) -> CmdResult {
     let room = world.get(player.loc).as_room();
 
     if !room.vars.contains(&HasWater) {
@@ -161,7 +161,7 @@ fn cmd_wash_hands(world: &mut World, player: &mut Player) -> CmdResult {
 }
 
 /// Gets a thing from the location's inventory.
-fn cmd_get(world: &mut World, player: &mut Player, name: &str) -> CmdResult {
+fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult {
     let room = &mut world.get(player.loc).as_room();
 
     // Does he already have it?
@@ -191,7 +191,7 @@ fn cmd_get(world: &mut World, player: &mut Player, name: &str) -> CmdResult {
 }
 
 /// Drops a thing you're carrying
-fn cmd_drop(world: &mut World, player: &mut Player, name: &str) -> CmdResult {
+fn cmd_drop(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult {
     let room = &mut world.get(player.loc).as_room();
 
     if let Some(id) = find_in_inventory(world, &player.inventory, name) {
@@ -246,7 +246,7 @@ fn cmd_list(world: &World) -> CmdResult {
 // These functions are used to implement the above commands.
 
 /// Describe the location.
-pub fn describe_location(world: &World, room: &Room, detail: Detail) {
+pub fn describe_location(world: &World, room: &RoomView, detail: Detail) {
     // FIRST, display the room's description
     if detail == Full {
         println!("{}\n{}\n", room.name, room.visual);
@@ -295,7 +295,7 @@ fn find_in_inventory(world: &World, inventory: &Inventory, name: &str) -> Option
 }
 
 /// Find a visible thing: something you're carrying, or that's here in this location.
-fn find_visible_thing(world: &World, player: &Player, name: &str) -> Option<ID> {
+fn find_visible_thing(world: &World, player: &PlayerView, name: &str) -> Option<ID> {
     // FIRST, does the player have it?
     if let Some(id) = find_in_inventory(world, &player.inventory, name) {
         return Some(id);

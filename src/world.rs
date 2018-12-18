@@ -87,7 +87,7 @@ impl World {
     // Helpers
 
     /// Gets a view of the player entity
-    pub fn player(&self) -> Player {
+    pub fn player(&self) -> PlayerView {
         self.entities[self.pid].as_player()
     }
 
