@@ -123,6 +123,35 @@ impl World {
             .unwrap_or_else(|| panic!("No entity found: {}", tag))
     }
 
+    /// Returns the location of the thing with the given ID
+    pub fn loc(&self, id: ID) -> ID {
+        assert!(
+            self.entities[id].loc.is_some(),
+            "Entity has no location: {}",
+            id
+        );
+        self.entities[id].loc.unwrap()
+    }
+
+    /// Puts the thing in the container's inventory, and sets the thing's location.
+    /// No op if the thing is already in the location.
+    pub fn put_in(&mut self, thing: ID, container: ID) {
+        if let Some(inv) = &mut self.entities[container].inventory {
+            inv.insert(thing);
+        }
+        self.entities[thing].loc = Some(container);
+    }
+
+    /// Removes the thing from its container's inventory, and puts it in LIMBO.
+    pub fn take_out(&mut self, thing: ID) {
+        if let Some(container) = self.get(thing).loc {
+            if let Some(inv) = &mut self.entities[container].inventory {
+                inv.remove(&thing);
+            }
+        }
+        self.entities[thing].loc = Some(LIMBO);
+    }
+
     /// Returns the name of the entity with the given ID.
     pub fn name(&self, id: ID) -> &str {
         // TODO: retrieve the entity's name once we have one.

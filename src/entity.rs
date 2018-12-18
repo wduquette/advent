@@ -284,6 +284,7 @@ impl RuleView {
 // Inventory View
 
 /// Inventory view: a view of an entity as an inventory
+#[allow(dead_code)]
 pub struct InventoryView {
     pub id: ID,
     pub tag: String,
@@ -294,6 +295,7 @@ pub struct InventoryView {
 
 impl InventoryView {
     /// Creates a InventoryView for the Entity.  For use by Entity::as_inventory().
+    #[allow(dead_code)]
     fn from(this: &Entity) -> InventoryView {
         InventoryView {
             id: this.id,
@@ -303,6 +305,7 @@ impl InventoryView {
     }
 
     /// Save the prose back to the world.  Replaces the main text.
+    #[allow(dead_code)]
     pub fn save(&mut self, world: &mut World) {
         world.entities[self.id].inventory = Some(self.inventory.clone());
     }
@@ -316,22 +319,29 @@ pub struct ProseView {
     pub tag: String,
 
     // Saved
-    pub prose: ProseComponent,
+    pub main: String,
+    pub pages: HashMap<String, String>,
 }
 
 impl ProseView {
     /// Creates a ProseView for the Entity.  For use by Entity::as_prose().
     fn from(this: &Entity) -> ProseView {
+        let prose = this.prose.as_ref().unwrap();
         ProseView {
             id: this.id,
             tag: this.tag.clone(),
-            prose: this.prose.as_ref().unwrap().clone(),
+            main: prose.main.clone(),
+            pages: prose.pages.clone(),
         }
     }
 
     /// Save the prose back to the world.  Replaces the main text.
+    #[allow(dead_code)]
     pub fn save(&mut self, world: &mut World) {
-        world.entities[self.id].prose = Some(self.prose.clone());
+        world.entities[self.id].prose = Some(ProseComponent {
+            main: self.main.clone(),
+            pages: self.pages.clone(),
+        });
     }
 }
 
@@ -422,7 +432,7 @@ impl<'a> EntityBuilder<'a> {
     /// Adds a variable to the entity, creating the var set if needed.
     pub fn prose(mut self, main: &str) -> EntityBuilder<'a> {
         self.prose = Some(ProseComponent {
-            main: main.into(),
+            main: main.trim().into(),
             pages: HashMap::new(),
         });
         self

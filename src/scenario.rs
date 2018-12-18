@@ -75,13 +75,13 @@ step!
         )
         .vars()
         .build();
-    put_in(world, clean_note, clearing);
+    world.put_in(clean_note, clearing);
 
     let dirty_note = world
         .make("note-dirty")
         .name("note")
         .visual("A note, on plain paper.  It looks pretty grubby.")
-        .prose("It's too dirty to read.")
+        .prose("You've gotten it too dirty to read.")
         .vars()
         .limbo()
         .build();
@@ -154,7 +154,7 @@ fn make_room(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
 fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -> ID {
     let id = world.make(tag).name(name).visual(text).var(Scenery).build();
 
-    put_in(world, id, loc);
+    world.put_in(id, loc);
 
     id
 }
@@ -172,15 +172,4 @@ fn oneway(world: &mut World, dir: Dir, from: ID, to: ID) {
 fn connect(world: &mut World, from_dir: Dir, from: ID, to_dir: Dir, to: ID) {
     oneway(world, from_dir, from, to);
     oneway(world, to_dir, to, from);
-}
-
-/// Puts the thing in the container's inventory, and sets the thing's location.
-/// No op if the thing is already in the location.
-pub fn put_in(world: &mut World, thing: ID, container: ID) {
-    if let Some(inv) = &mut world.entities[container].inventory {
-        if !inv.contains(&thing) {
-            inv.insert(thing);
-            world.entities[thing].loc = Some(container);
-        }
-    }
 }

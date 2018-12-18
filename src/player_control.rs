@@ -40,6 +40,7 @@ pub fn system(world: &mut World, command: &str) {
         ["examine", "self"] => cmd_examine_self(world, player),
         ["examine", "me"] => cmd_examine_self(world, player),
         ["examine", name] => cmd_examine(world, player, name),
+        ["read", name] => cmd_read(world, player, name),
         ["get", name] => cmd_get(world, player, name),
         ["drop", name] => cmd_drop(world, player, name),
         ["wash", "hands"] => cmd_wash_hands(world, player),
@@ -120,6 +121,30 @@ fn cmd_examine(world: &World, player: &PlayerView, name: &str) -> CmdResult {
         println!("{}\n", world.get(id).as_visual());
         Ok(())
     } else {
+        Err("You don't see any such thing.".into())
+    }
+}
+
+/// Read a thing in the current location.
+fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
+    if let Some(id) = find_visible_thing(world, player, name) {
+        let thing = world.get(id).as_thing();
+
+        // If it has no prose, it can't be read
+        if !world.get(id).is_prose() {
+            return Err("You can't read that.".into());
+        }
+
+        // If he's holding it, or it's scenery, then he can read it.
+        if thing.loc == player.id || thing.vars.contains(&Scenery) {
+            let prose = world.get(id).as_prose();
+            println!("{}\n", prose.main);
+            Ok(())
+        } else {
+            Err("You don't have it.".into())
+        }
+    } else {
+        // It isn't here.
         Err("You don't see any such thing.".into())
     }
 }
