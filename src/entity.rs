@@ -69,6 +69,39 @@ impl Entity {
         RoomView::from(self)
     }
 
+    /// Can this entity function as a thing?  I.e., as a noun?
+    pub fn is_thing(&self) -> bool {
+        self.name.is_some() && self.visual.is_some() && self.vars.is_some()
+    }
+
+    /// Retrieve a view of the entity as a Thing
+    pub fn as_thing(&self) -> ThingView {
+        assert!(self.is_thing(), "Not a thing: [{}] {}", self.id, self.tag);
+        ThingView::from(self)
+    }
+
+    /// Is this entity a rule?
+    pub fn is_rule(&self) -> bool {
+        self.rule.is_some() && self.visual.is_some()
+    }
+
+    /// Retrieve a view of the entity as a Rule
+    pub fn as_rule(&self) -> RuleView {
+        assert!(self.is_rule(), "Not a rule: [{}] {}", self.id, self.tag);
+        RuleView::from(self)
+    }
+
+    /// Does this entity have a visual component?
+    pub fn is_visual(&self) -> bool {
+        self.visual.is_some()
+    }
+
+    /// Return the entity's visual.
+    pub fn as_visual(&self) -> String {
+        assert!(self.is_visual(), "Not visual: [{}] {}", self.id, self.tag);
+        self.visual.as_ref().unwrap().clone()
+    }
+
     /// Does this entity have prose?
     pub fn is_prose(&self) -> bool {
         self.prose.is_some()
@@ -83,54 +116,7 @@ impl Entity {
             prose: self.prose.as_ref().unwrap().clone(),
         }
     }
-    /// Can this entity function as a thing?  I.e., as a noun?
-    pub fn is_thing(&self) -> bool {
-        self.name.is_some() && self.visual.is_some() && self.vars.is_some()
-    }
 
-    /// Retrieve a view of the entity as a Thing
-    pub fn as_thing(&self) -> Thing {
-        assert!(self.is_thing(), "Not a thing: [{}] {}", self.id, self.tag);
-        Thing {
-            id: self.id,
-            tag: self.tag.clone(),
-            name: self.name.as_ref().unwrap().clone(),
-            visual: self.visual.as_ref().unwrap().clone(),
-            loc: self.loc.unwrap(),
-            vars: self.vars.as_ref().unwrap().clone(),
-        }
-    }
-
-    /// Is this entity a rule?
-    pub fn is_rule(&self) -> bool {
-        self.rule.is_some() && self.visual.is_some()
-    }
-
-    /// Retrieve a view of the entity as a Rule
-    pub fn as_rule(&self) -> Rule {
-        assert!(self.is_rule(), "Not a rule: [{}] {}", self.id, self.tag);
-        let rule = self.rule.as_ref().unwrap().clone();
-        Rule {
-            id: self.id,
-            tag: self.tag.clone(),
-            predicate: rule.predicate,
-            actions: rule.actions,
-            once_only: rule.once_only,
-            visual: self.visual.as_ref().unwrap().clone(),
-            fired: rule.fired,
-        }
-    }
-
-    /// Does this entity have a visual component?
-    pub fn is_visual(&self) -> bool {
-        self.visual.is_some()
-    }
-
-    /// Return the entity's visual.
-    pub fn as_visual(&self) -> String {
-        assert!(self.is_visual(), "Not visual: [{}] {}", self.id, self.tag);
-        self.visual.as_ref().unwrap().clone()
-    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -211,6 +197,80 @@ impl RoomView {
 }
 
 //------------------------------------------------------------------------------------------------
+// Thing View
+
+/// Thing view: A view of an entity as a Thing
+pub struct ThingView {
+    pub id: ID,
+    pub tag: String,
+    pub name: String,
+    pub visual: String,
+
+    // Saved
+    pub loc: ID,
+    pub vars: VarSet,
+}
+
+impl ThingView {
+    /// Creates a ThingView for the Entity.  For use by Entity::as_thing().
+    fn from(this: &Entity) -> ThingView {
+        ThingView {
+            id: this.id,
+            tag: this.tag.clone(),
+            name: this.name.as_ref().unwrap().clone(),
+            visual: this.visual.as_ref().unwrap().clone(),
+            loc: this.loc.unwrap(),
+            vars: this.vars.as_ref().unwrap().clone(),
+        }
+    }
+
+    /// Save the room back to the world.  Replaces the location
+    pub fn save(&mut self, world: &mut World) {
+        world.entities[self.id].loc = Some(self.loc);
+        world.entities[self.id].vars = Some(self.vars.clone());
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+// Rule View
+
+/// Rule view: A view of an entity as a Rule
+pub struct RuleView {
+    pub id: ID,
+    pub tag: String,
+    pub predicate: RulePred,
+    pub actions: Vec<Action>,
+    pub once_only: bool,
+    pub visual: String,
+
+    // Saved
+    pub fired: bool,
+}
+
+impl RuleView {
+    /// Creates a RuleView for the Entity.  For use by Entity::as_rule().
+    fn from(this: &Entity) -> RuleView {
+        let rule = this.rule.as_ref().unwrap().clone();
+        RuleView {
+            id: this.id,
+            tag: this.tag.clone(),
+            predicate: rule.predicate,
+            actions: rule.actions,
+            once_only: rule.once_only,
+            visual: this.visual.as_ref().unwrap().clone(),
+            fired: rule.fired,
+        }
+    }
+
+    /// Save the rule back to the world
+    pub fn save(&self, world: &mut World) {
+        let mut ent = world.entities[self.id].rule.as_mut().unwrap();
+
+        ent.fired = self.fired;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
 // Prose View
 
 /// Prose view: a view of an entity as a collection of prose.
@@ -229,53 +289,6 @@ impl Prose {
     }
 }
 
-//------------------------------------------------------------------------------------------------
-// Thing View
-
-/// Thing view: A view of an entity as a Thing
-pub struct Thing {
-    pub id: ID,
-    pub tag: String,
-    pub name: String,
-    pub visual: String,
-
-    // Saved
-    pub loc: ID,
-    pub vars: VarSet,
-}
-
-impl Thing {
-    /// Save the room back to the world.  Replaces the location
-    pub fn save(&mut self, world: &mut World) {
-        world.entities[self.id].loc = Some(self.loc);
-        world.entities[self.id].vars = Some(self.vars.clone());
-    }
-}
-
-//------------------------------------------------------------------------------------------------
-// Rule View
-
-/// Rule view: A view of an entity as a Rule
-pub struct Rule {
-    pub id: ID,
-    pub tag: String,
-    pub predicate: RulePred,
-    pub actions: Vec<Action>,
-    pub once_only: bool,
-    pub visual: String,
-
-    // Saved
-    pub fired: bool,
-}
-
-impl Rule {
-    /// Save the rule back to the world
-    pub fn save(&self, world: &mut World) {
-        let mut ent = world.entities[self.id].rule.as_mut().unwrap();
-
-        ent.fired = self.fired;
-    }
-}
 
 //------------------------------------------------------------------------------------------------
 // Entity Builder

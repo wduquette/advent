@@ -1,12 +1,12 @@
 //! Rule System
 
-use crate::entity::Rule;
+use crate::entity::RuleView;
 use crate::types::*;
 use crate::world::*;
 
 /// The Rule System.  Processes all rules, executing those that should_fire.
 pub fn system(world: &mut World) {
-    let rules: Vec<Rule> = world
+    let rules: Vec<RuleView> = world
         .entities
         .iter()
         .filter(|e| e.is_rule())
@@ -22,7 +22,7 @@ pub fn system(world: &mut World) {
 }
 
 /// Execute the given rule
-fn fire_rule(world: &mut World, rule: &Rule) {
+fn fire_rule(world: &mut World, rule: &RuleView) {
     for action in &rule.actions {
         match action {
             Action::PrintVisual => {
@@ -34,15 +34,12 @@ fn fire_rule(world: &mut World, rule: &Rule) {
             Action::ClearVar(id, var) => {
                 world.clear_var(*id, var);
             }
-            Action::SetProse(id, str) => {
-                
-            }
         }
     }
 }
 
 // Mark the rule fired (if it's once_only).
-fn mark_fired(world: &mut World, rule: &mut Rule) {
+fn mark_fired(world: &mut World, rule: &mut RuleView) {
     if rule.once_only {
         rule.fired = true;
     }

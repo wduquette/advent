@@ -134,7 +134,4 @@ pub enum Action {
 
     /// Clear the given variable
     ClearVar(ID, Var),
-
-    /// Set a thing's main prose
-    SetProse(ID, String),
 }
