@@ -6,7 +6,7 @@ use crate::types::*;
 use crate::world::*;
 
 // Important Constants
-const NOTE: &str = "note-1";
+const NOTE: &str = "note-clean";
 
 /// Build the initial state of the game world.
 pub fn build() -> World {
@@ -16,7 +16,7 @@ pub fn build() -> World {
 
     // NEXT, make the rooms.
 
-    //Room: Clearing
+    // Room: Clearing
     let clearing = make_room(
         world,
         "clearing-1",
@@ -61,25 +61,36 @@ how narrow it is.
     connect(world, East, trail, West, bridge);
 
     // The note
-    let note = world.make(NOTE)
+    let clean_note = world
+        .make(NOTE)
         .name("note")
         .visual("A note, on plain paper.")
-        .prose("\
+        .prose(
+            "\
 Welcome, dear friend.  Your mission, should you choose to
 accept it, is to figure out how to get to the end of
 the trail.  You've already taken the first big
 step!
-         ")
+         ",
+        )
         .vars()
         .build();
-    put_in(world, note, clearing);
+    put_in(world, clean_note, clearing);
+
+    let dirty_note = world
+        .make("note-dirty")
+        .name("note")
+        .visual("A note, on plain paper.  It looks pretty grubby.")
+        .prose("It's too dirty to read.")
+        .vars()
+        .limbo()
+        .build();
 
     world
         .make("rule-dirty-note")
         .always(
             &|world| player_gets_note_dirty(world),
-            vec![Action::PrintVisual,
-                Action::SetVar(note, Dirty)],
+            vec![Action::PrintVisual, Action::Swap(clean_note, dirty_note)],
         )
         .visual("The dirt from your hands got all over the note.")
         .build();
@@ -108,9 +119,9 @@ fn player_gets_note_dirty(world: &World) -> bool {
     let player = world.player();
     let note = world.lookup(NOTE).as_thing();
 
-    player.inventory.contains(&note.id) &&
-    player.vars.contains(&DirtyHands) &&
-    !note.vars.contains(&Dirty)
+    player.inventory.contains(&note.id)
+        && player.vars.contains(&DirtyHands)
+        && !note.vars.contains(&Dirty)
 }
 
 /// Initializes the player's details
@@ -137,11 +148,6 @@ fn make_room(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
         .inventory()
         .vars()
         .build()
-}
-
-/// Makes a portable object, and returns its ID.
-fn make_thing(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
-    world.make(tag).name(name).visual(text).vars().build()
 }
 
 /// Makes a scenery object, and returns its ID.

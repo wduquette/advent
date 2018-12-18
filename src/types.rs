@@ -47,10 +47,8 @@ pub struct ProseComponent {
     pub main: String,
 
     /// Additional pages that you need to look up given their names.
-    pub pages: HashMap<String,String>,
+    pub pages: HashMap<String, String>,
 }
-
-
 
 //------------------------------------------------------------------------------------------------
 // Variables and Variable Sets
@@ -134,4 +132,7 @@ pub enum Action {
 
     /// Clear the given variable
     ClearVar(ID, Var),
+
+    /// Swap an item in the world for one in LIMBO
+    Swap(ID, ID),
 }

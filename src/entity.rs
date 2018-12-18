@@ -2,6 +2,7 @@
 
 use crate::types::*;
 use crate::world::World;
+use crate::world::LIMBO;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -91,17 +92,6 @@ impl Entity {
         RuleView::from(self)
     }
 
-    /// Does this entity have a visual component?
-    pub fn is_visual(&self) -> bool {
-        self.visual.is_some()
-    }
-
-    /// Return the entity's visual.
-    pub fn as_visual(&self) -> String {
-        assert!(self.is_visual(), "Not visual: [{}] {}", self.id, self.tag);
-        self.visual.as_ref().unwrap().clone()
-    }
-
     /// Does this entity have prose?
     pub fn is_prose(&self) -> bool {
         self.prose.is_some()
@@ -111,6 +101,32 @@ impl Entity {
     pub fn as_prose(&self) -> ProseView {
         assert!(self.is_prose(), "Not prose: [{}] {}", self.id, self.tag);
         ProseView::from(self)
+    }
+
+    /// Does this entity have an inventory?
+    pub fn is_inventory(&self) -> bool {
+        self.inventory.is_some()
+    }
+
+    /// Retrieve a view of the entity as an Inventory
+    pub fn as_inventory(&self) -> InventoryView {
+        assert!(
+            self.is_inventory(),
+            "Not inventory: [{}] {}",
+            self.id,
+            self.tag
+        );
+        InventoryView::from(self)
+    }
+    /// Does this entity have a visual component?
+    pub fn is_visual(&self) -> bool {
+        self.visual.is_some()
+    }
+
+    /// Return the entity's visual.
+    pub fn as_visual(&self) -> String {
+        assert!(self.is_visual(), "Not visual: [{}] {}", self.id, self.tag);
+        self.visual.as_ref().unwrap().clone()
     }
 }
 
@@ -188,7 +204,6 @@ impl RoomView {
         world.entities[self.id].inventory = Some(self.inventory.clone());
         world.entities[self.id].vars = Some(self.vars.clone());
     }
-
 }
 
 //------------------------------------------------------------------------------------------------
@@ -266,6 +281,33 @@ impl RuleView {
 }
 
 //------------------------------------------------------------------------------------------------
+// Inventory View
+
+/// Inventory view: a view of an entity as an inventory
+pub struct InventoryView {
+    pub id: ID,
+    pub tag: String,
+
+    // Saved
+    pub inventory: Inventory,
+}
+
+impl InventoryView {
+    /// Creates a InventoryView for the Entity.  For use by Entity::as_inventory().
+    fn from(this: &Entity) -> InventoryView {
+        InventoryView {
+            id: this.id,
+            tag: this.tag.clone(),
+            inventory: this.inventory.as_ref().unwrap().clone(),
+        }
+    }
+
+    /// Save the prose back to the world.  Replaces the main text.
+    pub fn save(&mut self, world: &mut World) {
+        world.entities[self.id].inventory = Some(self.inventory.clone());
+    }
+}
+//------------------------------------------------------------------------------------------------
 // Prose View
 
 /// Prose view: a view of an entity as a collection of prose.
@@ -292,7 +334,6 @@ impl ProseView {
         world.entities[self.id].prose = Some(self.prose.clone());
     }
 }
-
 
 //------------------------------------------------------------------------------------------------
 // Entity Builder
@@ -346,6 +387,11 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
+    pub fn limbo(mut self) -> EntityBuilder<'a> {
+        self.loc = Some(LIMBO);
+        self
+    }
+
     pub fn links(mut self) -> EntityBuilder<'a> {
         self.links = Some(HashMap::new());
         self
@@ -385,8 +431,16 @@ impl<'a> EntityBuilder<'a> {
     /// Adds a page to an existing prose component; the page can be looked up by its
     /// index.
     pub fn page(mut self, index: &str, text: &str) -> EntityBuilder<'a> {
-        assert!(self.prose.is_some(), "Can't add page, no prose component: {}", self.tag);
-        self.prose.as_mut().unwrap().pages.insert(index.into(), text.into());
+        assert!(
+            self.prose.is_some(),
+            "Can't add page, no prose component: {}",
+            self.tag
+        );
+        self.prose
+            .as_mut()
+            .unwrap()
+            .pages
+            .insert(index.into(), text.into());
         self
     }
 

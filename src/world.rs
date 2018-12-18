@@ -3,6 +3,8 @@ use crate::entity::*;
 use crate::types::*;
 use std::collections::HashMap;
 
+pub const LIMBO: ID = 0;
+
 /// The game state.  Uses a variant of the Entity-Component-System architecture.
 /// This struct provides many methods for querying and mutating entities.  These methods
 /// constitute a low-level interface for interacting with the world; e.g., `set_location()`
@@ -28,12 +30,16 @@ impl World {
 
     /// Creates a new instance of the World
     pub fn new() -> World {
-        World {
+        let mut world = World {
             entities: Vec::new(),
             tag_map: HashMap::new(),
             clock: 0,
             pid: 0,
-        }
+        };
+
+        world.make("LIMBO").name("LIMBO").build(); // ID=0
+
+        world
     }
 
     /// Add an entity and return its ID, saving it in the tag map.
@@ -57,7 +63,11 @@ impl World {
 
     /// Set the variable on the entity
     pub fn set_var(&mut self, id: ID, var: Var) {
-        assert!(self.entities[id].vars.is_some(), "Entity has no vars: {}", id);
+        assert!(
+            self.entities[id].vars.is_some(),
+            "Entity has no vars: {}",
+            id
+        );
 
         // Consider adding as_var_set() to Entity
         if let Some(vars) = &mut self.entities[id].vars {
