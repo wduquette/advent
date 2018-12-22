@@ -74,13 +74,12 @@ pub fn system(world: &mut World, command: &str) {
 /// Move the player in the given direction
 fn cmd_go(world: &mut World, player: &mut PlayerView, dir: Dir) -> CmdResult {
     if let Some(dest) = world.follow(player.loc, dir) {
-        let room = &world.get(dest).as_room();
         player.loc = dest;
 
         if !player.vars.contains(&Seen(dest)) {
-            describe_room(world, room, Full);
+            describe_room(world, dest, Full);
         } else {
-            describe_room(world, room, Brief);
+            describe_room(world, dest, Brief);
         }
 
         player.vars.insert(Seen(dest));
@@ -104,8 +103,7 @@ You know.  Like that.
 
 /// Re-describe the current location.
 fn cmd_look(world: &World, player: &PlayerView) -> CmdResult {
-    let room = &world.get(player.loc).as_room();
-    describe_room(world, room, Full);
+    describe_room(world, player.loc, Full);
     Ok(())
 }
 
@@ -122,8 +120,7 @@ fn cmd_inventory(world: &World, player: &PlayerView) -> CmdResult {
 /// Describe a thing in the current location.
 fn cmd_examine(world: &World, player: &PlayerView, name: &str) -> CmdResult {
     if let Some(id) = find_visible_thing(world, player, name) {
-        let thing = &world.get(id).as_thing();
-        describe_thing(world, thing);
+        describe_thing(world, id);
         Ok(())
     } else {
         Err("You don't see any such thing.".into())
@@ -170,6 +167,8 @@ fn cmd_examine_self(_world: &World, player: &PlayerView) -> CmdResult {
     Ok(())
 }
 
+// TODO: As currently implemented, this should be a scenario command, not a
+// built-in command.
 fn cmd_wash_hands(world: &mut World, player: &mut PlayerView) -> CmdResult {
     let room = world.get(player.loc).as_room();
 
@@ -293,8 +292,7 @@ fn cmd_debug_dump(world: &World, id_arg: &str) -> CmdResult {
 fn cmd_debug_look(world: &World, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
     if world.get(id).is_room() {
-        let room = world.get(id).as_room();
-        describe_room(world, &room, Full);
+        describe_room(world, id, Full);
         Ok(())
     } else {
         Err(format!("Entity {} is not a room.", id))
@@ -305,8 +303,7 @@ fn cmd_debug_look(world: &World, id_arg: &str) -> CmdResult {
 fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
     if world.get(id).is_thing() {
-        let thing = world.get(id).as_thing();
-        describe_thing(world, &thing);
+        describe_thing(world, id);
         Ok(())
     } else {
         Err(format!("Entity {} is not a thing.", id))
@@ -317,16 +314,13 @@ fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
 fn cmd_debug_go(world: &World, player: &mut PlayerView, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
     if world.get(id).is_room() {
-        let room = world.get(id).as_room();
-        player.loc = room.id;
-        describe_room(world, &room, Full);
+        player.loc = id;
+        describe_room(world, id, Full);
         Ok(())
     } else {
         Err(format!("Entity {} is not a room.", id))
     }
 }
-
-
 
 //-------------------------------------------------------------------------
 // Actions
@@ -334,7 +328,9 @@ fn cmd_debug_go(world: &World, player: &mut PlayerView, id_arg: &str) -> CmdResu
 // These functions are used to implement the above commands.
 
 /// Describe the room.
-pub fn describe_room(world: &World, room: &RoomView, detail: Detail) {
+pub fn describe_room(world: &World, id: ID, detail: Detail) {
+    let room = world.get(id).as_room();
+
     // FIRST, display the room's description
     if detail == Full {
         println!("{}\n{}\n", room.name, room.visual);
@@ -352,8 +348,10 @@ pub fn describe_room(world: &World, room: &RoomView, detail: Detail) {
 }
 
 /// Describe the location.
-pub fn describe_thing(_world: &World, thing: &ThingView) {
-    // FIRST, display the room's description
+pub fn describe_thing(world: &World, id: ID) {
+    let thing = world.get(id).as_thing();
+
+    // FIRST, display the thing's description
     println!("{}\n", thing.visual);
 
     // TODO: eventually we will want to describe its contents, if it has
