@@ -5,24 +5,25 @@ using the ECS architecture.
 
 ## To Do
 
-* Instead of changing the note's prose, have two note objects.  Swap
-  the dirty one for the clean one.
+Also, see docs/journal.txt.
+
+* Debug commands
+  * Prefix with "!".
+  * Add `!describe <entity>` and `!look <entity>` and `!go <entity>`
+* Implement visual system, with text wrapping/formatting details.
+  * Requires Thing and Room components.
+  * Include syntax for entering prose as part of the scenario, indicating
+    explicit line breaks, "as is" segments, and so on.
+  * Include inline descriptions of scenery and portable things.
+* Implement inventory system, for acquiring things in the local environment.
+* Define VarSet struct, with set, has, unset, replace methods.
 * Consider replacing the entities vector with a set of component hash
   tables.
-* Add Prose to debug::dump_entity().
-* Add routine to wrap a block of prose.
-* Consider adding VarSet struct, with set, has, clear methods.
-* Consider replacing Player's Seen(ID) with Room's Seen
-  * Current approach might be better for multiplayer, but I'm not doing
-    multiplayer.
-* Consider providing a Inventory view, when that's all we care about.
-* Consider giving Room a scenery Inventory
+  * Only if it would simplify the code.
 * Add dictionary: preferred words with synonyms.
 * Convert input from user's words to preferred words before pattern
   matching.
 * Add puzzle to make water flow
-* Get note dirty and illegible.
-* Review current code.
 * Extend the world.
 * Add some puzzles.
 * Add more story.

@@ -1,0 +1,77 @@
+Bonaventure Journal
+
+2018-12-22 (Saturday)
+
+x   Room/Thing Hybrids
+    x   Observations
+        x   A vehicle is a thing:
+        x It can be described as part of the content of a room.
+        x It can be moved from room to room (by driving it).
+    x   A vehicle is a room:
+        x   The player can be inside it.
+        x   It can be described as a location.
+        x   It will have its own inventory.
+    x   I can implement this a couple of ways
+        x   Option A: As a single entity which has the components for a
+            Thing and for a Room (and possibly for a Vehicle as well)
+        x   Option B: As two entities with a special link between them.
+    x   Option A seems simpler.
+        x   But then, Rooms and Things need different prose, because
+            a Vehicle would need both.
+        x   Implies a ThingComponent and a RoomComponent.
+            x   Neither would include the Inventory, as
+                players, things, rooms, and NPCs can all have inventories.
+x   Visual System
+    x   In standard ECS, the systems are independent, and the main loop
+        fires each in turn.
+    x   This is useful; but that's mostly because everything's happening
+        at once, e.g., the Visual System needs to render the results of
+        the Physical system, etc.
+    x   In Bonaventure, the basic time unit is the player turn, and
+        visuals are triggered by the player's actions, e.g., you don't
+        re-render the room if the player hasn't changed rooms, unless
+        the player specifically looks at it.
+    x   But that doesn't mean that we can't have a visual system that's
+        responsible for displaying information about things, rooms,
+        vehicles, etc, from the player's point of view.
+    x   Instead of the single "system()" method, it would have a variety
+        of methods for different kinds of description, and would be
+        responsible for "rendering" a description as formatted text.
+x   Scenery vs. Other Things
+    x   At present, both scenery and movable things are in the room's
+        inventory.
+        x   In some ways would be more convenient to have two inventory
+            lists one for scenery and one for non-scenery.
+        x   But what if we then need three kinds of thing: do we add
+            a third list?
+    x   I think just like we need a visual system, we need an inventory
+        system, for interacting with the things available to the player
+        in his current environment.  It would provide methods for
+        finding things by name, getting their details, finding lists of
+        different kinds of things, and so forth.
+x   Architectural Issues
+    x   The World struct should provide methods for low-level manipulation
+        and simple queries
+        x   These form the basic mechanism layer, and will be used by
+            the user's actions.  They are useful for updating multiple
+            entities at once, when creating multiple views would be
+            onerous.
+        x   E.g.,
+            x   Remove a thing from a location
+            x   Put a thing in a location, and update the location's
+                inventory
+            x   Get a thing's location
+            x   Get a view of an entity
+            x   Get a view of the player
+            x   Link two rooms in a direction.
+            x   Bidirectional link two rooms in two directions
+            x   Delete the link(s) between two rooms
+    x   The code should be divided in two layers: the scenario and the
+        engine.
+        x   Ideally, any logic written in Rust should be in the engine.
+        x   The scenario should be stuff that in principle could be loaded
+            from a data file.
+        x   That means that any predicates or actions defined by the
+            scenario need to be definable as "byte code", not as closures.
+        x   Also, the scenario can't add to the set of Vars; which means
+            we need some generic Vars for scenario use.

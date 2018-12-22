@@ -3,7 +3,6 @@
 use crate::types::*;
 use crate::world::*;
 
-#[allow(dead_code)]
 /// List all entities in the world
 pub fn list_world(world: &World) {
     for id in 0..world.entities.len() {
@@ -11,7 +10,6 @@ pub fn list_world(world: &World) {
     }
 }
 
-#[allow(dead_code)]
 /// List just the given entity
 fn list_entity(world: &World, id: ID) {
     if world.entities[id].name.is_some() {
@@ -21,16 +19,7 @@ fn list_entity(world: &World, id: ID) {
     }
 }
 
-#[allow(dead_code)]
-/// Dump all entities in the world
-pub fn dump_world(world: &World) {
-    for id in 0..world.entities.len() {
-        dump_entity(world, id);
-    }
-}
-
 /// Dump info about the entity with the given ID
-#[allow(dead_code)]
 pub fn dump_entity(world: &World, id: ID) {
     list_entity(world, id);
 

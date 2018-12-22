@@ -111,16 +111,18 @@ impl World {
     /// Looks up an entity in the tag map.
     /// Panics if the entity is unknown.
     pub fn lookup(&self, tag: &str) -> &Entity {
-        self.get(self.lookup_id(tag))
+        let id = self.lookup_id(tag)
+            .unwrap_or_else(|| panic!("No entity found: {}", tag));
+        self.get(id)
     }
 
     /// Looks up an entity's ID in the tag map.
-    /// Panics if the entity is unknown.
-    pub fn lookup_id(&self, tag: &str) -> ID {
-        *self
-            .tag_map
-            .get(tag)
-            .unwrap_or_else(|| panic!("No entity found: {}", tag))
+    pub fn lookup_id(&self, tag: &str) -> Option<ID> {
+        if let Some(id) = self.tag_map.get(tag) {
+            Some(*id)
+        } else {
+            None
+        }
     }
 
     /// Returns the location of the thing with the given ID

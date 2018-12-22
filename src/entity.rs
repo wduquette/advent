@@ -72,7 +72,10 @@ impl Entity {
 
     /// Can this entity function as a thing?  I.e., as a noun?
     pub fn is_thing(&self) -> bool {
-        self.name.is_some() && self.visual.is_some() && self.vars.is_some()
+        self.name.is_some() &&
+        self.visual.is_some() &&
+        self.loc.is_some() &&
+        self.vars.is_some()
     }
 
     /// Retrieve a view of the entity as a Thing
@@ -101,32 +104,6 @@ impl Entity {
     pub fn as_prose(&self) -> ProseView {
         assert!(self.is_prose(), "Not prose: [{}] {}", self.id, self.tag);
         ProseView::from(self)
-    }
-
-    /// Does this entity have an inventory?
-    pub fn is_inventory(&self) -> bool {
-        self.inventory.is_some()
-    }
-
-    /// Retrieve a view of the entity as an Inventory
-    pub fn as_inventory(&self) -> InventoryView {
-        assert!(
-            self.is_inventory(),
-            "Not inventory: [{}] {}",
-            self.id,
-            self.tag
-        );
-        InventoryView::from(self)
-    }
-    /// Does this entity have a visual component?
-    pub fn is_visual(&self) -> bool {
-        self.visual.is_some()
-    }
-
-    /// Return the entity's visual.
-    pub fn as_visual(&self) -> String {
-        assert!(self.is_visual(), "Not visual: [{}] {}", self.id, self.tag);
-        self.visual.as_ref().unwrap().clone()
     }
 }
 
@@ -280,36 +257,6 @@ impl RuleView {
     }
 }
 
-//------------------------------------------------------------------------------------------------
-// Inventory View
-
-/// Inventory view: a view of an entity as an inventory
-#[allow(dead_code)]
-pub struct InventoryView {
-    pub id: ID,
-    pub tag: String,
-
-    // Saved
-    pub inventory: Inventory,
-}
-
-impl InventoryView {
-    /// Creates a InventoryView for the Entity.  For use by Entity::as_inventory().
-    #[allow(dead_code)]
-    fn from(this: &Entity) -> InventoryView {
-        InventoryView {
-            id: this.id,
-            tag: this.tag.clone(),
-            inventory: this.inventory.as_ref().unwrap().clone(),
-        }
-    }
-
-    /// Save the prose back to the world.  Replaces the main text.
-    #[allow(dead_code)]
-    pub fn save(&mut self, world: &mut World) {
-        world.entities[self.id].inventory = Some(self.inventory.clone());
-    }
-}
 //------------------------------------------------------------------------------------------------
 // Prose View
 

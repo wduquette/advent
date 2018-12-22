@@ -1,5 +1,6 @@
 //! The Player Control System
 
+use crate::entity::ThingView;
 use crate::debug;
 use crate::entity::PlayerView;
 use crate::entity::RoomView;
@@ -49,9 +50,12 @@ pub fn system(world: &mut World, command: &str) {
         ["quit"] => cmd_quit(world),
 
         // Debugging
-        ["dump", id_arg] => cmd_dump(world, id_arg),
-        ["dump"] => cmd_dump_world(world),
-        ["list"] => cmd_list(world),
+        ["!list"] => cmd_debug_list(world),
+        ["!dump", id_arg] => cmd_debug_dump(world, id_arg),
+        ["!look", id_arg] => cmd_debug_look(world, id_arg),
+        ["!examine", id_arg] => cmd_debug_examine(world, id_arg),
+        ["!x", id_arg] => cmd_debug_examine(world, id_arg),
+        ["!go", id_arg] => cmd_debug_go(world, player, id_arg),
 
         // Error
         _ => Err("I don't understand.".into()),
@@ -74,9 +78,9 @@ fn cmd_go(world: &mut World, player: &mut PlayerView, dir: Dir) -> CmdResult {
         player.loc = dest;
 
         if !player.vars.contains(&Seen(dest)) {
-            describe_location(world, room, Full);
+            describe_room(world, room, Full);
         } else {
-            describe_location(world, room, Brief);
+            describe_room(world, room, Brief);
         }
 
         player.vars.insert(Seen(dest));
@@ -101,7 +105,7 @@ You know.  Like that.
 /// Re-describe the current location.
 fn cmd_look(world: &World, player: &PlayerView) -> CmdResult {
     let room = &world.get(player.loc).as_room();
-    describe_location(world, room, Full);
+    describe_room(world, room, Full);
     Ok(())
 }
 
@@ -118,7 +122,8 @@ fn cmd_inventory(world: &World, player: &PlayerView) -> CmdResult {
 /// Describe a thing in the current location.
 fn cmd_examine(world: &World, player: &PlayerView, name: &str) -> CmdResult {
     if let Some(id) = find_visible_thing(world, player, name) {
-        println!("{}\n", world.get(id).as_visual());
+        let thing = &world.get(id).as_thing();
+        describe_thing(world, thing);
         Ok(())
     } else {
         Err("You don't see any such thing.".into())
@@ -244,34 +249,92 @@ fn cmd_quit(_world: &World) -> CmdResult {
     ::std::process::exit(0);
 }
 
+//------------------------------------------------------------------------------
 // Debugging commands
 
+/// Parse a token as an entity tag or ID, return an ID on success and
+/// an error result on failure.
+fn parse_id(world: &World, token: &str) -> Result<ID, String> {
+    // FIRST, is the token a tag?
+    if let Some(id) = world.lookup_id(token) {
+        return Ok(id);
+    }
+
+    // NEXT, is it an explicit ID?
+    let id = match token.parse() {
+        Ok(id) => id,
+        Err(_) => {
+            return Err(format!("Not an ID: {}", token));
+        }
+    };
+
+    if id >= world.entities.len() {
+        return Err(format!("Out of range: {}", token));
+    }
+
+    Ok(id)
+}
+
+
+/// List all of the available entities.
+fn cmd_debug_list(world: &World) -> CmdResult {
+    debug::list_world(world);
+    Ok(())
+}
+
 /// Dump information about the given entity, provided the ID string is valid.
-fn cmd_dump(world: &World, id_arg: &str) -> CmdResult {
+fn cmd_debug_dump(world: &World, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
     debug::dump_entity(world, id);
     Ok(())
 }
 
-/// Dump information about all entities.
-fn cmd_dump_world(world: &World) -> CmdResult {
-    debug::dump_world(world);
-    Ok(())
+/// Describe the room as though the player were in it.
+fn cmd_debug_look(world: &World, id_arg: &str) -> CmdResult {
+    let id = parse_id(world, id_arg)?;
+    if world.get(id).is_room() {
+        let room = world.get(id).as_room();
+        describe_room(world, &room, Full);
+        Ok(())
+    } else {
+        Err(format!("Entity {} is not a room.", id))
+    }
 }
 
-/// List all of the available entities.
-fn cmd_list(world: &World) -> CmdResult {
-    debug::list_world(world);
-    Ok(())
+/// Examine the thing fully, as though the player could see it.
+fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
+    let id = parse_id(world, id_arg)?;
+    if world.get(id).is_thing() {
+        let thing = world.get(id).as_thing();
+        describe_thing(world, &thing);
+        Ok(())
+    } else {
+        Err(format!("Entity {} is not a thing.", id))
+    }
 }
+
+/// Take the player to the location.
+fn cmd_debug_go(world: &World, player: &mut PlayerView, id_arg: &str) -> CmdResult {
+    let id = parse_id(world, id_arg)?;
+    if world.get(id).is_room() {
+        let room = world.get(id).as_room();
+        player.loc = room.id;
+        describe_room(world, &room, Full);
+        Ok(())
+    } else {
+        Err(format!("Entity {} is not a room.", id))
+    }
+}
+
+
 
 //-------------------------------------------------------------------------
 // Actions
 //
 // These functions are used to implement the above commands.
 
-/// Describe the location.
-pub fn describe_location(world: &World, room: &RoomView, detail: Detail) {
+/// Describe the room.
+pub fn describe_room(world: &World, room: &RoomView, detail: Detail) {
     // FIRST, display the room's description
     if detail == Full {
         println!("{}\n{}\n", room.name, room.visual);
@@ -288,24 +351,17 @@ pub fn describe_location(world: &World, room: &RoomView, detail: Detail) {
     }
 }
 
+/// Describe the location.
+pub fn describe_thing(_world: &World, thing: &ThingView) {
+    // FIRST, display the room's description
+    println!("{}\n", thing.visual);
+
+    // TODO: eventually we will want to describe its contents, if it has
+    // contents and its open.
+}
+
 //-------------------------------------------------------------------------
 // Parsing Tools
-
-/// Parse a token as an entity ID, return an error result on failure.
-fn parse_id(world: &World, token: &str) -> Result<ID, String> {
-    let id = match token.parse() {
-        Ok(id) => id,
-        Err(_) => {
-            return Err(format!("Not an ID: {}", token));
-        }
-    };
-
-    if id >= world.entities.len() {
-        return Err(format!("Out of range: {}", token));
-    }
-
-    Ok(id)
-}
 
 /// Looks for a thing with the given name in the given inventory list.
 fn find_in_inventory(world: &World, inventory: &Inventory, name: &str) -> Option<ID> {
