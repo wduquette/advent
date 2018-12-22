@@ -1,9 +1,7 @@
 //! The Player Control System
 
-use crate::entity::ThingView;
 use crate::debug;
 use crate::entity::PlayerView;
-use crate::entity::RoomView;
 use crate::types::Detail::*;
 use crate::types::Dir::*;
 use crate::types::Var::*;

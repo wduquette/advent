@@ -15,6 +15,9 @@ pub struct Entity {
     // All entities have a tag.
     pub tag: String,
 
+    // Room details
+    pub room_info: Option<RoomInfo>,
+
     // Many entities have names for display.
     pub name: Option<String>,
 
@@ -23,9 +26,6 @@ pub struct Entity {
 
     // Some entities (e.g., the player) have a location.
     pub loc: Option<ID>,
-
-    // Rooms link to other rooms in a variety of directions
-    pub links: Option<Links>,
 
     // Some entities can own/contain Things.
     pub inventory: Option<Inventory>,
@@ -56,19 +56,10 @@ impl Entity {
         PlayerView::from(self)
     }
     /// Can this entity function as a room?  I.e., a place the player can be?
-    pub fn is_room(&self) -> bool {
-        self.name.is_some()
-            && self.visual.is_some()
-            && self.links.is_some()
-            && self.inventory.is_some()
-            && self.vars.is_some()
-    }
+    pub fn is_room(&self) -> bool { RoomView::is_room(&self) }
 
     /// Retrieve a view of the entity as a Room
-    pub fn as_room(&self) -> RoomView {
-        assert!(self.is_room(), "Not a room: [{}] {}", self.id, self.tag);
-        RoomView::from(self)
-    }
+    pub fn as_room(&self) -> RoomView { RoomView::from(self) }
 
     /// Can this entity function as a thing?  I.e., as a noun?
     pub fn is_thing(&self) -> bool {
@@ -162,14 +153,25 @@ pub struct RoomView {
 }
 
 impl RoomView {
+    /// Determines whether or not an entity is a room.
+    pub fn is_room(this: &Entity) -> bool {
+        this.room_info.is_some() &&
+        this.inventory.is_some() &&
+        this.vars.is_some()
+    }
+
     /// Creates a RoomView for the Entity.  For use by Entity::as_room().
     fn from(this: &Entity) -> RoomView {
+        assert!(RoomView::is_room(this), "Not a room: [{}] {}", this.id, this.tag);
+
+        let room_info = &this.room_info.as_ref().unwrap();
+
         RoomView {
             id: this.id,
             tag: this.tag.clone(),
-            name: this.name.as_ref().unwrap().clone(),
-            visual: this.visual.as_ref().unwrap().clone(),
-            links: this.links.as_ref().unwrap().clone(),
+            name: room_info.name.clone(),
+            visual: room_info.visual.clone(),
+            links: room_info.links.clone(),
             inventory: this.inventory.as_ref().unwrap().clone(),
             vars: this.vars.as_ref().unwrap().clone(),
         }
@@ -177,7 +179,9 @@ impl RoomView {
 
     /// Save the room back to the world.  Replaces the links and inventory.
     pub fn save(&mut self, world: &mut World) {
-        world.entities[self.id].links = Some(self.links.clone());
+        let room_info = &mut world.entities[self.id].room_info.as_mut().unwrap();
+
+        room_info.links = self.links.clone();
         world.entities[self.id].inventory = Some(self.inventory.clone());
         world.entities[self.id].vars = Some(self.vars.clone());
     }
@@ -303,10 +307,10 @@ impl ProseView {
 pub struct EntityBuilder<'a> {
     pub world: &'a mut World,
     pub tag: String,
+    pub room_info: Option<RoomInfo>,
     pub name: Option<String>,
     pub visual: Option<String>,
     pub loc: Option<ID>,
-    pub links: Option<Links>,
     pub inventory: Option<Inventory>,
     pub vars: Option<VarSet>,
     pub prose: Option<ProseComponent>,
@@ -318,15 +322,31 @@ impl<'a> EntityBuilder<'a> {
         EntityBuilder {
             world: world,
             tag: tag.to_string(),
+            room_info: None,
             name: None,
             visual: None,
             loc: None,
-            links: None,
             inventory: None,
             vars: None,
             prose: None,
             rule: None,
         }
+    }
+
+    /// Adds the essential trimmings for a room.
+    pub fn room(mut self, name: &str, visual: &str) -> EntityBuilder<'a> {
+        assert!(self.room_info.is_none(), "Tried to build room_info twice: {}", self.tag);
+        self.room_info = Some(RoomInfo::new(name, visual));
+
+        if self.inventory.is_none() {
+            self.inventory = Some(HashSet::new());
+        }
+
+        if self.vars.is_none() {
+            self.vars = Some(HashSet::new());
+        }
+
+        self
     }
 
     pub fn name(mut self, name: &str) -> EntityBuilder<'a> {
@@ -346,11 +366,6 @@ impl<'a> EntityBuilder<'a> {
 
     pub fn limbo(mut self) -> EntityBuilder<'a> {
         self.loc = Some(LIMBO);
-        self
-    }
-
-    pub fn links(mut self) -> EntityBuilder<'a> {
-        self.links = Some(HashMap::new());
         self
     }
 
@@ -418,10 +433,10 @@ impl<'a> EntityBuilder<'a> {
         self.world.add_entity(Entity {
             id: 0,
             tag: self.tag,
+            room_info: self.room_info,
             name: self.name,
             visual: self.visual,
             loc: self.loc,
-            links: self.links,
             inventory: self.inventory,
             vars: self.vars,
             prose: self.prose,

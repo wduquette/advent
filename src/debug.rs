@@ -12,11 +12,7 @@ pub fn list_world(world: &World) {
 
 /// List just the given entity
 fn list_entity(world: &World, id: ID) {
-    if world.entities[id].name.is_some() {
-        println!("[{}] {} \"{}\"", id, world.entities[id].tag, world.name(id));
-    } else {
-        println!("[{}] {}", id, world.entities[id].tag);
-    }
+    println!("[{}] {}", id, world.entities[id].tag);
 }
 
 /// Dump info about the entity with the given ID
@@ -27,11 +23,11 @@ pub fn dump_entity(world: &World, id: ID) {
         println!("  Location: [{}] -- {}", loc, world.name(loc));
     }
 
-    if let Some(links) = &world.entities[id].links {
-        for (dir, id) in links {
-            println!("  Link: {:?} to {}", dir, id);
-        }
-    }
+    // if let Some(links) = &world.entities[id].links {
+    //     for (dir, id) in links {
+    //         println!("  Link: {:?} to {}", dir, id);
+    //     }
+    // }
 
     if let Some(vars) = &world.entities[id].vars {
         for var in vars {

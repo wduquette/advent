@@ -166,8 +166,8 @@ impl World {
     /// Tries to follow a link in the given direction; returns the linked
     /// location if any.
     pub fn follow(&self, loc: ID, dir: Dir) -> Option<ID> {
-        if let Some(links) = &self.entities[loc].links {
-            if let Some(dest) = links.get(&dir) {
+        if let Some(room_info) = &self.entities[loc].room_info {
+            if let Some(dest) = room_info.links.get(&dir) {
                 return Some(*dest);
             }
         }

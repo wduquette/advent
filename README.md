@@ -7,9 +7,9 @@ using the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Debug commands
-  * Prefix with "!".
-  * Add `!describe <entity>` and `!look <entity>` and `!go <entity>`
+* Implement new RoomInfo component, and update code.
+* Implement new ThingInfo component, and update code.
+* Update debug::dump_entity to reflect thing and room components.
 * Implement visual system, with text wrapping/formatting details.
   * Requires Thing and Room components.
   * Include syntax for entering prose as part of the scenario, indicating

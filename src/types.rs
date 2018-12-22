@@ -38,6 +38,28 @@ pub type Links = HashMap<Dir, ID>;
 pub type Inventory = HashSet<ID>;
 
 //------------------------------------------------------------------------------------------------
+// Room Info
+
+/// Information specific to rooms.
+#[derive(Debug, Clone)]
+pub struct RoomInfo {
+    pub name: String,
+    pub visual: String,
+    pub links: HashMap<Dir, ID>
+}
+
+impl RoomInfo {
+    /// Create a new room with a name, visual, and related info.
+    pub fn new(name: &str, visual: &str) -> RoomInfo {
+        RoomInfo {
+            name: name.into(),
+            visual: visual.trim().into(),
+            links: HashMap::new(),
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------
 // Prose
 
 /// Prose for an object that's readable.

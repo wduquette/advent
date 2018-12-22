@@ -17,32 +17,26 @@ pub fn build() -> World {
     // NEXT, make the rooms.
 
     // Room: Clearing
-    let clearing = make_room(
-        world,
-        "clearing-1",
-        "Clearing",
-        "A wide spot in the woods.  You can go east.",
-    );
+    let clearing = world
+        .make("clearing")
+        .room("Clearing",
+            "A wide spot in the woods.  You can go east.")
+        .build();
 
     // Room: Trail
-    let trail = make_room(
-        world,
-        "trail-1",
-        "Trail",
-        "A trail from hither to yon.  You can go east or west.",
-    );
+    let trail = world
+        .make("trail")
+        .room("Trail", "A trail from hither to yon.  You can go east or west.")
+        .build();
 
     // Room: Bridge
-    let bridge = make_room(
-        world,
-        "bridge-1",
-        "Bridge",
-        "\
+    let bridge = world
+        .make("bridge")
+        .room("Bridge", "\
 The trail crosses a small stream here.  You can go east or west.
-        ",
-    );
-
-    world.set_var(bridge, HasWater);
+        ")
+        .var(HasWater)
+        .build();
 
     make_scenery(
         world,
@@ -135,19 +129,6 @@ fn make_player(world: &mut World, start: ID) {
         .var(DirtyHands)
         .var(Seen(start))
         .build();
-}
-
-/// Makes a room with the given name and visual, and an empty set of links.
-/// Returns the room's ID.
-fn make_room(world: &mut World, tag: &str, name: &str, text: &str) -> ID {
-    world
-        .make(tag)
-        .name(name)
-        .visual(text)
-        .links()
-        .inventory()
-        .vars()
-        .build()
 }
 
 /// Makes a scenery object, and returns its ID.

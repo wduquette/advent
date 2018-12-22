@@ -87,3 +87,24 @@ x   Revised the debugging verbs.
     x   Debugging commands that take an entity argument now accept
         tags as well as IDs.
     x   Added !examine, !look, and !go.
+x   Rooms vs. Things vs. NPCs
+    x   A room must have:
+        x   A name
+        x   A visual string
+        x   Links
+        x   An inventory
+        x   A variable set
+    x   A thing must have
+        x   A noun, for use in the grammar
+        x   A name for display
+        x   A visual string
+        x   A location
+        x   A variable set
+        x   Possibly, an inventory
+    x   An entity that is both a room and a thing will need:
+        x   Only one variable set
+        x   Only one inventory.
+        x   Only one set of Links
+        x   A room name and visual string
+        x   A thing name and visual string and noun.
+    x   An NPC is a thing with behavior
