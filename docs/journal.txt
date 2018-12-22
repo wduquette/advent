@@ -2,6 +2,7 @@ Bonaventure Journal
 
 2018-12-22 (Saturday)
 
+x   Lots of stuff to think about.
 x   Room/Thing Hybrids
     x   Observations
         x   A vehicle is a thing:
@@ -75,3 +76,14 @@ x   Architectural Issues
             scenario need to be definable as "byte code", not as closures.
         x   Also, the scenario can't add to the set of Vars; which means
             we need some generic Vars for scenario use.
+x   Revised the debugging verbs.
+    x   All debugging verbs begin with "!".
+        x   At present this is done in the normal command parser; the
+            verb simple begins with a "!" character.
+        x   Might want to use a special parser for debugging commands,
+            triggered by an initial "!".
+            x   Would allow circumventing any grammar code.
+            x   Would be easier to disable all debugging commands.
+    x   Debugging commands that take an entity argument now accept
+        tags as well as IDs.
+    x   Added !examine, !look, and !go.
