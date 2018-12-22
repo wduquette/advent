@@ -45,5 +45,5 @@ fn print_introduction(world: &World) {
 
     let player = world.get(world.pid).as_player();
 
-    player_control::describe_room(world, player.loc, Detail::Full);
+    player_control::describe_room(world, player.location, Detail::Full);
 }

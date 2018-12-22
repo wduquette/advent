@@ -2,7 +2,6 @@
 
 use crate::types::*;
 use crate::world::World;
-use crate::world::LIMBO;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -15,17 +14,16 @@ pub struct Entity {
     // All entities have a tag.
     pub tag: String,
 
+    pub player_info: Option<PlayerInfo>,
+
     // Room details
     pub room_info: Option<RoomInfo>,
 
-    // Many entities have names for display.
-    pub name: Option<String>,
+    // Thing details
+    pub thing_info: Option<ThingInfo>,
 
-    // Most entities have a visual, e.g., what a room or a thing looks like.
+    // TODO: Currently used only by Rule.  Make it go away.
     pub visual: Option<String>,
-
-    // Some entities (e.g., the player) have a location.
-    pub loc: Option<ID>,
 
     // Some entities can own/contain Things.
     pub inventory: Option<Inventory>,
@@ -42,19 +40,11 @@ pub struct Entity {
 
 impl Entity {
     /// Can this entity function as a player?
-    pub fn is_player(&self) -> bool {
-        self.name.is_some()
-            && self.visual.is_some()
-            && self.loc.is_some()
-            && self.inventory.is_some()
-            && self.vars.is_some()
-    }
+    pub fn is_player(&self) -> bool { PlayerView::is_player(&self) }
 
     /// Retrieve a view of the entity as a Player
-    pub fn as_player(&self) -> PlayerView {
-        assert!(self.is_player(), "Not a player: [{}] {}", self.id, self.tag);
-        PlayerView::from(self)
-    }
+    pub fn as_player(&self) -> PlayerView { PlayerView::from(self) }
+
     /// Can this entity function as a room?  I.e., a place the player can be?
     pub fn is_room(&self) -> bool { RoomView::is_room(&self) }
 
@@ -62,18 +52,10 @@ impl Entity {
     pub fn as_room(&self) -> RoomView { RoomView::from(self) }
 
     /// Can this entity function as a thing?  I.e., as a noun?
-    pub fn is_thing(&self) -> bool {
-        self.name.is_some() &&
-        self.visual.is_some() &&
-        self.loc.is_some() &&
-        self.vars.is_some()
-    }
+    pub fn is_thing(&self) -> bool { ThingView::is_thing(&self) }
 
     /// Retrieve a view of the entity as a Thing
-    pub fn as_thing(&self) -> ThingView {
-        assert!(self.is_thing(), "Not a thing: [{}] {}", self.id, self.tag);
-        ThingView::from(self)
-    }
+    pub fn as_thing(&self) -> ThingView { ThingView::from(self) }
 
     /// Is this entity a rule?
     pub fn is_rule(&self) -> bool {
@@ -109,20 +91,30 @@ pub struct PlayerView {
     pub visual: String,
 
     // Saved
-    pub loc: ID,
+    pub location: ID,
     pub inventory: Inventory,
     pub vars: VarSet,
 }
 
 impl PlayerView {
+    /// Can the entity function as a player?
+    pub fn is_player(this: &Entity) -> bool {
+        this.player_info.is_some() &&
+        this.inventory.is_some() &&
+        this.vars.is_some()
+    }
+
     /// Creates a PlayerView for the Entity.  For use by Entity::as_player().
     fn from(this: &Entity) -> PlayerView {
+        assert!(this.is_player(), "Not a player: [{}] {}", this.id, this.tag);
+        let thing = &this.thing_info.as_ref().unwrap();
+
         PlayerView {
             id: this.id,
             tag: this.tag.clone(),
-            name: this.name.as_ref().unwrap().clone(),
-            visual: this.visual.as_ref().unwrap().clone(),
-            loc: this.loc.unwrap(),
+            name: thing.name.clone(),
+            visual: thing.visual.clone(),
+            location: thing.location,
             inventory: this.inventory.as_ref().unwrap().clone(),
             vars: this.vars.as_ref().unwrap().clone(),
         }
@@ -130,7 +122,9 @@ impl PlayerView {
 
     /// Save the player back to the world.  Replaces the links and inventory.
     pub fn save(&mut self, world: &mut World) {
-        world.entities[self.id].loc = Some(self.loc);
+        let thing_info = &mut world.entities[self.id].thing_info.as_mut().unwrap();
+
+        thing_info.location = self.location;
         world.entities[self.id].inventory = Some(self.inventory.clone());
         world.entities[self.id].vars = Some(self.vars.clone());
     }
@@ -198,26 +192,35 @@ pub struct ThingView {
     pub visual: String,
 
     // Saved
-    pub loc: ID,
+    pub location: ID,
     pub vars: VarSet,
 }
 
 impl ThingView {
+    pub fn is_thing(this: &Entity) -> bool {
+        this.thing_info.is_some() &&
+        this.vars.is_some()
+    }
+
     /// Creates a ThingView for the Entity.  For use by Entity::as_thing().
     fn from(this: &Entity) -> ThingView {
+        assert!(ThingView::is_thing(this), "Not a thing: [{}] {}", this.id, this.tag);
+        let thing = &this.thing_info.as_ref().unwrap();
+
         ThingView {
             id: this.id,
             tag: this.tag.clone(),
-            name: this.name.as_ref().unwrap().clone(),
-            visual: this.visual.as_ref().unwrap().clone(),
-            loc: this.loc.unwrap(),
+            name: thing.name.clone(),
+            visual: thing.visual.clone(),
+            location: thing.location,
             vars: this.vars.as_ref().unwrap().clone(),
         }
     }
 
     /// Save the room back to the world.  Replaces the location
     pub fn save(&mut self, world: &mut World) {
-        world.entities[self.id].loc = Some(self.loc);
+        let info = &mut world.entities[self.id].thing_info.as_mut().unwrap();
+        info.location = self.location;
         world.entities[self.id].vars = Some(self.vars.clone());
     }
 }
@@ -307,10 +310,10 @@ impl ProseView {
 pub struct EntityBuilder<'a> {
     pub world: &'a mut World,
     pub tag: String,
+    pub player_info: Option<PlayerInfo>,
     pub room_info: Option<RoomInfo>,
-    pub name: Option<String>,
+    pub thing_info: Option<ThingInfo>,
     pub visual: Option<String>,
-    pub loc: Option<ID>,
     pub inventory: Option<Inventory>,
     pub vars: Option<VarSet>,
     pub prose: Option<ProseComponent>,
@@ -322,15 +325,41 @@ impl<'a> EntityBuilder<'a> {
         EntityBuilder {
             world: world,
             tag: tag.to_string(),
+            player_info: None,
             room_info: None,
-            name: None,
+            thing_info: None,
             visual: None,
-            loc: None,
             inventory: None,
             vars: None,
             prose: None,
             rule: None,
         }
+    }
+
+    /// Adds the essential trimmings for a player.
+    pub fn player(mut self, start: ID, visual: &str) -> EntityBuilder<'a> {
+        assert!(self.player_info.is_none(), "Tried to build player_info twice: {}", self.tag);
+
+        // Someday we'll have some data to go with this.
+        self.player_info = Some(PlayerInfo {});
+
+        let mut thing_info = ThingInfo::new("Yourself", "self", visual);
+        thing_info.location = start;
+        self.thing_info = Some(thing_info);
+
+        if self.inventory.is_none() {
+            self.inventory = Some(HashSet::new());
+        }
+
+        if self.vars.is_none() {
+            self.vars = Some(HashSet::new());
+        }
+
+        // We've seen the starting point.
+        let vars = &mut self.vars.as_mut().unwrap();
+        vars.insert(Var::Seen(start));
+
+        self
     }
 
     /// Adds the essential trimmings for a room.
@@ -349,8 +378,15 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    pub fn name(mut self, name: &str) -> EntityBuilder<'a> {
-        self.name = Some(name.into());
+    /// Adds the essential trimmings for a thing.
+    pub fn thing(mut self, name: &str, noun: &str, visual: &str) -> EntityBuilder<'a> {
+        assert!(self.thing_info.is_none(), "Tried to build thing_info twice: {}", self.tag);
+        self.thing_info = Some(ThingInfo::new(name, noun, visual));
+
+        if self.vars.is_none() {
+            self.vars = Some(HashSet::new());
+        }
+
         self
     }
 
@@ -359,25 +395,10 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    pub fn location(mut self, loc: ID) -> EntityBuilder<'a> {
-        self.loc = Some(loc);
-        self
-    }
-
-    pub fn limbo(mut self) -> EntityBuilder<'a> {
-        self.loc = Some(LIMBO);
-        self
-    }
-
     /// Adds an inventory list to the entity.
+    #[allow(dead_code)]
     pub fn inventory(mut self) -> EntityBuilder<'a> {
         self.inventory = Some(HashSet::new());
-        self
-    }
-
-    /// Adds a variable set to the entity.
-    pub fn vars(mut self) -> EntityBuilder<'a> {
-        self.vars = Some(HashSet::new());
         self
     }
 
@@ -402,6 +423,7 @@ impl<'a> EntityBuilder<'a> {
 
     /// Adds a page to an existing prose component; the page can be looked up by its
     /// index.
+    #[allow(dead_code)]
     pub fn page(mut self, index: &str, text: &str) -> EntityBuilder<'a> {
         assert!(
             self.prose.is_some(),
@@ -433,10 +455,10 @@ impl<'a> EntityBuilder<'a> {
         self.world.add_entity(Entity {
             id: 0,
             tag: self.tag,
+            player_info: self.player_info,
             room_info: self.room_info,
-            name: self.name,
+            thing_info: self.thing_info,
             visual: self.visual,
-            loc: self.loc,
             inventory: self.inventory,
             vars: self.vars,
             prose: self.prose,

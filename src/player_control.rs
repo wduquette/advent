@@ -71,8 +71,8 @@ pub fn system(world: &mut World, command: &str) {
 
 /// Move the player in the given direction
 fn cmd_go(world: &mut World, player: &mut PlayerView, dir: Dir) -> CmdResult {
-    if let Some(dest) = world.follow(player.loc, dir) {
-        player.loc = dest;
+    if let Some(dest) = world.follow(player.location, dir) {
+        player.location = dest;
 
         if !player.vars.contains(&Seen(dest)) {
             describe_room(world, dest, Full);
@@ -101,7 +101,7 @@ You know.  Like that.
 
 /// Re-describe the current location.
 fn cmd_look(world: &World, player: &PlayerView) -> CmdResult {
-    describe_room(world, player.loc, Full);
+    describe_room(world, player.location, Full);
     Ok(())
 }
 
@@ -136,7 +136,7 @@ fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
         }
 
         // If he's holding it, or it's scenery, then he can read it.
-        if thing.loc == player.id || thing.vars.contains(&Scenery) {
+        if thing.location == player.id || thing.vars.contains(&Scenery) {
             let prose = world.get(id).as_prose();
             println!("{}\n", prose.main);
             Ok(())
@@ -168,7 +168,7 @@ fn cmd_examine_self(_world: &World, player: &PlayerView) -> CmdResult {
 // TODO: As currently implemented, this should be a scenario command, not a
 // built-in command.
 fn cmd_wash_hands(world: &mut World, player: &mut PlayerView) -> CmdResult {
-    let room = world.get(player.loc).as_room();
+    let room = world.get(player.location).as_room();
 
     if !room.vars.contains(&HasWater) {
         return Err("That'd be a neat trick.".into());
@@ -189,7 +189,7 @@ fn cmd_wash_hands(world: &mut World, player: &mut PlayerView) -> CmdResult {
 
 /// Gets a thing from the location's inventory.
 fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult {
-    let room = &mut world.get(player.loc).as_room();
+    let room = &mut world.get(player.location).as_room();
 
     // Does he already have it?
     if find_in_inventory(world, &player.inventory, name).is_some() {
@@ -205,7 +205,7 @@ fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult 
         // Get the thing.
         room.inventory.remove(&thing.id);
         player.inventory.insert(thing.id);
-        thing.loc = player.id;
+        thing.location = player.id;
 
         room.save(world);
         thing.save(world);
@@ -219,14 +219,14 @@ fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult 
 
 /// Drops a thing you're carrying
 fn cmd_drop(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult {
-    let room = &mut world.get(player.loc).as_room();
+    let room = &mut world.get(player.location).as_room();
 
     if let Some(id) = find_in_inventory(world, &player.inventory, name) {
         let thing = &mut world.get(id).as_thing();
 
         player.inventory.remove(&thing.id);
         room.inventory.insert(thing.id);
-        thing.loc = room.id;
+        thing.location = room.id;
 
         room.save(world);
         thing.save(world);
@@ -312,7 +312,7 @@ fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
 fn cmd_debug_go(world: &World, player: &mut PlayerView, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
     if world.get(id).is_room() {
-        player.loc = id;
+        player.location = id;
         describe_room(world, id, Full);
         Ok(())
     } else {
@@ -379,7 +379,7 @@ fn find_visible_thing(world: &World, player: &PlayerView, name: &str) -> Option<
     }
 
     // NEXT, is it in this room?
-    let room = &world.get(player.loc).as_room();
+    let room = &world.get(player.location).as_room();
 
     if let Some(id) = find_in_inventory(world, &room.inventory, name) {
         return Some(id);
@@ -402,7 +402,7 @@ fn invent_list(world: &World, inventory: &Inventory) -> String {
             if !list.is_empty() {
                 list.push_str(", ");
             }
-            list.push_str(world.name(*id));
+            list.push_str(&thing.name);
         }
     }
 

@@ -37,7 +37,7 @@ impl World {
             pid: 0,
         };
 
-        world.make("LIMBO").name("LIMBO").build(); // ID=0
+        world.make("LIMBO").build(); // ID=0
 
         world
     }
@@ -128,11 +128,11 @@ impl World {
     /// Returns the location of the thing with the given ID
     pub fn loc(&self, id: ID) -> ID {
         assert!(
-            self.entities[id].loc.is_some(),
+            self.entities[id].thing_info.is_some(),
             "Entity has no location: {}",
             id
         );
-        self.entities[id].loc.unwrap()
+        self.entities[id].thing_info.as_ref().unwrap().location
     }
 
     /// Puts the thing in the container's inventory, and sets the thing's location.
@@ -141,26 +141,23 @@ impl World {
         if let Some(inv) = &mut self.entities[container].inventory {
             inv.insert(thing);
         }
-        self.entities[thing].loc = Some(container);
+
+        if let Some(thing_info) = &mut self.entities[thing].thing_info {
+            thing_info.location = container;
+        }
     }
 
     /// Removes the thing from its container's inventory, and puts it in LIMBO.
     pub fn take_out(&mut self, thing: ID) {
-        if let Some(container) = self.get(thing).loc {
-            if let Some(inv) = &mut self.entities[container].inventory {
-                inv.remove(&thing);
-            }
-        }
-        self.entities[thing].loc = Some(LIMBO);
-    }
+        let container = self.loc(thing);
 
-    /// Returns the name of the entity with the given ID.
-    pub fn name(&self, id: ID) -> &str {
-        // TODO: retrieve the entity's name once we have one.
-        &self.entities[id]
-            .name
-            .as_ref()
-            .unwrap_or_else(|| panic!("Name missing: {}", id))
+        if let Some(inv) = &mut self.entities[container].inventory {
+            inv.remove(&thing);
+        }
+
+        if let Some(thing_info) = &mut self.entities[thing].thing_info {
+            thing_info.location = LIMBO;
+        }
     }
 
     /// Tries to follow a link in the given direction; returns the linked

@@ -3,6 +3,7 @@
 use crate::world::*;
 use std::collections::hash_map::HashMap;
 use std::collections::hash_set::HashSet;
+use crate::world::LIMBO;
 
 //------------------------------------------------------------------------------------------------
 // Basic Types
@@ -38,6 +39,15 @@ pub type Links = HashMap<Dir, ID>;
 pub type Inventory = HashSet<ID>;
 
 //------------------------------------------------------------------------------------------------
+// Player Info
+
+/// Information specific to players.
+#[derive(Debug, Clone)]
+pub struct PlayerInfo {
+    // None yet
+}
+
+//------------------------------------------------------------------------------------------------
 // Room Info
 
 /// Information specific to rooms.
@@ -59,6 +69,29 @@ impl RoomInfo {
     }
 }
 
+//------------------------------------------------------------------------------------------------
+// Thing Info
+
+/// Information specific to things.
+#[derive(Debug, Clone)]
+pub struct ThingInfo {
+    pub name: String,
+    pub noun: String,
+    pub location: ID,
+    pub visual: String,
+}
+
+impl ThingInfo {
+    /// Create a new room with a name, noun, visual, and related info.
+    pub fn new(name: &str, noun: &str, visual: &str) -> ThingInfo {
+        ThingInfo {
+            name: name.into(),
+            noun: noun.into(),
+            location: LIMBO,
+            visual: visual.trim().into(),
+        }
+    }
+}
 //------------------------------------------------------------------------------------------------
 // Prose
 

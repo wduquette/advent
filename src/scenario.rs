@@ -57,8 +57,7 @@ how narrow it is.
     // The note
     let clean_note = world
         .make(NOTE)
-        .name("note")
-        .visual("A note, on plain paper.")
+        .thing("note", "note", "A note, on plain paper.")
         .prose(
             "\
 Welcome, dear friend.  Your mission, should you choose to
@@ -67,17 +66,13 @@ the trail.  You've already taken the first big
 step!
          ",
         )
-        .vars()
         .build();
     world.put_in(clean_note, clearing);
 
     let dirty_note = world
         .make("note-dirty")
-        .name("note")
-        .visual("A note, on plain paper.  It looks pretty grubby.")
+        .thing("note", "note", "A note, on plain paper.  It looks pretty grubby.")
         .prose("You've gotten it too dirty to read.")
-        .vars()
-        .limbo()
         .build();
 
     world
@@ -103,7 +98,11 @@ and gosh, this doesn't look anything like the toy aisle.
         .build();
 
     // NEXT, Make the player
-    make_player(world, clearing);
+    world.pid = world
+        .make("self")
+        .player(clearing, "You've got all the usual bits.")
+        .var(DirtyHands)
+        .build();
 
     // NEXT, return the world.
     the_world
@@ -118,23 +117,13 @@ fn player_gets_note_dirty(world: &World) -> bool {
         && !note.vars.contains(&Dirty)
 }
 
-/// Initializes the player's details
-fn make_player(world: &mut World, start: ID) {
-    world.pid = world
-        .make("self")
-        .name("self")
-        .visual("You've got all the usual bits.")
-        .location(start)
-        .inventory()
-        .var(DirtyHands)
-        .var(Seen(start))
-        .build();
-}
-
 /// Makes a scenery object, and returns its ID.
 fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -> ID {
-    let id = world.make(tag).name(name).visual(text).var(Scenery).build();
-
+    let id = world
+        .make(tag)
+        .thing(name, name, text)
+        .var(Scenery)
+        .build();
     world.put_in(id, loc);
 
     id

@@ -19,15 +19,27 @@ fn list_entity(world: &World, id: ID) {
 pub fn dump_entity(world: &World, id: ID) {
     list_entity(world, id);
 
-    if let Some(loc) = world.entities[id].loc {
-        println!("  Location: [{}] -- {}", loc, world.name(loc));
+    // FIRST, display the player info
+    if world.entities[id].player_info.is_some() {
+        println!("  Player");
     }
 
-    // if let Some(links) = &world.entities[id].links {
-    //     for (dir, id) in links {
-    //         println!("  Link: {:?} to {}", dir, id);
-    //     }
-    // }
+    // NEXT, if it's a thing display the thing info.
+    if let Some(thing_info) = &world.entities[id].thing_info {
+        println!("  Thing name: {}", thing_info.name);
+        println!("    Noun: {}", thing_info.noun);
+        println!("    Location: {}", thing_info.location);
+        println!("    Visual: {}", thing_info.visual);
+    }
+
+    // NEXT, if it's a room display the room info.
+    if let Some(room_info) = &world.entities[id].room_info {
+        println!("  Room name: {}", room_info.name);
+        for (dir, id) in &room_info.links {
+            println!("    Link: {:?} to {}", dir, id);
+        }
+        println!("    Visual: {}", room_info.visual);
+    }
 
     if let Some(vars) = &world.entities[id].vars {
         for var in vars {
@@ -37,7 +49,8 @@ pub fn dump_entity(world: &World, id: ID) {
 
     if let Some(inventory) = &world.entities[id].inventory {
         for tid in inventory {
-            println!("  Contains: [{}] {}", *tid, world.name(*tid));
+            let thing = world.get(*tid).as_thing();
+            println!("  Contains: [{}] {}", thing.id, thing.name);
         }
     }
 
