@@ -60,35 +60,36 @@ impl World {
     }
 
     //--------------------------------------------------------------------------------------------
-    // Variables
+    // Flags
+    // TODO: This must either be renamed or removed.
 
     /// Set the variable on the entity
-    pub fn set_var(&mut self, id: ID, var: Var) {
+    pub fn set_var(&mut self, id: ID, var: Flag) {
         assert!(
-            self.entities[id].vars.is_some(),
-            "Entity has no vars: {}",
+            self.entities[id].flags.is_some(),
+            "Entity has no flags: {}",
             id
         );
 
         // Consider adding as_var_set() to Entity
-        if let Some(vars) = &mut self.entities[id].vars {
-            vars.insert(var);
+        if let Some(flags) = &mut self.entities[id].flags {
+            flags.set(var);
         }
     }
 
     /// Clear the variable from the entity
     #[allow(dead_code)]
-    pub fn clear_var(&mut self, id: ID, var: &Var) {
-        if let Some(vars) = &mut self.entities[id].vars {
-            vars.remove(var);
+    pub fn clear_var(&mut self, id: ID, var: &Flag) {
+        if let Some(flags) = &mut self.entities[id].flags {
+            flags.unset(*var);
         }
     }
 
     /// Is the variable set on the entity?
     #[allow(dead_code)]
-    pub fn has_var(&self, id: ID, var: &Var) -> bool {
-        if let Some(vars) = &self.entities[id].vars {
-            vars.contains(&var)
+    pub fn has_var(&self, id: ID, var: &Flag) -> bool {
+        if let Some(flags) = &self.entities[id].flags {
+            flags.has(*var)
         } else {
             false
         }

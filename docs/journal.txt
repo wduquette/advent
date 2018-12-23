@@ -74,8 +74,8 @@ x   Architectural Issues
             from a data file.
         x   That means that any predicates or actions defined by the
             scenario need to be definable as "byte code", not as closures.
-        x   Also, the scenario can't add to the set of Vars; which means
-            we need some generic Vars for scenario use.
+        x   Also, the scenario can't add to the set of Flags; which means
+            we need some generic Flags for scenario use.
 x   Revised the debugging verbs.
     x   All debugging verbs begin with "!".
         x   At present this is done in the normal command parser; the

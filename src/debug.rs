@@ -41,9 +41,9 @@ pub fn dump_entity(world: &World, id: ID) {
         println!("    Visual: {}", room_info.visual);
     }
 
-    if let Some(vars) = &world.entities[id].vars {
-        for var in vars {
-            println!("  Var: {:?}", var);
+    if let Some(flags) = &world.entities[id].flags {
+        for flag in flags.iter() {
+            println!("  Flag: {:?}", flag);
         }
     }
 

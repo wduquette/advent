@@ -1,7 +1,7 @@
 //! Scenario definition
 
 use crate::types::Dir::*;
-use crate::types::var_set::Var::*;
+use crate::types::var_set::Flag::*;
 use crate::types::*;
 use crate::world::*;
 
@@ -123,8 +123,8 @@ fn player_gets_note_dirty(world: &World) -> bool {
     let note = world.lookup(NOTE).as_thing();
 
     player.inventory.contains(&note.id)
-        && player.vars.contains(&DirtyHands)
-        && !note.vars.contains(&Dirty)
+        && player.flags.has(DirtyHands)
+        && !note.flags.has(Dirty)
 }
 
 /// Makes a scenery object, and returns its ID.

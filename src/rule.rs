@@ -31,12 +31,12 @@ fn fire_rule(world: &mut World, rule: &RuleView) {
             }
 
             // Set the var on the entity's var set
-            Action::SetVar(id, var) => {
+            Action::SetFlag(id, var) => {
                 world.set_var(*id, *var);
             }
 
             // Clear the var on the entity's var set
-            Action::ClearVar(id, var) => {
+            Action::ClearFlag(id, var) => {
                 world.clear_var(*id, var);
             }
 

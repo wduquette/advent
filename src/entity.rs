@@ -26,7 +26,7 @@ pub struct Entity {
     pub inventory: Option<Inventory>,
 
     // Entity variable settings
-    pub vars: Option<VarSet>,
+    pub flags: Option<FlagSet>,
 
     // BookInfo, a readable thing's text content.
     pub book_info: Option<BookInfo>,
@@ -100,13 +100,13 @@ pub struct PlayerView {
     // Saved
     pub location: ID,
     pub inventory: Inventory,
-    pub vars: VarSet,
+    pub flags: FlagSet,
 }
 
 impl PlayerView {
     /// Can the entity function as a player?
     pub fn is_player(this: &Entity) -> bool {
-        this.player_info.is_some() && this.inventory.is_some() && this.vars.is_some()
+        this.player_info.is_some() && this.inventory.is_some() && this.flags.is_some()
     }
 
     /// Creates a PlayerView for the Entity.  For use by Entity::as_player().
@@ -121,7 +121,7 @@ impl PlayerView {
             visual: thing.visual.clone(),
             location: thing.location,
             inventory: this.inventory.as_ref().unwrap().clone(),
-            vars: this.vars.as_ref().unwrap().clone(),
+            flags: this.flags.as_ref().unwrap().clone(),
         }
     }
 
@@ -131,7 +131,7 @@ impl PlayerView {
 
         thing_info.location = self.location;
         world.entities[self.id].inventory = Some(self.inventory.clone());
-        world.entities[self.id].vars = Some(self.vars.clone());
+        world.entities[self.id].flags = Some(self.flags.clone());
     }
 }
 
@@ -148,13 +148,13 @@ pub struct RoomView {
     // Saved
     pub links: Links,
     pub inventory: Inventory,
-    pub vars: VarSet,
+    pub flags: FlagSet,
 }
 
 impl RoomView {
     /// Determines whether or not an entity is a room.
     pub fn is_room(this: &Entity) -> bool {
-        this.room_info.is_some() && this.inventory.is_some() && this.vars.is_some()
+        this.room_info.is_some() && this.inventory.is_some() && this.flags.is_some()
     }
 
     /// Creates a RoomView for the Entity.  For use by Entity::as_room().
@@ -175,7 +175,7 @@ impl RoomView {
             visual: room_info.visual.clone(),
             links: room_info.links.clone(),
             inventory: this.inventory.as_ref().unwrap().clone(),
-            vars: this.vars.as_ref().unwrap().clone(),
+            flags: this.flags.as_ref().unwrap().clone(),
         }
     }
 
@@ -185,7 +185,7 @@ impl RoomView {
 
         room_info.links = self.links.clone();
         world.entities[self.id].inventory = Some(self.inventory.clone());
-        world.entities[self.id].vars = Some(self.vars.clone());
+        world.entities[self.id].flags = Some(self.flags.clone());
     }
 }
 
@@ -201,12 +201,12 @@ pub struct ThingView {
 
     // Saved
     pub location: ID,
-    pub vars: VarSet,
+    pub flags: FlagSet,
 }
 
 impl ThingView {
     pub fn is_thing(this: &Entity) -> bool {
-        this.thing_info.is_some() && this.vars.is_some()
+        this.thing_info.is_some() && this.flags.is_some()
     }
 
     /// Creates a ThingView for the Entity.  For use by Entity::as_thing().
@@ -225,7 +225,7 @@ impl ThingView {
             name: thing.name.clone(),
             visual: thing.visual.clone(),
             location: thing.location,
-            vars: this.vars.as_ref().unwrap().clone(),
+            flags: this.flags.as_ref().unwrap().clone(),
         }
     }
 
@@ -233,7 +233,7 @@ impl ThingView {
     pub fn save(&mut self, world: &mut World) {
         let info = &mut world.entities[self.id].thing_info.as_mut().unwrap();
         info.location = self.location;
-        world.entities[self.id].vars = Some(self.vars.clone());
+        world.entities[self.id].flags = Some(self.flags.clone());
     }
 }
 
@@ -334,7 +334,7 @@ pub struct EntityBuilder<'a> {
     pub room_info: Option<RoomInfo>,
     pub thing_info: Option<ThingInfo>,
     pub inventory: Option<Inventory>,
-    pub vars: Option<VarSet>,
+    pub flags: Option<FlagSet>,
     pub book_info: Option<BookInfo>,
     pub rule_info: Option<RuleInfo>,
 }
@@ -348,7 +348,7 @@ impl<'a> EntityBuilder<'a> {
             room_info: None,
             thing_info: None,
             inventory: None,
-            vars: None,
+            flags: None,
             book_info: None,
             rule_info: None,
         }
@@ -373,13 +373,13 @@ impl<'a> EntityBuilder<'a> {
             self.inventory = Some(HashSet::new());
         }
 
-        if self.vars.is_none() {
-            self.vars = Some(HashSet::new());
+        if self.flags.is_none() {
+            self.flags = Some(FlagSet::new());
         }
 
         // We've seen the starting point.
-        let vars = &mut self.vars.as_mut().unwrap();
-        vars.insert(Var::Seen(start));
+        let flags = &mut self.flags.as_mut().unwrap();
+        flags.set(Flag::Seen(start));
 
         self
     }
@@ -397,8 +397,8 @@ impl<'a> EntityBuilder<'a> {
             self.inventory = Some(HashSet::new());
         }
 
-        if self.vars.is_none() {
-            self.vars = Some(HashSet::new());
+        if self.flags.is_none() {
+            self.flags = Some(FlagSet::new());
         }
 
         self
@@ -413,8 +413,8 @@ impl<'a> EntityBuilder<'a> {
         );
         self.thing_info = Some(ThingInfo::new(name, noun, visual));
 
-        if self.vars.is_none() {
-            self.vars = Some(HashSet::new());
+        if self.flags.is_none() {
+            self.flags = Some(FlagSet::new());
         }
 
         self
@@ -428,12 +428,12 @@ impl<'a> EntityBuilder<'a> {
     }
 
     /// Adds a variable to the entity, creating the var set if needed.
-    pub fn var(mut self, var: Var) -> EntityBuilder<'a> {
-        if self.vars.is_none() {
-            self.vars = Some(HashSet::new());
+    pub fn var(mut self, var: Flag) -> EntityBuilder<'a> {
+        if self.flags.is_none() {
+            self.flags = Some(FlagSet::new());
         }
 
-        self.vars.as_mut().unwrap().insert(var);
+        self.flags.as_mut().unwrap().set(var);
         self
     }
 
@@ -482,7 +482,7 @@ impl<'a> EntityBuilder<'a> {
             room_info: self.room_info,
             thing_info: self.thing_info,
             inventory: self.inventory,
-            vars: self.vars,
+            flags: self.flags,
             book_info: self.book_info,
             rule_info: self.rule_info,
         })

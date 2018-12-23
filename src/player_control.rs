@@ -4,7 +4,7 @@ use crate::debug;
 use crate::entity::PlayerView;
 use crate::types::Detail::*;
 use crate::types::Dir::*;
-use crate::types::var_set::Var::*;
+use crate::types::var_set::Flag::*;
 use crate::types::*;
 use crate::world::*;
 
@@ -74,13 +74,13 @@ fn cmd_go(world: &mut World, player: &mut PlayerView, dir: Dir) -> CmdResult {
     if let Some(dest) = world.follow(player.location, dir) {
         player.location = dest;
 
-        if !player.vars.contains(&Seen(dest)) {
+        if !player.flags.has(Seen(dest)) {
             describe_room(world, dest, Full);
         } else {
             describe_room(world, dest, Brief);
         }
 
-        player.vars.insert(Seen(dest));
+        player.flags.set(Seen(dest));
         Ok(())
     } else {
         Err("You can't go that way.".into())
@@ -136,7 +136,7 @@ fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
         }
 
         // If he's holding it, or it's scenery, then he can read it.
-        if thing.location == player.id || thing.vars.contains(&Scenery) {
+        if thing.location == player.id || thing.flags.has(Scenery) {
             let book = world.get(id).as_book();
             println!("{}\n", book.text);
             Ok(())
@@ -155,7 +155,7 @@ fn cmd_examine_self(_world: &World, player: &PlayerView) -> CmdResult {
 
     msg.push_str(&player.visual);
 
-    if player.vars.contains(&DirtyHands) {
+    if player.flags.has(DirtyHands) {
         msg.push_str(" Your hands are kind of dirty, though.");
     } else {
         msg.push_str(" Plus, they're clean bits!");
@@ -170,16 +170,16 @@ fn cmd_examine_self(_world: &World, player: &PlayerView) -> CmdResult {
 fn cmd_wash_hands(world: &mut World, player: &mut PlayerView) -> CmdResult {
     let room = world.get(player.location).as_room();
 
-    if !room.vars.contains(&HasWater) {
+    if !room.flags.has(HasWater) {
         return Err("That'd be a neat trick.".into());
     }
 
     let mut msg = String::new();
     msg.push_str("You wash your hands in the water.");
 
-    if player.vars.contains(&DirtyHands) {
+    if player.flags.has(DirtyHands) {
         msg.push_str(" They look much cleaner.");
-        player.vars.remove(&DirtyHands);
+        player.flags.unset(DirtyHands);
     }
 
     println!("{}\n", msg);
@@ -198,7 +198,7 @@ fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult 
 
     if let Some(id) = find_in_inventory(world, &room.inventory, name) {
         let thing = &mut world.get(id).as_thing();
-        if thing.vars.contains(&Scenery) {
+        if thing.flags.has(Scenery) {
             return Err("You can't take that!".into());
         }
 
@@ -397,7 +397,7 @@ fn invent_list(world: &World, inventory: &Inventory) -> String {
     for id in inventory {
         let thing = world.get(*id).as_thing();
 
-        if !thing.vars.contains(&Scenery) {
+        if !thing.flags.has(Scenery) {
             if !list.is_empty() {
                 list.push_str(", ");
             }

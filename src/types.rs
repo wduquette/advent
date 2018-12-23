@@ -158,10 +158,10 @@ pub enum Action {
     Print(String),
 
     /// Set the variable for the entity with the given ID
-    SetVar(ID, Var),
+    SetFlag(ID, Flag),
 
     /// Clear the given variable
-    ClearVar(ID, Var),
+    ClearFlag(ID, Flag),
 
     /// Swap an item in the world for one in LIMBO
     Swap(ID, ID),
