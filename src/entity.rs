@@ -1,6 +1,7 @@
 //! The Entity Data Type and Builder
 
 use crate::types::*;
+use crate::types::var_set::*;
 use crate::world::World;
 use std::collections::HashSet;
 

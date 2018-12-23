@@ -1,7 +1,7 @@
 //! Scenario definition
 
 use crate::types::Dir::*;
-use crate::types::Var::*;
+use crate::types::var_set::Var::*;
 use crate::types::*;
 use crate::world::*;
 

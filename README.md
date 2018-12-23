@@ -1,25 +1,20 @@
 # Bonaventure: A simple text adventure in Rust
 
 A simple text adventure, written as a way to learn the Rust language,
-using the ECS architecture.
+using something like the ECS architecture.
 
 ## To Do
 
 Also, see docs/journal.txt.
 
-* Update Action::PrintProse to be Action::Print(String), and use that
-  string instead of the rule's visual.
-  * And get rid of the visual component.
-* Change BookInfo to BookInfo.
-  * And get rid of pages.
-  * And only Things can be Books.
+* Implement low level text formatting code.
 * Implement visual system, with text wrapping/formatting details.
   * Requires Thing and Room components.
   * Include syntax for entering prose as part of the scenario, indicating
     explicit line breaks, "as is" segments, and so on.
   * Include inline descriptions of scenery and portable things.
 * Implement inventory system, for acquiring things in the local environment.
-* Define VarSet struct, with set, has, unset, replace methods.
+* Define VarInfo struct, with set, has, unset, replace methods.
 * Consider replacing the entities vector with a set of component hash
   tables.
   * Only if it would simplify the code.

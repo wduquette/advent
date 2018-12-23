@@ -1,6 +1,7 @@
 //! The game world
 use crate::entity::*;
 use crate::types::*;
+use crate::types::var_set::*;
 use std::collections::HashMap;
 
 pub const LIMBO: ID = 0;

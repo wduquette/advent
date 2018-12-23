@@ -1,9 +1,14 @@
 //! Type definitions for this app.
 
+
 use crate::world::LIMBO;
 use crate::world::*;
 use std::collections::hash_map::HashMap;
 use std::collections::hash_set::HashSet;
+
+use crate::types::var_set::*;
+
+pub mod var_set;
 
 //------------------------------------------------------------------------------------------------
 // Basic Types
@@ -100,32 +105,6 @@ impl ThingInfo {
 pub struct BookInfo {
     pub text: String,
 }
-
-//------------------------------------------------------------------------------------------------
-// Variables and Variable Sets
-
-#[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
-#[allow(dead_code)]
-/// A game variable
-pub enum Var {
-    /// Has this entity been seen by the player?  Used mostly for locations.
-    Seen(ID),
-
-    /// Does the player have dirty hands?
-    DirtyHands,
-
-    /// Does the location have clean water?
-    HasWater,
-
-    /// Is the thing Scenery?
-    Scenery,
-
-    /// Is the thing dirty?
-    Dirty,
-}
-
-/// A set of variable settings.
-pub type VarSet = HashSet<Var>;
 
 //------------------------------------------------------------------------------------------------
 // Rules and Actions
