@@ -22,9 +22,6 @@ pub struct Entity {
     // Thing details
     pub thing_info: Option<ThingInfo>,
 
-    // TODO: Currently used only by Rule.  Make it go away.
-    pub visual: Option<String>,
-
     // Some entities can own/contain Things.
     pub inventory: Option<Inventory>,
 
@@ -58,15 +55,10 @@ impl Entity {
     pub fn as_thing(&self) -> ThingView { ThingView::from(self) }
 
     /// Is this entity a rule?
-    pub fn is_rule(&self) -> bool {
-        self.rule_info.is_some()
-    }
+    pub fn is_rule(&self) -> bool { RuleView::is_rule(self) }
 
     /// Retrieve a view of the entity as a Rule
-    pub fn as_rule(&self) -> RuleView {
-        assert!(self.is_rule(), "Not a rule: [{}] {}", self.id, self.tag);
-        RuleView::from(self)
-    }
+    pub fn as_rule(&self) -> RuleView { RuleView::from(self) }
 
     /// Does this entity have prose?
     pub fn is_prose(&self) -> bool {
@@ -235,15 +227,21 @@ pub struct RuleView {
     pub predicate: RulePred,
     pub actions: Vec<Action>,
     pub once_only: bool,
-    pub visual: String,
 
     // Saved
     pub fired: bool,
 }
 
 impl RuleView {
+    /// Is the entity a rule?
+    pub fn is_rule(this: &Entity) -> bool {
+        this.rule_info.is_some()
+    }
+
     /// Creates a RuleView for the Entity.  For use by Entity::as_rule().
     fn from(this: &Entity) -> RuleView {
+        assert!(this.is_rule(), "Not a rule: [{}] {}", this.id, this.tag);
+
         let rule_info = this.rule_info.as_ref().unwrap().clone();
         RuleView {
             id: this.id,
@@ -251,7 +249,6 @@ impl RuleView {
             predicate: rule_info.predicate,
             actions: rule_info.actions,
             once_only: rule_info.once_only,
-            visual: this.visual.as_ref().unwrap().clone(),
             fired: rule_info.fired,
         }
     }
@@ -313,7 +310,6 @@ pub struct EntityBuilder<'a> {
     pub player_info: Option<PlayerInfo>,
     pub room_info: Option<RoomInfo>,
     pub thing_info: Option<ThingInfo>,
-    pub visual: Option<String>,
     pub inventory: Option<Inventory>,
     pub vars: Option<VarSet>,
     pub prose: Option<ProseComponent>,
@@ -328,7 +324,6 @@ impl<'a> EntityBuilder<'a> {
             player_info: None,
             room_info: None,
             thing_info: None,
-            visual: None,
             inventory: None,
             vars: None,
             prose: None,
@@ -390,11 +385,6 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    pub fn visual(mut self, visual: &str) -> EntityBuilder<'a> {
-        self.visual = Some(visual.trim().into());
-        self
-    }
-
     /// Adds an inventory list to the entity.
     #[allow(dead_code)]
     pub fn inventory(mut self) -> EntityBuilder<'a> {
@@ -439,16 +429,24 @@ impl<'a> EntityBuilder<'a> {
     }
 
     /// Adds a rule that will fire at most once.
-    pub fn once(mut self, predicate: RulePred, actions: Vec<Action>) -> EntityBuilder<'a> {
-        self.rule_info = Some(RuleInfo::once(predicate, actions));
+    pub fn once(mut self, predicate: RulePred) -> EntityBuilder<'a> {
+        self.rule_info = Some(RuleInfo::once(predicate));
         self
     }
 
     /// Adds a rule that will fire every time the predicate is met.
-    pub fn always(mut self, predicate: RulePred, actions: Vec<Action>) -> EntityBuilder<'a> {
-        self.rule_info = Some(RuleInfo::always(predicate, actions));
+    pub fn always(mut self, predicate: RulePred) -> EntityBuilder<'a> {
+        self.rule_info = Some(RuleInfo::always(predicate));
         self
     }
+
+    /// Adds an action to a rule.
+    pub fn action(mut self, action: Action) -> EntityBuilder<'a> {
+        assert!(self.rule_info.is_some(), "Adding action to non-rule: {}", self.tag);
+        self.rule_info.as_mut().unwrap().actions.push(action);
+        self
+    }
+
 
     /// Builds the entity, adds it to the world, and sets its ID.  Returns the ID.
     pub fn build(self) -> ID {
@@ -458,7 +456,6 @@ impl<'a> EntityBuilder<'a> {
             player_info: self.player_info,
             room_info: self.room_info,
             thing_info: self.thing_info,
-            visual: self.visual,
             inventory: self.inventory,
             vars: self.vars,
             prose: self.prose,

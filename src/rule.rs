@@ -26,8 +26,8 @@ fn fire_rule(world: &mut World, rule: &RuleView) {
     for action in &rule.actions {
         match action {
             // Print the rule's visual
-            Action::PrintVisual => {
-                println!("{}\n", rule.visual);
+            Action::Print(visual) => {
+                println!("{}\n", visual);
             }
 
             // Set the var on the entity's var set

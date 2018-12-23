@@ -59,8 +59,4 @@ pub fn dump_entity(world: &World, id: ID) {
             println!("  Rule Action: {:?}", action);
         }
     }
-
-    if let Some(visual) = &world.entities[id].visual {
-        println!("  Visual: {}", visual);
-    }
 }

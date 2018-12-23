@@ -146,19 +146,19 @@ pub struct RuleInfo {
 }
 
 impl RuleInfo {
-    pub fn once(predicate: RulePred, actions: Vec<Action>) -> RuleInfo {
+    pub fn once(predicate: RulePred) -> RuleInfo {
         RuleInfo {
             predicate: predicate,
-            actions,
+            actions: Vec::new(),
             once_only: true,
             fired: false,
         }
     }
 
-    pub fn always(predicate: RulePred, actions: Vec<Action>) -> RuleInfo {
+    pub fn always(predicate: RulePred) -> RuleInfo {
         RuleInfo {
             predicate: predicate,
-            actions,
+            actions: Vec::new(),
             once_only: false,
             fired: false,
         }
@@ -180,7 +180,7 @@ impl Clone for RuleInfo {
 #[derive(Clone, Debug)]
 pub enum Action {
     /// Print the entity's visual
-    PrintVisual,
+    Print(String),
 
     /// Set the variable for the entity with the given ID
     SetVar(ID, Var),

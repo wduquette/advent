@@ -77,24 +77,20 @@ step!
 
     world
         .make("rule-dirty-note")
-        .always(
-            &|world| player_gets_note_dirty(world),
-            vec![Action::PrintVisual, Action::Swap(clean_note, dirty_note)],
-        )
-        .visual("The dirt from your hands got all over the note.")
+        .always(&|world| player_gets_note_dirty(world))
+        .action(Action::Print("The dirt from your hands got all over the note.".into()))
+        .action(Action::Swap(clean_note, dirty_note))
         .build();
 
     // Stories: Rules that supply backstory to the player.
     world
         .make("rule-story-1")
-        .once(&|world| world.clock == 2, vec![Action::PrintVisual])
-        .visual(
-            "\
+        .once(&|world| world.clock == 2)
+        .action(Action::Print("\
 You don't know where you are.  You don't even know where you want to
 be.  All you know is that your feet are wet, your hands are dirty,
 and gosh, this doesn't look anything like the toy aisle.
-        ",
-        )
+        ".into()))
         .build();
 
     // NEXT, Make the player
