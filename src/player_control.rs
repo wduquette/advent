@@ -4,7 +4,7 @@ use crate::debug;
 use crate::entity::PlayerView;
 use crate::types::Detail::*;
 use crate::types::Dir::*;
-use crate::types::var_set::Flag::*;
+use crate::types::flags::Flag::*;
 use crate::types::*;
 use crate::world::*;
 

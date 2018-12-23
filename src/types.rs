@@ -6,9 +6,9 @@ use crate::world::*;
 use std::collections::hash_map::HashMap;
 use std::collections::hash_set::HashSet;
 
-use crate::types::var_set::*;
+use crate::types::flags::*;
 
-pub mod var_set;
+pub mod flags;
 
 //------------------------------------------------------------------------------------------------
 // Basic Types

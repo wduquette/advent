@@ -1,7 +1,7 @@
 //! Scenario definition
 
 use crate::types::Dir::*;
-use crate::types::var_set::Flag::*;
+use crate::types::flags::Flag::*;
 use crate::types::*;
 use crate::world::*;
 

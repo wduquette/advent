@@ -1,7 +1,7 @@
 //! The game world
 use crate::entity::*;
 use crate::types::*;
-use crate::types::var_set::*;
+use crate::types::flags::*;
 use std::collections::HashMap;
 
 pub const LIMBO: ID = 0;
@@ -71,7 +71,7 @@ impl World {
             id
         );
 
-        // Consider adding as_var_set() to Entity
+        // Consider adding as_flags() to Entity
         if let Some(flags) = &mut self.entities[id].flags {
             flags.set(var);
         }
