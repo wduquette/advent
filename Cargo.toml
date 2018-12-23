@@ -1,7 +1,8 @@
 [package]
 edition = "2018"
-name = "advent"
+name = "bonaventure"
 version = "0.1.0"
 authors = ["Will Duquette <will@wjduquette.com>"]
 
 [dependencies]
+textwrap = { version = "0.11", features = ["term_size"] }

@@ -1,3 +1,3 @@
 fn main() {
-    advent::run();
+    bonaventure::run();
 }
