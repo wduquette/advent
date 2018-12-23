@@ -14,7 +14,6 @@ Also, see docs/journal.txt.
     explicit line breaks, "as is" segments, and so on.
   * Include inline descriptions of scenery and portable things.
 * Implement inventory system, for acquiring things in the local environment.
-* Define FlagInfo struct, with set, has, unset, replace methods.
 * Consider replacing the entities vector with a set of component hash
   tables.
   * Only if it would simplify the code.

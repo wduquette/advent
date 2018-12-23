@@ -108,3 +108,19 @@ x   Rooms vs. Things vs. NPCs
         x   A room name and visual string
         x   A thing name and visual string and noun.
     x   An NPC is a thing with behavior
+x   Added PlayerInfo, RoomInfo, ThingInfo components based on the above
+    analysis.
+    x   The EntityBuilder syntax is now much nicer;
+        x   The new player(), room(), and thing() methods unequivocally
+            add those components in an unequivocal way.
+        x   They also add necessary trimmings, i.e., inventory for both
+            room and player.
+x   RuleComponent is now RuleInfo.
+    x   Added an action() EntityBuilder method.  The once() and always()
+        methods add a rule with an empty actions vector; action() requires
+        that the entity be a rule, and adds the action to the vector.
+x   ProseComponent is now BookInfo.
+    x   You can only add a book() to an entity if it's already a thing.
+x   Removed obsolete components, e.g., name, loc, visual.
+x   Replaced the VarSet type alias with a rule type, FlagSet.
+    x   Vars are now Flags, because they really are.

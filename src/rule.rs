@@ -30,14 +30,14 @@ fn fire_rule(world: &mut World, rule: &RuleView) {
                 println!("{}\n", visual);
             }
 
-            // Set the var on the entity's var set
-            Action::SetFlag(id, var) => {
-                world.set_var(*id, *var);
+            // Set the flag on the entity's flag set
+            Action::SetFlag(id, flag) => {
+                world.set_flag(*id, *flag);
             }
 
-            // Clear the var on the entity's var set
-            Action::ClearFlag(id, var) => {
-                world.clear_var(*id, var);
+            // Clear the flag on the entity's flag set
+            Action::ClearFlag(id, flag) => {
+                world.unset_flag(*id, flag);
             }
 
             // Swap a, in a place, with b, in LIMBO

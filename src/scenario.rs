@@ -40,7 +40,7 @@ pub fn build() -> World {
 The trail crosses a small stream here.  You can go east or west.
         ",
         )
-        .var(HasWater)
+        .flag(HasWater)
         .build();
 
     make_scenery(
@@ -111,7 +111,7 @@ and gosh, this doesn't look anything like the toy aisle.
     world.pid = world
         .make("self")
         .player(clearing, "You've got all the usual bits.")
-        .var(DirtyHands)
+        .flag(DirtyHands)
         .build();
 
     // NEXT, return the world.
@@ -129,7 +129,7 @@ fn player_gets_note_dirty(world: &World) -> bool {
 
 /// Makes a scenery object, and returns its ID.
 fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -> ID {
-    let id = world.make(tag).thing(name, name, text).var(Scenery).build();
+    let id = world.make(tag).thing(name, name, text).flag(Scenery).build();
     world.put_in(id, loc);
 
     id

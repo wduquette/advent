@@ -25,7 +25,7 @@ pub struct Entity {
     // Some entities can own/contain Things.
     pub inventory: Option<Inventory>,
 
-    // Entity variable settings
+    // Entity flag settings
     pub flags: Option<FlagSet>,
 
     // BookInfo, a readable thing's text content.
@@ -427,13 +427,13 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    /// Adds a variable to the entity, creating the var set if needed.
-    pub fn var(mut self, var: Flag) -> EntityBuilder<'a> {
+    /// Adds a flag to the entity, creating the flag set if needed.
+    pub fn flag(mut self, flag: Flag) -> EntityBuilder<'a> {
         if self.flags.is_none() {
             self.flags = Some(FlagSet::new());
         }
 
-        self.flags.as_mut().unwrap().set(var);
+        self.flags.as_mut().unwrap().set(flag);
         self
     }
 
