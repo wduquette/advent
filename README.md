@@ -10,7 +10,7 @@ Also, see docs/journal.txt.
 * Update Action::PrintProse to be Action::Print(String), and use that
   string instead of the rule's visual.
   * And get rid of the visual component.
-* Change ProseComponent to BookInfo.
+* Change BookInfo to BookInfo.
   * And get rid of pages.
   * And only Things can be Books.
 * Implement visual system, with text wrapping/formatting details.

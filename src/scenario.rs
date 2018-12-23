@@ -58,7 +58,7 @@ how narrow it is.
     let clean_note = world
         .make(NOTE)
         .thing("note", "note", "A note, on plain paper.")
-        .prose(
+        .book(
             "\
 Welcome, dear friend.  Your mission, should you choose to
 accept it, is to figure out how to get to the end of
@@ -72,7 +72,7 @@ step!
     let dirty_note = world
         .make("note-dirty")
         .thing("note", "note", "A note, on plain paper.  It looks pretty grubby.")
-        .prose("You've gotten it too dirty to read.")
+        .book("You've gotten it too dirty to read.")
         .build();
 
     world

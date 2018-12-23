@@ -2,7 +2,6 @@
 
 use crate::types::*;
 use crate::world::World;
-use std::collections::HashMap;
 use std::collections::HashSet;
 
 /// The entity type: a set of optional components defining an entity in the game.
@@ -28,8 +27,8 @@ pub struct Entity {
     // Entity variable settings
     pub vars: Option<VarSet>,
 
-    // Prose, i.e., a book's content.
-    pub prose: Option<ProseComponent>,
+    // BookInfo, a readable thing's text content.
+    pub book_info: Option<BookInfo>,
 
     // Some entities are rules, actions to be taken when a condition is met.
     pub rule_info: Option<RuleInfo>,
@@ -61,15 +60,10 @@ impl Entity {
     pub fn as_rule(&self) -> RuleView { RuleView::from(self) }
 
     /// Does this entity have prose?
-    pub fn is_prose(&self) -> bool {
-        self.prose.is_some()
-    }
+    pub fn is_book(&self) -> bool { BookView::is_book(self) }
 
-    /// Retrieve a view of the entity as a Prose
-    pub fn as_prose(&self) -> ProseView {
-        assert!(self.is_prose(), "Not prose: [{}] {}", self.id, self.tag);
-        ProseView::from(self)
-    }
+    /// Retrieve a view of the entity as a Book
+    pub fn as_book(&self) -> BookView { BookView::from(self) }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -262,36 +256,40 @@ impl RuleView {
 }
 
 //------------------------------------------------------------------------------------------------
-// Prose View
+// Book View
 
-/// Prose view: a view of an entity as a collection of prose.
-pub struct ProseView {
+/// BookView: a view of an entity as a body of text.
+pub struct BookView {
     pub id: ID,
     pub tag: String,
 
     // Saved
-    pub main: String,
-    pub pages: HashMap<String, String>,
+    pub text: String,
 }
 
-impl ProseView {
-    /// Creates a ProseView for the Entity.  For use by Entity::as_prose().
-    fn from(this: &Entity) -> ProseView {
-        let prose = this.prose.as_ref().unwrap();
-        ProseView {
+impl BookView {
+    // Can this entity be viewed as a book?
+    pub fn is_book(this: &Entity) -> bool {
+        this.thing_info.is_some() &&
+        this.book_info.is_some()
+    }
+
+    /// Creates a BookView for the Entity.  For use by Entity::as_book().
+    fn from(this: &Entity) -> BookView {
+        assert!(this.is_book(), "Not book: [{}] {}", this.id, this.tag);
+        let book_info = this.book_info.as_ref().unwrap();
+        BookView {
             id: this.id,
             tag: this.tag.clone(),
-            main: prose.main.clone(),
-            pages: prose.pages.clone(),
+            text: book_info.text.clone(),
         }
     }
 
-    /// Save the prose back to the world.  Replaces the main text.
+    /// Save the text back to the world.
     #[allow(dead_code)]
     pub fn save(&mut self, world: &mut World) {
-        world.entities[self.id].prose = Some(ProseComponent {
-            main: self.main.clone(),
-            pages: self.pages.clone(),
+        world.entities[self.id].book_info = Some(BookInfo {
+            text: self.text.clone(),
         });
     }
 }
@@ -312,7 +310,7 @@ pub struct EntityBuilder<'a> {
     pub thing_info: Option<ThingInfo>,
     pub inventory: Option<Inventory>,
     pub vars: Option<VarSet>,
-    pub prose: Option<ProseComponent>,
+    pub book_info: Option<BookInfo>,
     pub rule_info: Option<RuleInfo>,
 }
 
@@ -326,7 +324,7 @@ impl<'a> EntityBuilder<'a> {
             thing_info: None,
             inventory: None,
             vars: None,
-            prose: None,
+            book_info: None,
             rule_info: None,
         }
     }
@@ -402,31 +400,15 @@ impl<'a> EntityBuilder<'a> {
         self
     }
 
-    /// Adds a variable to the entity, creating the var set if needed.
-    pub fn prose(mut self, main: &str) -> EntityBuilder<'a> {
-        self.prose = Some(ProseComponent {
-            main: main.trim().into(),
-            pages: HashMap::new(),
+    /// Adds a book component to the entity.
+    pub fn book(mut self, text: &str) -> EntityBuilder<'a> {
+        assert!(self.thing_info.is_some(), "Adding book info to non-thing: {}", self.tag);
+        self.book_info = Some(BookInfo {
+            text: text.trim().into(),
         });
         self
     }
 
-    /// Adds a page to an existing prose component; the page can be looked up by its
-    /// index.
-    #[allow(dead_code)]
-    pub fn page(mut self, index: &str, text: &str) -> EntityBuilder<'a> {
-        assert!(
-            self.prose.is_some(),
-            "Can't add page, no prose component: {}",
-            self.tag
-        );
-        self.prose
-            .as_mut()
-            .unwrap()
-            .pages
-            .insert(index.into(), text.into());
-        self
-    }
 
     /// Adds a rule that will fire at most once.
     pub fn once(mut self, predicate: RulePred) -> EntityBuilder<'a> {
@@ -458,7 +440,7 @@ impl<'a> EntityBuilder<'a> {
             thing_info: self.thing_info,
             inventory: self.inventory,
             vars: self.vars,
-            prose: self.prose,
+            book_info: self.book_info,
             rule_info: self.rule_info,
         })
     }

@@ -95,14 +95,10 @@ impl ThingInfo {
 //------------------------------------------------------------------------------------------------
 // Prose
 
-/// Prose for an object that's readable.
+/// Books: things that can be read.
 #[derive(Debug, Clone)]
-pub struct ProseComponent {
-    /// The object's main string: used for signs, notes, and simple books
-    pub main: String,
-
-    /// Additional pages that you need to look up given their names.
-    pub pages: HashMap<String, String>,
+pub struct BookInfo {
+    pub text: String,
 }
 
 //------------------------------------------------------------------------------------------------

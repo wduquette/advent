@@ -131,14 +131,14 @@ fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
         let thing = world.get(id).as_thing();
 
         // If it has no prose, it can't be read
-        if !world.get(id).is_prose() {
+        if !world.get(id).is_book() {
             return Err("You can't read that.".into());
         }
 
         // If he's holding it, or it's scenery, then he can read it.
         if thing.location == player.id || thing.vars.contains(&Scenery) {
-            let prose = world.get(id).as_prose();
-            println!("{}\n", prose.main);
+            let book = world.get(id).as_book();
+            println!("{}\n", book.text);
             Ok(())
         } else {
             Err("You don't have it.".into())
