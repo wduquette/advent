@@ -7,19 +7,27 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Implement low level text formatting code.
-* Implement visual system, with text wrapping/formatting details.
-  * Requires Thing and Room components.
-  * Include syntax for entering prose as part of the scenario, indicating
-    explicit line breaks, "as is" segments, and so on.
-  * Include inline descriptions of scenery and portable things.
-* Implement inventory system, for acquiring things in the local environment.
+* Add `environment` system
+  * For finding and listing things in the local environment.
+  * Can support queries of various kinds.
+* Improve vocabulary and grammar management
+  * Strip punctuation and articles
+  * Convert synonyms to preferred verbs/nouns
+    * Including two-word synonyms for verbs.
+  * Possibly, compile commands to action lists.
+  * Allow scenario to define verbs.
+  * Support simple patterns, e.g.,
+    * ["drop", noun]
+    * ["give", noun,"to", npc]
+    * ["hit", npc, "with", noun]
+* Extend `visual` system
+  * `visual::room()` should include descriptions of portable things as
+    prose in the basic description, and maybe of some scenery items as
+    well.
+  * Need articles for things.
 * Consider replacing the entities vector with a set of component hash
   tables.
   * Only if it would simplify the code.
-* Add dictionary: preferred words with synonyms.
-* Convert input from user's words to preferred words before pattern
-  matching.
 * Add puzzle to make water flow
 * Extend the world.
 * Add some puzzles.
@@ -43,7 +51,7 @@ me headed the right direction.
 
 As a text adventure, Bonaventure is (at present) dirt simple.  It doesn't
 have a fancy natural language parser; it has only a very few rooms
-(and few objects); and there are no puzzles and no way to win the game.
+(and few objects); and there are few puzzles and no way to win the game.
 
 What it does have is a data model that would support a real game and
 could be extended cleanly in all sorts of ways. At present, the player can:
@@ -61,50 +69,45 @@ The game world consists of a vector of "entities".  Each entity has a tag,
 which is used for debugging, and can also be used to look up the entity's
 ID; entities may also have the following components:
 
-* A name, for display
-* A descriptive text string
-* A location (for when it is contained in another entity)
-* A set of links to other entities (i.e., the trail is East of the clearing)
-* Details of things with which the player interacts (i.e., can he
-  pick it up)
-* An inventory of entities contained within this entity
-* A variable set, for details that can change.
-* A Rule: under certain conditions, do something automatically.
+* A player component, for the player entity.
+* A room component, for entities that can be linked together into the
+  room network.  This includes the room's name, visual description,
+  and links.
+* A thing component, for entities that can be placed in a room or
+  (in some cases) the player's inventory.
+* A flags component, for flags that can be set on the entity.
+* An inventory component, to contain things found within the entity
+  (a room, the player, a box).
+* A book component, for things that have readable text.
+* A rule component: for rule entities, that make things happen.
 
-Thus,
+These components are not classes in the OO sense; they can be composed
+as desired.  A normal thing will not have a room component, and a normal
+room will not have a thing component, but a vehicle could have both:
+it's a thing that can appear in a room, but that the user can get in.
 
-* The player has a name, a location, an inventory, and a variable set.
-* A room has a name, a description, links, an inventory, and a variable
-  set
-* A thing has a name, a description, a location, and a variable set.
-  * "Scenery" (i.e., things that are part of a room) have variable Scenery.
+The entities themselves have very little logic attached to them.
 
-The point is, these categories of things are not classes in the OOP sense.
-The Entity struct has Option<T> fields for each of the above components;
-and by mixing and matching the components you can create almost any kind of
-of object, e.g., a magical car that is an object that can appear in a room
-(or be put in the player's pocket) but which the player can also get into
-and drive.  
+* The World struct (which contains the entities) provides convenience
+  methods for querying and mutating the game world at a very low level.
 
-The Entity struct and its components are almost pure data; some of the
-component structs have `new()` methods, but otherwise all of the logic
-is in two places.
+* The Entity struct allows for acquiring "view" objects focussed on a
+  particular role, e.g., `as_room()` and `as_thing()`.  Views can be
+  mutated and the result saved back into the World.  
 
-* The World struct provides convenience methods for querying and mutating
-  the game world at a very low level.  
-
-* The game's "systems" define the game logic that determines how the game
-  world mutates each turn, e.g., how to process the player's commands.  
+* The bulk of the logic is in the game's "systems", which define how
+  the entities appear to the player (the `visual` system), how the
+  player's commands are processed (the `player_control` system), etc.
 
 ## Ideas for the Future
 
 ### NPCs and Monsters
 
 These would be entities with behavior.  Behavior could be implemented as
-a BehaviorComponent that takes a closure as a value; but it's probably
-easier to define an Enum with values for each kind of behavior the NPC
-or monster might have: sneaking, fighting, running away in fear,
-patrolling.  These behaviors could be configured using Enum constant
+a BehaviorComponent that takes a closure or functional pointer as a value;
+but it's probably easier to define an Enum with values for each kind of
+behavior the NPC or monster might have: sneaking, fighting, running away in
+fear, patrolling.  These behaviors could be configured using Enum constant
 fields, e.g., the monster might fight until its health decreases past
 a threshold at which point it runs.  The threshold could be part of the
 Fight enum:
@@ -153,13 +156,14 @@ Here, `Go` means just link there; `DeadEnd` means you can't go that way,
 but there's a special message; `Guarded` means you can only go there if
 a predicate condition is met, and you'll get a `DeadEnd` message otherwise.
 
-### Book/Note Content
+### Dictionary Content
 
-A "Thing" can have additional prose, as the ID of a prose-only component,
-e.g., so you can examine a book and then read it.  Alternatively, just
-add another text component, description vs. prose.
-
-Or, give a book a variable Text(ID), where the ID is a prose component.
+A number of inform games have "dictionaries", in which the user needs
+to look things up.  This could be a dictionary or encyclopedia, a set
+of mail slots, a corridor with lots of numbered offices, a phone book,
+or what have you. The essence is that the user isn't allowed to simply
+search through all the possibilities; he has to know what he's looking
+for, e.g., Prof. Plum's mail slot is number 47.
 
 ### Expression Syntax
 
@@ -167,6 +171,20 @@ At present Rules take a closure |&World| -> bool as the predicate.  If
 I were reading the game from a scenario file, though, I'd need some
 kind of expression Syntax, probably translated to a syntax tree
 represented by enum values.  It could be useful anyway.
+
+There might be some crate that provides this.
+
+* There doesn't seem to be any good crate providing basic boolean/arithmetic
+  expression parsing and evaluation.
+  * `calculate` doesn't seem to offer boolean expressions, and the
+    documentation is lacking.
+  * `pupil` is only arithmetic
+
+There are some scripting language possibilities.
+
+* `rhai`
+* gluon-lang/gluon
+* PistonDevelopers/dyon
 
 ### Action Syntax
 

@@ -23,6 +23,13 @@ x   Text formatting plan
     x   In console::, add output methods that use confmt and conwrap.
         x   And add macros that use format! on their argument, and
             call the confmt/conwrap output methods.
+    x   Add visual:: module that uses these.
+x   Things done:
+    x   Added conmark::
+    x   Added console:: methods
+    x   Added visual:: system, and revised the app to use it.
+    x   Added visual::prose()...para() mechanism for building up and
+        outputting strings.
 
 2018-12-22 (Saturday)
 
