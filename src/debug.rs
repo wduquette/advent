@@ -54,8 +54,8 @@ pub fn dump_entity(world: &World, id: ID) {
         }
     }
 
-    if let Some(rule) = &world.entities[id].rule {
-        for action in &rule.actions {
+    if let Some(rule_info) = &world.entities[id].rule_info {
+        for action in &rule_info.actions {
             println!("  Rule Action: {:?}", action);
         }
     }

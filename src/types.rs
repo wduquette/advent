@@ -138,16 +138,16 @@ pub type VarSet = HashSet<Var>;
 pub type RulePred = &'static Fn(&World) -> bool;
 
 /// Game rules: actions taken when a predicate is met, and probably never repeated.
-pub struct RuleComponent {
+pub struct RuleInfo {
     pub predicate: RulePred,
     pub actions: Vec<Action>,
     pub once_only: bool,
     pub fired: bool,
 }
 
-impl RuleComponent {
-    pub fn once(predicate: RulePred, actions: Vec<Action>) -> RuleComponent {
-        RuleComponent {
+impl RuleInfo {
+    pub fn once(predicate: RulePred, actions: Vec<Action>) -> RuleInfo {
+        RuleInfo {
             predicate: predicate,
             actions,
             once_only: true,
@@ -155,8 +155,8 @@ impl RuleComponent {
         }
     }
 
-    pub fn always(predicate: RulePred, actions: Vec<Action>) -> RuleComponent {
-        RuleComponent {
+    pub fn always(predicate: RulePred, actions: Vec<Action>) -> RuleInfo {
+        RuleInfo {
             predicate: predicate,
             actions,
             once_only: false,
@@ -165,9 +165,9 @@ impl RuleComponent {
     }
 }
 
-impl Clone for RuleComponent {
-    fn clone(&self) -> RuleComponent {
-        RuleComponent {
+impl Clone for RuleInfo {
+    fn clone(&self) -> RuleInfo {
+        RuleInfo {
             predicate: self.predicate,
             actions: self.actions.clone(),
             once_only: self.once_only,

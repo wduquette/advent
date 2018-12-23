@@ -35,7 +35,7 @@ pub struct Entity {
     pub prose: Option<ProseComponent>,
 
     // Some entities are rules, actions to be taken when a condition is met.
-    pub rule: Option<RuleComponent>,
+    pub rule_info: Option<RuleInfo>,
 }
 
 impl Entity {
@@ -59,7 +59,7 @@ impl Entity {
 
     /// Is this entity a rule?
     pub fn is_rule(&self) -> bool {
-        self.rule.is_some() && self.visual.is_some()
+        self.rule_info.is_some()
     }
 
     /// Retrieve a view of the entity as a Rule
@@ -244,23 +244,23 @@ pub struct RuleView {
 impl RuleView {
     /// Creates a RuleView for the Entity.  For use by Entity::as_rule().
     fn from(this: &Entity) -> RuleView {
-        let rule = this.rule.as_ref().unwrap().clone();
+        let rule_info = this.rule_info.as_ref().unwrap().clone();
         RuleView {
             id: this.id,
             tag: this.tag.clone(),
-            predicate: rule.predicate,
-            actions: rule.actions,
-            once_only: rule.once_only,
+            predicate: rule_info.predicate,
+            actions: rule_info.actions,
+            once_only: rule_info.once_only,
             visual: this.visual.as_ref().unwrap().clone(),
-            fired: rule.fired,
+            fired: rule_info.fired,
         }
     }
 
     /// Save the rule back to the world
     pub fn save(&self, world: &mut World) {
-        let mut ent = world.entities[self.id].rule.as_mut().unwrap();
+        let mut rule_info = world.entities[self.id].rule_info.as_mut().unwrap();
 
-        ent.fired = self.fired;
+        rule_info.fired = rule_info.fired;
     }
 }
 
@@ -317,7 +317,7 @@ pub struct EntityBuilder<'a> {
     pub inventory: Option<Inventory>,
     pub vars: Option<VarSet>,
     pub prose: Option<ProseComponent>,
-    pub rule: Option<RuleComponent>,
+    pub rule_info: Option<RuleInfo>,
 }
 
 impl<'a> EntityBuilder<'a> {
@@ -332,7 +332,7 @@ impl<'a> EntityBuilder<'a> {
             inventory: None,
             vars: None,
             prose: None,
-            rule: None,
+            rule_info: None,
         }
     }
 
@@ -440,13 +440,13 @@ impl<'a> EntityBuilder<'a> {
 
     /// Adds a rule that will fire at most once.
     pub fn once(mut self, predicate: RulePred, actions: Vec<Action>) -> EntityBuilder<'a> {
-        self.rule = Some(RuleComponent::once(predicate, actions));
+        self.rule_info = Some(RuleInfo::once(predicate, actions));
         self
     }
 
     /// Adds a rule that will fire every time the predicate is met.
     pub fn always(mut self, predicate: RulePred, actions: Vec<Action>) -> EntityBuilder<'a> {
-        self.rule = Some(RuleComponent::always(predicate, actions));
+        self.rule_info = Some(RuleInfo::always(predicate, actions));
         self
     }
 
@@ -462,7 +462,7 @@ impl<'a> EntityBuilder<'a> {
             inventory: self.inventory,
             vars: self.vars,
             prose: self.prose,
-            rule: self.rule,
+            rule_info: self.rule_info,
         })
     }
 }
