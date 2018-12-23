@@ -160,15 +160,10 @@ fn cmd_wash_hands(world: &mut World, player: &mut PlayerView) -> CmdResult {
         return Err("That'd be a neat trick.".into());
     }
 
-    let mut msg = String::new();
-    msg.push_str("You wash your hands in the water.");
-
-    if player.flags.has(DirtyHands) {
-        msg.push_str(" They look much cleaner.");
-        player.flags.unset(DirtyHands);
-    }
-
-    visual::act(&msg);
+    visual::prose("You wash your hands in the water.")
+        .when(player.flags.has(DirtyHands), "They look much cleaner now.")
+        .para();
+    player.flags.unset(DirtyHands);
 
     Ok(())
 }

@@ -14,6 +14,9 @@ use crate::world::World;
 use crate::types::*;
 use crate::types::flags::Flag::*;
 
+//-----------------------------------------------------------------------------
+// Types
+
 /// Level of Detail
 #[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
 enum Detail {
@@ -21,13 +24,19 @@ enum Detail {
     Brief,
 }
 
-/// Outputs an error message.
-pub fn error(msg: &str) {
-    para(msg);
-}
+//-----------------------------------------------------------------------------
+// Basic Messages
+//
+// At present these are all treated like "para"; but this gives the opportunity
+// to distinguish them at some future time.
 
 /// Outputs a player action, e.g., "Taken."
 pub fn act(msg: &str) {
+    para(msg);
+}
+
+/// Outputs an error message.
+pub fn error(msg: &str) {
     para(msg);
 }
 
@@ -35,6 +44,13 @@ pub fn act(msg: &str) {
 pub fn info(msg: &str) {
     para(msg);
 }
+
+pub fn prose(text: &str) -> Buffer {
+    Buffer::new().add(text)
+}
+
+//-----------------------------------------------------------------------------
+// Room Visuals
 
 /// Outputs a full description of a room.
 ///
@@ -74,6 +90,9 @@ fn print_room(world: &World, id: ID, detail: Detail) {
     }
 }
 
+//-----------------------------------------------------------------------------
+// Thing Visuals
+
 /// Outputs a description of a thing.
 pub fn thing(world: &World, id: ID) {
     let thing = world.get(id).as_thing();
@@ -91,16 +110,8 @@ pub fn book(world: &World, id: ID) {
     para(&book.text);
 }
 
-/// Outputs the player's inventory
-pub fn player_inventory(world: &World) {
-    let player = world.player();
-
-    if player.inventory.is_empty() {
-        para("You aren't carrying anything.");
-    } else {
-        para!("You have: {}.\n", invent_list(world, &player.inventory));
-    }
-}
+//-----------------------------------------------------------------------------
+// Player Visuals
 
 /// Outputs a visual of the player.
 ///
@@ -113,13 +124,21 @@ pub fn player(world: &World) {
 
     // TODO: This stuff is scenario-dependent.  There really ought to be
     // a mechanism for this.
-    if player.flags.has(DirtyHands) {
-        msg.push_str(" Your hands are kind of dirty, though.");
-    } else {
-        msg.push_str(" Plus, they're clean bits!");
-    }
+    prose(&player.visual)
+        .when(player.flags.has(DirtyHands), "Your hands are kind of dirty, though")
+        .when(!player.flags.has(DirtyHands), "Plus, they're clean bits!")
+        .para();
+}
 
-    para(&msg);
+/// Outputs the player's inventory
+pub fn player_inventory(world: &World) {
+    let player = world.player();
+
+    if player.inventory.is_empty() {
+        para("You aren't carrying anything.");
+    } else {
+        para!("You have: {}.\n", invent_list(world, &player.inventory));
+    }
 }
 
 /// List the names of the entities, separated by commas.  Omits scenery.
@@ -138,4 +157,42 @@ fn invent_list(world: &World, inventory: &Inventory) -> String {
     }
 
     list
+}
+
+//-----------------------------------------------------------------------------
+// Helpers
+
+/// A buffer for building up text strings for output.
+pub struct Buffer {
+    buff: String,
+}
+
+impl Buffer {
+    /// Creates an empty buffer.  Prefer visual::prose().
+    pub fn new() -> Buffer {
+        Buffer { buff: String::new() }
+    }
+
+    /// Adds a text string to the buffer, adding a blank if necessary.
+    pub fn add(mut self, text: &str) -> Buffer {
+        if !self.buff.is_empty() {
+            self.buff.push(' ');
+        }
+        self.buff.push_str(text);
+        self
+    }
+
+    /// Adds a text string only if the flag is true
+    pub fn when(self, flag: bool, text: &str) -> Buffer {
+        if flag {
+            self.add(text)
+        } else {
+            self
+        }
+    }
+
+    /// Outputs the constructed message as a para.
+    pub fn para(self) {
+        para(&self.buff);
+    }
 }
