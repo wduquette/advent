@@ -272,7 +272,6 @@ fn parse_id(world: &World, token: &str) -> Result<ID, String> {
     Ok(id)
 }
 
-
 /// List all of the available entities.
 fn cmd_debug_list(world: &World) -> CmdResult {
     debug::list_world(world);

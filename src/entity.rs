@@ -36,34 +36,54 @@ pub struct Entity {
 
 impl Entity {
     /// Can this entity function as a player?
-    pub fn is_player(&self) -> bool { PlayerView::is_player(&self) }
+    pub fn is_player(&self) -> bool {
+        PlayerView::is_player(&self)
+    }
 
     /// Retrieve a view of the entity as a Player
-    pub fn as_player(&self) -> PlayerView { PlayerView::from(self) }
+    pub fn as_player(&self) -> PlayerView {
+        PlayerView::from(self)
+    }
 
     /// Can this entity function as a room?  I.e., a place the player can be?
-    pub fn is_room(&self) -> bool { RoomView::is_room(&self) }
+    pub fn is_room(&self) -> bool {
+        RoomView::is_room(&self)
+    }
 
     /// Retrieve a view of the entity as a Room
-    pub fn as_room(&self) -> RoomView { RoomView::from(self) }
+    pub fn as_room(&self) -> RoomView {
+        RoomView::from(self)
+    }
 
     /// Can this entity function as a thing?  I.e., as a noun?
-    pub fn is_thing(&self) -> bool { ThingView::is_thing(&self) }
+    pub fn is_thing(&self) -> bool {
+        ThingView::is_thing(&self)
+    }
 
     /// Retrieve a view of the entity as a Thing
-    pub fn as_thing(&self) -> ThingView { ThingView::from(self) }
+    pub fn as_thing(&self) -> ThingView {
+        ThingView::from(self)
+    }
 
     /// Is this entity a rule?
-    pub fn is_rule(&self) -> bool { RuleView::is_rule(self) }
+    pub fn is_rule(&self) -> bool {
+        RuleView::is_rule(self)
+    }
 
     /// Retrieve a view of the entity as a Rule
-    pub fn as_rule(&self) -> RuleView { RuleView::from(self) }
+    pub fn as_rule(&self) -> RuleView {
+        RuleView::from(self)
+    }
 
     /// Does this entity have prose?
-    pub fn is_book(&self) -> bool { BookView::is_book(self) }
+    pub fn is_book(&self) -> bool {
+        BookView::is_book(self)
+    }
 
     /// Retrieve a view of the entity as a Book
-    pub fn as_book(&self) -> BookView { BookView::from(self) }
+    pub fn as_book(&self) -> BookView {
+        BookView::from(self)
+    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -85,9 +105,7 @@ pub struct PlayerView {
 impl PlayerView {
     /// Can the entity function as a player?
     pub fn is_player(this: &Entity) -> bool {
-        this.player_info.is_some() &&
-        this.inventory.is_some() &&
-        this.vars.is_some()
+        this.player_info.is_some() && this.inventory.is_some() && this.vars.is_some()
     }
 
     /// Creates a PlayerView for the Entity.  For use by Entity::as_player().
@@ -135,14 +153,17 @@ pub struct RoomView {
 impl RoomView {
     /// Determines whether or not an entity is a room.
     pub fn is_room(this: &Entity) -> bool {
-        this.room_info.is_some() &&
-        this.inventory.is_some() &&
-        this.vars.is_some()
+        this.room_info.is_some() && this.inventory.is_some() && this.vars.is_some()
     }
 
     /// Creates a RoomView for the Entity.  For use by Entity::as_room().
     fn from(this: &Entity) -> RoomView {
-        assert!(RoomView::is_room(this), "Not a room: [{}] {}", this.id, this.tag);
+        assert!(
+            RoomView::is_room(this),
+            "Not a room: [{}] {}",
+            this.id,
+            this.tag
+        );
 
         let room_info = &this.room_info.as_ref().unwrap();
 
@@ -184,13 +205,17 @@ pub struct ThingView {
 
 impl ThingView {
     pub fn is_thing(this: &Entity) -> bool {
-        this.thing_info.is_some() &&
-        this.vars.is_some()
+        this.thing_info.is_some() && this.vars.is_some()
     }
 
     /// Creates a ThingView for the Entity.  For use by Entity::as_thing().
     fn from(this: &Entity) -> ThingView {
-        assert!(ThingView::is_thing(this), "Not a thing: [{}] {}", this.id, this.tag);
+        assert!(
+            ThingView::is_thing(this),
+            "Not a thing: [{}] {}",
+            this.id,
+            this.tag
+        );
         let thing = &this.thing_info.as_ref().unwrap();
 
         ThingView {
@@ -270,8 +295,7 @@ pub struct BookView {
 impl BookView {
     // Can this entity be viewed as a book?
     pub fn is_book(this: &Entity) -> bool {
-        this.thing_info.is_some() &&
-        this.book_info.is_some()
+        this.thing_info.is_some() && this.book_info.is_some()
     }
 
     /// Creates a BookView for the Entity.  For use by Entity::as_book().
@@ -331,7 +355,11 @@ impl<'a> EntityBuilder<'a> {
 
     /// Adds the essential trimmings for a player.
     pub fn player(mut self, start: ID, visual: &str) -> EntityBuilder<'a> {
-        assert!(self.player_info.is_none(), "Tried to build player_info twice: {}", self.tag);
+        assert!(
+            self.player_info.is_none(),
+            "Tried to build player_info twice: {}",
+            self.tag
+        );
 
         // Someday we'll have some data to go with this.
         self.player_info = Some(PlayerInfo {});
@@ -357,7 +385,11 @@ impl<'a> EntityBuilder<'a> {
 
     /// Adds the essential trimmings for a room.
     pub fn room(mut self, name: &str, visual: &str) -> EntityBuilder<'a> {
-        assert!(self.room_info.is_none(), "Tried to build room_info twice: {}", self.tag);
+        assert!(
+            self.room_info.is_none(),
+            "Tried to build room_info twice: {}",
+            self.tag
+        );
         self.room_info = Some(RoomInfo::new(name, visual));
 
         if self.inventory.is_none() {
@@ -373,7 +405,11 @@ impl<'a> EntityBuilder<'a> {
 
     /// Adds the essential trimmings for a thing.
     pub fn thing(mut self, name: &str, noun: &str, visual: &str) -> EntityBuilder<'a> {
-        assert!(self.thing_info.is_none(), "Tried to build thing_info twice: {}", self.tag);
+        assert!(
+            self.thing_info.is_none(),
+            "Tried to build thing_info twice: {}",
+            self.tag
+        );
         self.thing_info = Some(ThingInfo::new(name, noun, visual));
 
         if self.vars.is_none() {
@@ -402,13 +438,16 @@ impl<'a> EntityBuilder<'a> {
 
     /// Adds a book component to the entity.
     pub fn book(mut self, text: &str) -> EntityBuilder<'a> {
-        assert!(self.thing_info.is_some(), "Adding book info to non-thing: {}", self.tag);
+        assert!(
+            self.thing_info.is_some(),
+            "Adding book info to non-thing: {}",
+            self.tag
+        );
         self.book_info = Some(BookInfo {
             text: text.trim().into(),
         });
         self
     }
-
 
     /// Adds a rule that will fire at most once.
     pub fn once(mut self, predicate: RulePred) -> EntityBuilder<'a> {
@@ -424,11 +463,14 @@ impl<'a> EntityBuilder<'a> {
 
     /// Adds an action to a rule.
     pub fn action(mut self, action: Action) -> EntityBuilder<'a> {
-        assert!(self.rule_info.is_some(), "Adding action to non-rule: {}", self.tag);
+        assert!(
+            self.rule_info.is_some(),
+            "Adding action to non-rule: {}",
+            self.tag
+        );
         self.rule_info.as_mut().unwrap().actions.push(action);
         self
     }
-
 
     /// Builds the entity, adds it to the world, and sets its ID.  Returns the ID.
     pub fn build(self) -> ID {

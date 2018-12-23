@@ -111,7 +111,8 @@ impl World {
     /// Looks up an entity in the tag map.
     /// Panics if the entity is unknown.
     pub fn lookup(&self, tag: &str) -> &Entity {
-        let id = self.lookup_id(tag)
+        let id = self
+            .lookup_id(tag)
             .unwrap_or_else(|| panic!("No entity found: {}", tag));
         self.get(id)
     }

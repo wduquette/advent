@@ -1,9 +1,9 @@
 //! Type definitions for this app.
 
+use crate::world::LIMBO;
 use crate::world::*;
 use std::collections::hash_map::HashMap;
 use std::collections::hash_set::HashSet;
-use crate::world::LIMBO;
 
 //------------------------------------------------------------------------------------------------
 // Basic Types
@@ -55,7 +55,7 @@ pub struct PlayerInfo {
 pub struct RoomInfo {
     pub name: String,
     pub visual: String,
-    pub links: HashMap<Dir, ID>
+    pub links: HashMap<Dir, ID>,
 }
 
 impl RoomInfo {

@@ -19,22 +19,27 @@ pub fn build() -> World {
     // Room: Clearing
     let clearing = world
         .make("clearing")
-        .room("Clearing",
-            "A wide spot in the woods.  You can go east.")
+        .room("Clearing", "A wide spot in the woods.  You can go east.")
         .build();
 
     // Room: Trail
     let trail = world
         .make("trail")
-        .room("Trail", "A trail from hither to yon.  You can go east or west.")
+        .room(
+            "Trail",
+            "A trail from hither to yon.  You can go east or west.",
+        )
         .build();
 
     // Room: Bridge
     let bridge = world
         .make("bridge")
-        .room("Bridge", "\
+        .room(
+            "Bridge",
+            "\
 The trail crosses a small stream here.  You can go east or west.
-        ")
+        ",
+        )
         .var(HasWater)
         .build();
 
@@ -71,14 +76,20 @@ step!
 
     let dirty_note = world
         .make("note-dirty")
-        .thing("note", "note", "A note, on plain paper.  It looks pretty grubby.")
+        .thing(
+            "note",
+            "note",
+            "A note, on plain paper.  It looks pretty grubby.",
+        )
         .book("You've gotten it too dirty to read.")
         .build();
 
     world
         .make("rule-dirty-note")
         .always(&|world| player_gets_note_dirty(world))
-        .action(Action::Print("The dirt from your hands got all over the note.".into()))
+        .action(Action::Print(
+            "The dirt from your hands got all over the note.".into(),
+        ))
         .action(Action::Swap(clean_note, dirty_note))
         .build();
 
@@ -86,11 +97,14 @@ step!
     world
         .make("rule-story-1")
         .once(&|world| world.clock == 2)
-        .action(Action::Print("\
+        .action(Action::Print(
+            "\
 You don't know where you are.  You don't even know where you want to
 be.  All you know is that your feet are wet, your hands are dirty,
 and gosh, this doesn't look anything like the toy aisle.
-        ".into()))
+        "
+            .into(),
+        ))
         .build();
 
     // NEXT, Make the player
@@ -115,11 +129,7 @@ fn player_gets_note_dirty(world: &World) -> bool {
 
 /// Makes a scenery object, and returns its ID.
 fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -> ID {
-    let id = world
-        .make(tag)
-        .thing(name, name, text)
-        .var(Scenery)
-        .build();
+    let id = world.make(tag).thing(name, name, text).var(Scenery).build();
     world.put_in(id, loc);
 
     id
