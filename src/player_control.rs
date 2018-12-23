@@ -2,7 +2,7 @@
 
 use crate::debug;
 use crate::entity::PlayerView;
-use crate::types::Detail::*;
+use crate::visual;
 use crate::types::Dir::*;
 use crate::types::flags::Flag::*;
 use crate::types::*;
@@ -30,14 +30,14 @@ pub fn system(world: &mut World, command: &str) {
         ["west"] => cmd_go(world, player, West),
         ["help"] => cmd_help(),
         ["look"] => cmd_look(world, player),
-        ["i"] => cmd_inventory(world, player),
-        ["invent"] => cmd_inventory(world, player),
-        ["inventory"] => cmd_inventory(world, player),
-        ["x", "self"] => cmd_examine_self(world, player),
-        ["x", "me"] => cmd_examine_self(world, player),
+        ["i"] => cmd_inventory(world),
+        ["invent"] => cmd_inventory(world),
+        ["inventory"] => cmd_inventory(world),
+        ["x", "self"] => cmd_examine_self(world),
+        ["x", "me"] => cmd_examine_self(world),
         ["x", name] => cmd_examine(world, player, name),
-        ["examine", "self"] => cmd_examine_self(world, player),
-        ["examine", "me"] => cmd_examine_self(world, player),
+        ["examine", "self"] => cmd_examine_self(world),
+        ["examine", "me"] => cmd_examine_self(world),
         ["examine", name] => cmd_examine(world, player, name),
         ["read", name] => cmd_read(world, player, name),
         ["get", name] => cmd_get(world, player, name),
@@ -61,7 +61,7 @@ pub fn system(world: &mut World, command: &str) {
 
     // NEXT, handle the result
     if let Err(msg) = result {
-        println!("{}\n", msg);
+        visual::error(&msg);
     } else {
         player.save(world);
     }
@@ -75,9 +75,9 @@ fn cmd_go(world: &mut World, player: &mut PlayerView, dir: Dir) -> CmdResult {
         player.location = dest;
 
         if !player.flags.has(Seen(dest)) {
-            describe_room(world, dest, Full);
+            visual::room(world, dest);
         } else {
-            describe_room(world, dest, Brief);
+            visual::room_brief(world, dest);
         }
 
         player.flags.set(Seen(dest));
@@ -89,7 +89,7 @@ fn cmd_go(world: &mut World, player: &mut PlayerView, dir: Dir) -> CmdResult {
 
 /// Display basic help, i.e., what commands are available.
 fn cmd_help() -> CmdResult {
-    println!(
+    visual::info(
         "\
 You've got the usual commands: n, s, e, w, look, get, drop, quit.
 You know.  Like that.
@@ -101,24 +101,20 @@ You know.  Like that.
 
 /// Re-describe the current location.
 fn cmd_look(world: &World, player: &PlayerView) -> CmdResult {
-    describe_room(world, player.location, Full);
+    visual::room(world, player.location);
     Ok(())
 }
 
 /// Re-describe the current location.
-fn cmd_inventory(world: &World, player: &PlayerView) -> CmdResult {
-    if player.inventory.is_empty() {
-        println!("You aren't carrying anything.\n");
-    } else {
-        println!("You have: {}.\n", invent_list(world, &player.inventory));
-    }
+fn cmd_inventory(world: &World) -> CmdResult {
+    visual::player_inventory(world);
     Ok(())
 }
 
 /// Describe a thing in the current location.
 fn cmd_examine(world: &World, player: &PlayerView, name: &str) -> CmdResult {
     if let Some(id) = find_visible_thing(world, player, name) {
-        describe_thing(world, id);
+        visual::thing(world, id);
         Ok(())
     } else {
         Err("You don't see any such thing.".into())
@@ -137,8 +133,7 @@ fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
 
         // If he's holding it, or it's scenery, then he can read it.
         if thing.location == player.id || thing.flags.has(Scenery) {
-            let book = world.get(id).as_book();
-            println!("{}\n", book.text);
+            visual::book(world, id);
             Ok(())
         } else {
             Err("You don't have it.".into())
@@ -150,17 +145,8 @@ fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
 }
 
 /// Describe a thing in the current location.
-fn cmd_examine_self(_world: &World, player: &PlayerView) -> CmdResult {
-    let mut msg = String::new();
-
-    msg.push_str(&player.visual);
-
-    if player.flags.has(DirtyHands) {
-        msg.push_str(" Your hands are kind of dirty, though.");
-    } else {
-        msg.push_str(" Plus, they're clean bits!");
-    }
-    println!("{}\n", msg);
+fn cmd_examine_self(world: &World) -> CmdResult {
+    visual::player(world);
 
     Ok(())
 }
@@ -182,7 +168,7 @@ fn cmd_wash_hands(world: &mut World, player: &mut PlayerView) -> CmdResult {
         player.flags.unset(DirtyHands);
     }
 
-    println!("{}\n", msg);
+    visual::act(&msg);
 
     Ok(())
 }
@@ -210,7 +196,7 @@ fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult 
         room.save(world);
         thing.save(world);
 
-        println!("Taken.\n");
+        visual::act("Taken.");
         Ok(())
     } else {
         Err("You don't see any such thing.".into())
@@ -231,7 +217,7 @@ fn cmd_drop(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult
         room.save(world);
         thing.save(world);
 
-        println!("Dropped.\n");
+        visual::act("Dropped.");
         Ok(())
     } else if find_in_inventory(world, &room.inventory, name).is_some() {
         Err("You aren't carrying that.".into())
@@ -242,7 +228,7 @@ fn cmd_drop(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult
 
 /// Quit the game.
 fn cmd_quit(_world: &World) -> CmdResult {
-    println!("Bye, then.");
+    visual::act("Bye, then.");
     ::std::process::exit(0);
 }
 
@@ -289,7 +275,7 @@ fn cmd_debug_dump(world: &World, id_arg: &str) -> CmdResult {
 fn cmd_debug_look(world: &World, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
     if world.get(id).is_room() {
-        describe_room(world, id, Full);
+        visual::room(world, id);
         Ok(())
     } else {
         Err(format!("Entity {} is not a room.", id))
@@ -300,7 +286,7 @@ fn cmd_debug_look(world: &World, id_arg: &str) -> CmdResult {
 fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
     if world.get(id).is_thing() {
-        describe_thing(world, id);
+        visual::thing(world, id);
         Ok(())
     } else {
         Err(format!("Entity {} is not a thing.", id))
@@ -312,47 +298,11 @@ fn cmd_debug_go(world: &World, player: &mut PlayerView, id_arg: &str) -> CmdResu
     let id = parse_id(world, id_arg)?;
     if world.get(id).is_room() {
         player.location = id;
-        describe_room(world, id, Full);
+        visual::room(world, id);
         Ok(())
     } else {
         Err(format!("Entity {} is not a room.", id))
     }
-}
-
-//-------------------------------------------------------------------------
-// Actions
-//
-// These functions are used to implement the above commands.
-
-/// Describe the room.
-pub fn describe_room(world: &World, id: ID, detail: Detail) {
-    let room = world.get(id).as_room();
-
-    // FIRST, display the room's description
-    if detail == Full {
-        println!("{}\n{}\n", room.name, room.visual);
-    } else {
-        println!("{}\n", room.name);
-    }
-
-    // NEXT, list any objects in the room's inventory.  (We don't list
-    // scenary; presumably that's in the description.)
-    let list = invent_list(world, &room.inventory);
-
-    if !list.is_empty() {
-        println!("You see: {}.\n", list);
-    }
-}
-
-/// Describe the location.
-pub fn describe_thing(world: &World, id: ID) {
-    let thing = world.get(id).as_thing();
-
-    // FIRST, display the thing's description
-    println!("{}\n", thing.visual);
-
-    // TODO: eventually we will want to describe its contents, if it has
-    // contents and its open.
 }
 
 //-------------------------------------------------------------------------
@@ -385,25 +335,4 @@ fn find_visible_thing(world: &World, player: &PlayerView, name: &str) -> Option<
     }
 
     None
-}
-
-//-------------------------------------------------------------------------
-// Display Tools
-
-/// List the names of the entities, separated by commas.  Omits scenery.
-fn invent_list(world: &World, inventory: &Inventory) -> String {
-    let mut list = String::new();
-
-    for id in inventory {
-        let thing = world.get(*id).as_thing();
-
-        if !thing.flags.has(Scenery) {
-            if !list.is_empty() {
-                list.push_str(", ");
-            }
-            list.push_str(&thing.name);
-        }
-    }
-
-    list
 }

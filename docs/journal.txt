@@ -2,17 +2,17 @@ Bonaventure Journal
 
 2018-12-23 (Sunday)
 
-x   Text formatting
+x   Text formatting plan
     x   Add conmark module
         x   Reference the textwrap crate.
         x   Add conmark::conwrap(), which uses textwrap to wrap to
             the console line length.
-        x   Add conmark::reformat(), which responds to a dirt-simple
+        x   Add conmark::confmt(), which responds to a dirt-simple
             markup.
             x   textwrap honors newlines, which is good.
             x   But the newlines in multi-line strings are usually
                 not where we want line-breaks.
-            x   conmark::reformat() processes a string like this:
+            x   conmark::confmt() processes a string like this:
                 x   Trims beginning and end.
                 x   Replaces newlines with spaces.
                 x   Replaces "|" with newline.
@@ -20,9 +20,9 @@ x   Text formatting
             x   Normally, then, a string will be flattened and wrapped,
                 but specific strings can choose to have additional
                 formatting.
-    x   In console::, add output methods that reformat and wrap.
+    x   In console::, add output methods that use confmt and conwrap.
         x   And add macros that use format! on their argument, and
-            call the reformat/wrap output methods.
+            call the confmt/conwrap output methods.
 
 2018-12-22 (Saturday)
 

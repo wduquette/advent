@@ -16,13 +16,6 @@ pub mod flags;
 /// The entity ID type: an integer.
 pub type ID = usize;
 
-/// Level of Detail
-#[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
-pub enum Detail {
-    Full,
-    Brief,
-}
-
 /// Directions
 #[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
 #[allow(dead_code)]
@@ -152,6 +145,7 @@ impl Clone for RuleInfo {
 }
 
 /// Actions taken by rules (and maybe other things)
+#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub enum Action {
     /// Print the entity's visual

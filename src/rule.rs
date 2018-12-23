@@ -3,6 +3,7 @@
 use crate::entity::RuleView;
 use crate::types::*;
 use crate::world::*;
+use crate::visual;
 
 /// The Rule System.  Processes all rules, executing those that should_fire.
 pub fn system(world: &mut World) {
@@ -27,7 +28,7 @@ fn fire_rule(world: &mut World, rule: &RuleView) {
         match action {
             // Print the rule's visual
             Action::Print(visual) => {
-                println!("{}\n", visual);
+                visual::info(visual);
             }
 
             // Set the flag on the entity's flag set

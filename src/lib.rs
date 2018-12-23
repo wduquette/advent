@@ -1,6 +1,7 @@
 //! The Main Application Library
 
 mod conmark;
+#[macro_use]
 mod console;
 mod debug;
 mod entity;
@@ -8,9 +9,9 @@ mod player_control;
 mod rule;
 mod scenario;
 mod types;
+mod visual;
 mod world;
 
-use crate::types::Detail;
 use crate::world::*;
 
 /// Runs the program.
@@ -44,7 +45,7 @@ pub fn run() {
 fn print_introduction(world: &World) {
     println!("Welcome to Advent!\n");
 
-    let player = world.get(world.pid).as_player();
+    let player = world.player();
 
-    player_control::describe_room(world, player.location, Detail::Full);
+    visual::room(world, player.location);
 }

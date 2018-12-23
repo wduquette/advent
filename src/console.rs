@@ -2,6 +2,7 @@
 
 use std::io;
 use std::io::prelude::*;
+use crate::conmark::*;
 
 /// Outputs the standard command prompt to stdout.
 pub fn prompt(prompt: &str) {
@@ -34,4 +35,29 @@ pub fn get_command(prompt_text: &str) -> String {
         }
     }
     command
+}
+
+/// Formats the text using confmt/conwrap, and outputs it using print!()
+#[allow(dead_code)]
+pub fn puts(text: &str) {
+    print!("{}", conwrap(&confmt(text)));
+}
+
+/// Formats the text using confmt/conwrap, and outputs it using println!()
+#[allow(dead_code)]
+pub fn putln(text: &str) {
+    println!("{}", conwrap(&confmt(text)));
+}
+
+/// Outputs the text as a block paragraph, i.e., adds an extra newline.
+/// This is the normal way to output text.
+pub fn para(text: &str) {
+    println!("{}\n", conwrap(&confmt(text)));
+}
+
+#[macro_export]
+macro_rules! para {
+    ($($arg:tt)*) => (
+        para(&format!($($arg)*));
+    )
 }
