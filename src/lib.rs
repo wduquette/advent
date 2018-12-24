@@ -1,5 +1,6 @@
 //! The Main Application Library
 
+mod command;
 mod conmark;
 #[macro_use]
 mod console;
