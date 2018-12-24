@@ -7,19 +7,42 @@ use crate::types::Dir::*;
 use crate::types::flags::Flag::*;
 use crate::types::*;
 use crate::world::*;
+use crate::command;
+use crate::command::Command;
 
 /// An error result
 type CmdResult = Result<(), String>;
 
 /// The Player Control system.  Processes player commands.
-pub fn system(world: &mut World, command: &str) {
+pub fn system(world: &mut World, input: &str) {
+    // FIRST, get the player.  We'll save any changes at the end.
     let player = &mut world.get(world.pid).as_player();
 
-    let tokens: Vec<&str> = command.split_whitespace().collect();
+    // NEXT, handle the input
+    match handle_input(world, player, input) {
+        Err(msg) => visual::error(&msg),
+        _ => player.save(world),
+    }
+}
 
-    // TODO: Map synonyms, remove punctuation, before pattern matching
+fn handle_input(world: &mut World, player: &mut PlayerView, input: &str) -> CmdResult {
+    // FIRST, parse the input.
+    let cmd = command::parse(world, input)?;
 
-    let result = match tokens.as_slice() {
+    if cmd.is_debug {
+        handle_debug_command(world, player, &cmd)?;
+    } else {
+        handle_normal_command(world, player, &cmd)?;
+    }
+
+    // NEXT, all is good
+    Ok(())
+}
+
+fn handle_normal_command(world: &mut World, player: &mut PlayerView, cmd: &Command) -> CmdResult {
+    let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
+
+    match words.as_slice() {
         ["n"] => cmd_go(world, player, North),
         ["north"] => cmd_go(world, player, North),
         ["s"] => cmd_go(world, player, South),
@@ -47,25 +70,27 @@ pub fn system(world: &mut World, command: &str) {
         ["exit"] => cmd_quit(world),
         ["quit"] => cmd_quit(world),
 
-        // Debugging
-        ["!list"] => cmd_debug_list(world),
-        ["!dump", id_arg] => cmd_debug_dump(world, id_arg),
-        ["!look", id_arg] => cmd_debug_look(world, id_arg),
-        ["!examine", id_arg] => cmd_debug_examine(world, id_arg),
-        ["!x", id_arg] => cmd_debug_examine(world, id_arg),
-        ["!go", id_arg] => cmd_debug_go(world, player, id_arg),
+        // Error
+        _ => Err("I don't understand.".into()),
+    }
+}
+
+fn handle_debug_command(world: &mut World, player: &mut PlayerView, cmd: &Command) -> CmdResult {
+    let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
+
+    match words.as_slice() {
+        ["list"] => cmd_debug_list(world),
+        ["dump", id_arg] => cmd_debug_dump(world, id_arg),
+        ["look", id_arg] => cmd_debug_look(world, id_arg),
+        ["examine", id_arg] => cmd_debug_examine(world, id_arg),
+        ["x", id_arg] => cmd_debug_examine(world, id_arg),
+        ["go", id_arg] => cmd_debug_go(world, player, id_arg),
 
         // Error
         _ => Err("I don't understand.".into()),
-    };
-
-    // NEXT, handle the result
-    if let Err(msg) = result {
-        visual::error(&msg);
-    } else {
-        player.save(world);
     }
 }
+
 
 // User Commands
 

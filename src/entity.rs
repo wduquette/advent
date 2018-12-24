@@ -1,5 +1,6 @@
 //! The Entity Data Type and Builder
 
+use std::collections::HashMap;
 use crate::types::*;
 use crate::types::flags::*;
 use crate::world::World;
@@ -146,7 +147,7 @@ pub struct RoomView {
     pub visual: String,
 
     // Saved
-    pub links: Links,
+    pub links: HashMap<Dir, ID>,
     pub inventory: Inventory,
     pub flags: FlagSet,
 }

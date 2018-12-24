@@ -30,27 +30,6 @@ pub enum Dir {
     Out,
 }
 
-pub struct Command {
-    // The original text of the command, as entered by the user
-    text: String,
-
-    // The simplified command tokens.  This may eventually become a
-    // vector of some enum type.
-    tokens: Vec<String>,
-
-    // If true, this is a debugging command.
-    debug: bool,
-}
-
-impl Command {
-    pub fn new(text: &str) {
-        Command {
-            text: text.into(),
-            tokens: Vec::new(),
-            debug: false
-        }
-    }
-}
 
 /// An Inventory is the set of things contained with the current entity.
 pub type Inventory = HashSet<ID>;
