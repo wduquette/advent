@@ -1,52 +1,51 @@
-//! Console I/O
+//! # Console I/O
+//! Create a Console to read input in "readline" fashion.  Use para() and the para!() macro
+//! to output paragraphs of text.
 
-use std::io;
-use std::io::prelude::*;
 use crate::conmark::*;
 
-/// Outputs the standard command prompt to stdout.
-pub fn prompt(prompt: &str) {
-    print!("{} ", prompt);
-    io::stdout().flush().expect("Could not flush stdout");
+use rustyline::Editor;
+use rustyline::error::ReadlineError;
+
+
+/// A console input abstraction, wrapping the rustyline input processor.
+pub struct Console {
+    rusty: Editor<()>
 }
 
-/// Reads a trimmed, lowercase line of input from stdin and returns
-/// it.
-pub fn get_line() -> String {
-    let mut guess = String::new();
-
-    io::stdin()
-        .read_line(&mut guess)
-        .expect("Failed to read line");
-
-    guess.trim().to_lowercase()
-}
-
-/// Prompts the user to enter a command.  Empty commands are ignored.
-pub fn get_command(prompt_text: &str) -> String {
-    let mut command;
-    loop {
-        prompt(prompt_text);
-
-        command = get_line();
-
-        if !command.is_empty() {
-            break;
+impl Console {
+    /// Creates the console input abstraction.
+    pub fn new() -> Console {
+        Console {
+            rusty: Editor::<()>::new(),
         }
     }
-    command
-}
 
-/// Formats the text using confmt/conwrap, and outputs it using print!()
-#[allow(dead_code)]
-pub fn puts(text: &str) {
-    print!("{}", conwrap(&confmt(text)));
-}
+    /// Read a non-empty line from the console, using the given prompt.
+    /// Ignores empty lines; halts on ^C, ^D.
+    pub fn readline(&mut self, prompt: &str) -> String {
+        loop {
+            match self.rusty.readline(prompt) {
+                Ok(line) => {
+                    let line = line.trim();
+                    if line.is_empty() {
+                        continue;
+                    } else {
+                        self.rusty.add_history_entry(line);
+                        return line.to_string();
+                    }
+                }
+                Err(ReadlineError::Interrupted) => break,
+                Err(ReadlineError::Eof) => break,
+                Err(err) => {
+                    println!("Input Error: {:?}", err);
+                    continue;
+                }
+            }
+        }
 
-/// Formats the text using confmt/conwrap, and outputs it using println!()
-#[allow(dead_code)]
-pub fn putln(text: &str) {
-    println!("{}", conwrap(&confmt(text)));
+        ::std::process::exit(0);
+    }
 }
 
 /// Outputs the text as a block paragraph, i.e., adds an extra newline.
@@ -55,6 +54,8 @@ pub fn para(text: &str) {
     println!("{}\n", conwrap(&confmt(text)));
 }
 
+/// Formats its arguments using format!(), and outputs them as a wrapped
+/// text block.  Uses `conmark` syntax for line breaks, etc.
 #[macro_export]
 macro_rules! para {
     ($($arg:tt)*) => (

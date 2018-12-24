@@ -6,3 +6,4 @@ authors = ["Will Duquette <will@wjduquette.com>"]
 
 [dependencies]
 textwrap = { version = "0.11", features = ["term_size"] }
+rustyline = "3.0.0"

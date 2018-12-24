@@ -1,4 +1,7 @@
-//! The Main Application Library
+//! # Bonaventure: A Text Adventure Framework
+/// Bonaventure is a simple text adventure framework.  At present, it is used to
+/// implement a single game; see src/scenario.rs.  Eventually it might support
+/// multiple games.
 
 mod command;
 mod conmark;
@@ -25,9 +28,11 @@ pub fn run() {
     print_introduction(world);
 
     // NEXT, enter the game loop.
+    let mut con = console::Console::new();
+
     loop {
         // FIRST, get the user's input
-        let cmd = console::get_command(">");
+        let cmd = con.readline("> ");
 
         // NEXT, let the player do what he does.
         player_control::system(world, &cmd);
