@@ -7,11 +7,21 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Need command history, and ideally readline support.
-  * rustyline appears to be the best choice.
+* The Game
+  * Add puzzle to make water flow in the stream.
+  * Extend the world.
+  * Add some more things and more puzzles.
+  * Add more story.
+  * Add NPCs, monsters.
+    * Maybe less of a standard text adventure, more of a text-based
+      RPG?
+  * Add winning condition.
+* Add save/restore
 * Add `stuff` system
   * For finding and listing things in the local environment.
   * Can support queries of various kinds.
+  * Goal is to simplify the command handlers.
+  * Don't try to do too much too quickly.
 * Improve vocabulary and grammar management
   * Support inputs containing multiple commands, with command queue.
   * Allow two-word synonyms for verbs as part of basic parsing.
@@ -25,7 +35,7 @@ Also, see docs/journal.txt.
   * `visual::room()` should include descriptions of portable things as
     prose in the basic description, and maybe of some scenery items as
     well.
-  * Need articles for things.
+    * Need articles for things.
 * Need "undo" command.
   * Allows wrong actions to cause horrific results without requiring
     the player to start over from the beginning.
@@ -37,12 +47,7 @@ Also, see docs/journal.txt.
       or map for each component.
 * Consider replacing the entities vector with a set of component hash
   tables.
-  * Only if it would simplify the code.
-* Add puzzle to make water flow
-* Extend the world.
-* Add some puzzles.
-* Add more story.
-* Add winning condition.
+  * Might help if we want to split components into read-only and read-write.
 
 ## Background
 
