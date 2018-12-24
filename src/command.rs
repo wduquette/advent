@@ -26,7 +26,7 @@ impl Command {
     }
 }
 
-pub fn parse(_world: &World, input: &str) -> Result<Command,String> {
+pub fn parse(world: &World, input: &str) -> Result<Command,String> {
     // FIRST, remove extraneous characters.
     let input = input.trim();
     let mut text = String::new();
@@ -42,13 +42,25 @@ pub fn parse(_world: &World, input: &str) -> Result<Command,String> {
     }
 
     // NEXT, split into words
-    let words: Vec<String> = text
+    let raw_words: Vec<&str> = text
         .split_whitespace()
-        .map(|token| token.to_string())
         .collect();
 
-    // NEXT, handle verb synonyms
-    // TODO
+    // NEXT, strip articles and translate synonyms.
+    let mut words: Vec<String> = Vec::new();
+
+    for word in raw_words {
+        match word {
+            "a" | "an" | "the" => (),
+            _ => {
+                if let Some(canon) = world.synonyms.get(word) {
+                    words.push(canon.to_string());
+                } else {
+                    words.push(word.to_string());
+                }
+            }
+        }
+    }
 
     // NEXT, return the result.
     Ok(Command::new(input, words))

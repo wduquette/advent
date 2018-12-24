@@ -3,6 +3,7 @@ use crate::entity::*;
 use crate::types::*;
 use crate::types::flags::*;
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 pub const LIMBO: ID = 0;
 
@@ -23,6 +24,12 @@ pub struct World {
 
     // The player's entity ID.
     pub pid: ID,
+
+    // The valid verbs
+    pub verbs: HashSet<String>,
+
+    // Mapping from verb synonyms to verbs
+    pub synonyms: HashMap<String,String>,
 }
 
 impl World {
@@ -36,12 +43,80 @@ impl World {
             tag_map: HashMap::new(),
             clock: 0,
             pid: 0,
+            verbs: HashSet::new(),
+            synonyms: HashMap::new(),
         };
 
+        // NEXT, add LIMBO, the container for things which aren't anywhere else.
         world.make("LIMBO").build(); // ID=0
+
+        // NEXT, add the standard verbs and synonyms
+        world.add_verb("go");
+        
+        world.add_verb("north");
+        world.add_syn("north", "n");
+
+        world.add_verb("south");
+        world.add_syn("south", "s");
+
+        world.add_verb("east");
+        world.add_syn("east", "e");
+
+        world.add_verb("west");
+        world.add_syn("west", "w");
+
+        world.add_verb("help");
+        world.add_verb("look");
+
+        world.add_verb("inventory");
+        world.add_syn("inventory", "invent");
+        world.add_syn("inventory", "i");
+
+        world.add_verb("examine");
+        world.add_syn("examine", "x");
+
+        world.add_verb("get");
+        world.add_syn("get", "take");
+
+        world.add_verb("drop");
+
+        world.add_verb("read");
+
+        world.add_verb("quit");
+        world.add_syn("quit", "exit");
+        world.add_syn("quit", "bye");
+
+        // NEXT, add debugging-only verbs
+        world.add_verb("list");
+        world.add_verb("dump");
+
+        // NEXT, add custom verbs
+        // TODO: Should be part of scenario, once the scenario can define
+        // custom command handlers.
+        world.add_verb("wash");
 
         world
     }
+
+    //--------------------------------------------------------------------------------------------
+    // Verbs
+
+    /// Adds a single canonical verb to the set of valid verbs.
+    pub fn add_verb(&mut self, verb: &str) {
+        assert!(!self.verbs.contains(verb));
+        self.verbs.insert(verb.to_string());
+        self.synonyms.insert(verb.to_string(), verb.to_string());
+    }
+
+    /// Adds a synonym verb to the set of valid verbs.
+    pub fn add_syn(&mut self, canon: &str, verb: &str) {
+        assert!(!self.verbs.contains(verb), "verb already defined: {}", verb);
+        self.verbs.insert(verb.to_string());
+        self.synonyms.insert(verb.to_string(), canon.to_string());
+    }
+
+    //--------------------------------------------------------------------------------------------
+    // Entities
 
     /// Add an entity and return its ID, saving it in the tag map.
     /// Sets the entity's ID field.

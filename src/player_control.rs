@@ -42,32 +42,28 @@ fn handle_input(world: &mut World, player: &mut PlayerView, input: &str) -> CmdR
 fn handle_normal_command(world: &mut World, player: &mut PlayerView, cmd: &Command) -> CmdResult {
     let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
 
+    // TODO: parser should handle two-word verb synonyms.
     match words.as_slice() {
-        ["n"] => cmd_go(world, player, North),
+        ["go", "north"] => cmd_go(world, player, North),
         ["north"] => cmd_go(world, player, North),
-        ["s"] => cmd_go(world, player, South),
+        ["go", "south"] => cmd_go(world, player, South),
         ["south"] => cmd_go(world, player, South),
-        ["e"] => cmd_go(world, player, East),
+        ["go", "east"] => cmd_go(world, player, East),
         ["east"] => cmd_go(world, player, East),
-        ["w"] => cmd_go(world, player, West),
+        ["go", "west"] => cmd_go(world, player, West),
         ["west"] => cmd_go(world, player, West),
         ["help"] => cmd_help(),
         ["look"] => cmd_look(world, player),
-        ["i"] => cmd_inventory(world),
-        ["invent"] => cmd_inventory(world),
         ["inventory"] => cmd_inventory(world),
-        ["x", "self"] => cmd_examine_self(world),
-        ["x", "me"] => cmd_examine_self(world),
-        ["x", name] => cmd_examine(world, player, name),
         ["examine", "self"] => cmd_examine_self(world),
         ["examine", "me"] => cmd_examine_self(world),
         ["examine", name] => cmd_examine(world, player, name),
         ["read", name] => cmd_read(world, player, name),
         ["get", name] => cmd_get(world, player, name),
+        ["pick", "up", name] => cmd_get(world, player, name),
         ["drop", name] => cmd_drop(world, player, name),
         ["wash", "hands"] => cmd_wash_hands(world, player),
         ["wash", _] => Err("Whatever for?".into()),
-        ["exit"] => cmd_quit(world),
         ["quit"] => cmd_quit(world),
 
         // Error
@@ -83,7 +79,6 @@ fn handle_debug_command(world: &mut World, player: &mut PlayerView, cmd: &Comman
         ["dump", id_arg] => cmd_debug_dump(world, id_arg),
         ["look", id_arg] => cmd_debug_look(world, id_arg),
         ["examine", id_arg] => cmd_debug_examine(world, id_arg),
-        ["x", id_arg] => cmd_debug_examine(world, id_arg),
         ["go", id_arg] => cmd_debug_go(world, player, id_arg),
 
         // Error

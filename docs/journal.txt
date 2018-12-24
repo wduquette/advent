@@ -12,13 +12,13 @@ x   Command Processing
             x   However, some situations should clear the queue.
                 x   Command errors.
         x   Other punctuation should be removed, e.g., commas.
-        x   Finally, each command is broken on whitespace into a list of 
+        x   Finally, each command is broken on whitespace into a list of
             words.
-    x   Command simplification 
-        x   Once a command has been discovered, it needs to be prepared 
+    x   Command simplification
+        x   Once a command has been discovered, it needs to be prepared
             for execution.
         x   Strip articles (a, an, the) as they do not affect the sense.
-        x   Replace synonyms with canonical words, e.g., from "n" to 
+        x   Replace synonyms with canonical words, e.g., from "n" to
             "north", from "x" to "examine", from "take" to "get".
             x   Simplifies the pattern matcher.
             x   We need a mapping from synonyms to canonical words
@@ -55,7 +55,7 @@ x   Command Processing
             x   Perform the verb on the noun.
         x   [verb, noun:usable]
             x   "read"
-            x   The noun must be available for use.  As a rule, 
+            x   The noun must be available for use.  As a rule,
                 a noun is available for use if it is:
                 x   visible
                 x   If portable, then held.
@@ -76,13 +76,14 @@ x   Ideas:
         x   Absolutely compute which things are "visible" once.
         x   Then provide predicates for other conditions, e.g.,
             held, gettable, usable, portable, etc.
-    x   This all seems to be part of the inventory system. 
+    x   This all seems to be part of the inventory system.
         x   Or, maybe call it the "stuff" system.
 x   Action Items:
     x   Define input parsing and command simplification
         x   Define Command struct; that's where the data goes.
         x   Define synonym mapping
         x   Leave multiple commands/command queue for later.
+        x   DONE.
 
 2018-12-23 (Sunday)
 x   Text formatting plan
