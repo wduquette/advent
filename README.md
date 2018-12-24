@@ -25,6 +25,17 @@ Also, see docs/journal.txt.
     prose in the basic description, and maybe of some scenery items as
     well.
   * Need articles for things.
+* Need command history, and ideally readline support.
+  * rustyline appears to be the best choice.
+* Need "undo" command.
+  * Allows wrong actions to cause horrific results without requiring
+    the player to start over from the beginning.
+  * Means that the World needs to be cloneable.
+  * Consider defining the World's components into read-only and read-write.
+    * Minimizes the amount of data that needs to be saved/restored on
+      undo or game save/restore, and allows a deeper undo stack.
+    * Either use two entities vectors, or invert, with a distinct vector
+      or map for each component.
 * Consider replacing the entities vector with a set of component hash
   tables.
   * Only if it would simplify the code.
@@ -180,7 +191,8 @@ There might be some crate that provides this.
     documentation is lacking.
   * `pupil` is only arithmetic
 
-There are some scripting language possibilities.
+There are some scripting language possibilities.  These would also allow 
+writing rule and command actions in the scenario.
 
 * `rhai`
 * gluon-lang/gluon

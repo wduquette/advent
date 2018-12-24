@@ -1,7 +1,90 @@
 Bonaventure Journal
 
-2018-12-23 (Sunday)
+2018-12-24 (Monday)
+x   Command Processing
+    x   Input parsing
+        x   Commands beginning with "!" are debugging commands, and
+            should be processed separately.
+        x   The "." character separates individual commands on the
+            command line.
+            x   However entered, each command represents a game turn.
+            x   Consequently, we need a command queue.
+            x   However, some situations should clear the queue.
+                x   Command errors.
+        x   Other punctuation should be removed, e.g., commas.
+        x   Finally, each command is broken on whitespace into a list of 
+            words.
+    x   Command simplification 
+        x   Once a command has been discovered, it needs to be prepared 
+            for execution.
+        x   Strip articles (a, an, the) as they do not affect the sense.
+        x   Replace synonyms with canonical words, e.g., from "n" to 
+            "north", from "x" to "examine", from "take" to "get".
+            x   Simplifies the pattern matcher.
+            x   We need a mapping from synonyms to canonical words
+            x   Probably necessary only for verbs; nouns and (eventually)
+                adjectives are visible in the text, but verbs have to
+                be guessed at.
+            x   Probably want a "verbs" command to list the canonical
+                verbs.
+            x   The scenario needs to be able to add synonyms.
+        x   Then, normal pattern matching can be used to execute the
+            commands.
+    x   Sentence forms
+        x   Normal pattern matching can take us from command vectors
+            to cmd_* functions for execution.  However, by studying
+            the command forms, we can conceivably automate much of
+            the error handling.
+        x   [verb]
+            x   E.g., "east", "west", "look", "help", "verbs".
+            x   Execute the verb.
+        x   [verb, noun:visible]
+            x   "examine"
+            x   Perform the verb on a thing that's visible in the
+                room:
+                x   In the player's inventory
+                x   In the room's inventory
+                x   Ultimately, in any open container in the room.
+        x   [verb, noun:cantake]
+            x   "get"
+            x   Perform the verb on the noun that is visible and can
+                be picked up.
+            x   E.g., "get note".
+        x   [verb, noun:held]
+            x   "drop"
+            x   Perform the verb on the noun.
+        x   [verb, noun:usable]
+            x   "read"
+            x   The noun must be available for use.  As a rule, 
+                a noun is available for use if it is:
+                x   visible
+                x   If portable, then held.
+            x   E.g., "read note".
+x   Ideas:
+    x   Maybe add a system that scans the list of things and categorizes them
+        between game turns.
+        x   Visible, Held, Takeable, Droppable, etc.
+        x   Save them in lists owned by the PlayerComponent.
+            x   visible, held, takeable, etc.
+            x   THIS.  This is very cool, and will simplify the
+                command processing a lot.
+                x   Puts all of the logic in one place.
+            x   Eventually, the same scheme can be used by NPCs.
+        x   However, how does this work with special actions, e.g.,
+            "wash hands"?
+    x   Perhaps better:
+        x   Absolutely compute which things are "visible" once.
+        x   Then provide predicates for other conditions, e.g.,
+            held, gettable, usable, portable, etc.
+    x   This all seems to be part of the inventory system. 
+        x   Or, maybe call it the "stuff" system.
+x   Action Items:
+    x   Define input parsing and command simplification
+        x   Define Command struct; that's where the data goes.
+        x   Define synonym mapping
+        x   Leave multiple commands/command queue for later.
 
+2018-12-23 (Sunday)
 x   Text formatting plan
     x   Add conmark module
         x   Reference the textwrap crate.
@@ -32,7 +115,6 @@ x   Things done:
         outputting strings.
 
 2018-12-22 (Saturday)
-
 x   Lots of stuff to think about.
 x   Room/Thing Hybrids
     x   Observations
