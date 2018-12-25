@@ -169,10 +169,10 @@ fn cmd_examine(world: &World, player: &PlayerView, name: &str) -> CmdResult {
 /// Read a thing in the current location.
 fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
     if let Some(id) = find_visible_thing(world, player, name) {
-        let thing = world.get(id).as_thing();
+        let thing = world.as_thing(id);
 
         // If it has no prose, it can't be read
-        if !world.get(id).is_book() {
+        if !world.is_book(id) {
             return Err("You can't read that.".into());
         }
 

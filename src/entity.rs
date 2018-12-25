@@ -67,26 +67,6 @@ impl Entity {
     pub fn as_thing(&self) -> ThingView {
         ThingView::from(self)
     }
-
-    /// Is this entity a rule?
-    pub fn is_rule(&self) -> bool {
-        RuleView::is_rule(self)
-    }
-
-    /// Retrieve a view of the entity as a Rule
-    pub fn as_rule(&self) -> RuleView {
-        RuleView::from(self)
-    }
-
-    /// Does this entity have prose?
-    pub fn is_book(&self) -> bool {
-        BookView::is_book(self)
-    }
-
-    /// Retrieve a view of the entity as a Book
-    pub fn as_book(&self) -> BookView {
-        BookView::from(self)
-    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -113,7 +93,7 @@ impl PlayerView {
 
     /// Creates a PlayerView for the Entity.  For use by Entity::as_player().
     pub fn from(this: &Entity) -> PlayerView {
-        assert!(this.is_player(), "Not a player: [{}] {}", this.id, this.tag);
+        assert!(Self::is_player(this), "Not a player: [{}] {}", this.id, this.tag);
         let thing = &this.thing_info.as_ref().unwrap();
 
         PlayerView {
@@ -162,7 +142,7 @@ impl RoomView {
     /// Creates a RoomView for the Entity.  For use by Entity::as_room().
     pub fn from(this: &Entity) -> RoomView {
         assert!(
-            RoomView::is_room(this),
+            Self::is_room(this),
             "Not a room: [{}] {}",
             this.id,
             this.tag
@@ -214,7 +194,7 @@ impl ThingView {
     /// Creates a ThingView for the Entity.  For use by Entity::as_thing().
     pub fn from(this: &Entity) -> ThingView {
         assert!(
-            ThingView::is_thing(this),
+            Self::is_thing(this),
             "Not a thing: [{}] {}",
             this.id,
             this.tag
@@ -262,7 +242,7 @@ impl RuleView {
 
     /// Creates a RuleView for the Entity.  For use by Entity::as_rule().
     pub fn from(this: &Entity) -> RuleView {
-        assert!(this.is_rule(), "Not a rule: [{}] {}", this.id, this.tag);
+        assert!(Self::is_rule(this), "Not a rule: [{}] {}", this.id, this.tag);
 
         let rule_info = this.rule_info.as_ref().unwrap().clone();
         RuleView {
@@ -303,7 +283,7 @@ impl BookView {
 
     /// Creates a BookView for the Entity.  For use by Entity::as_book().
     pub fn from(this: &Entity) -> BookView {
-        assert!(this.is_book(), "Not book: [{}] {}", this.id, this.tag);
+        assert!(Self::is_book(this), "Not book: [{}] {}", this.id, this.tag);
         let book_info = this.book_info.as_ref().unwrap();
         BookView {
             id: this.id,

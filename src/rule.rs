@@ -7,11 +7,12 @@ use crate::visual;
 
 /// The Rule System.  Processes all rules, executing those that should_fire.
 pub fn system(world: &mut World) {
-    let rules: Vec<RuleView> = world
-        .entities
-        .iter()
-        .filter(|e| e.is_rule())
-        .map(|e| e.as_rule())
+    // TODO: Need to provide an interator over IDs; or, world.rules(), an interator over a
+    // set of IDs.
+    let rules: Vec<RuleView> =
+        (1..world.entities.len())
+        .filter(|id| world.is_rule(*id))
+        .map(|id| world.as_rule(id))
         .collect();
 
     for mut rule in rules {
