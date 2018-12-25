@@ -15,6 +15,12 @@ mod world;
 
 use crate::world::*;
 
+/// The main game object.  The Game contains the world, and any other data that
+/// change when the world changes.
+pub struct Game {
+    world: World,
+}
+
 /// Runs the program.
 pub fn run() {
     // FIRST, create the game world.

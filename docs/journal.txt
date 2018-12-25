@@ -1,5 +1,23 @@
 Bonaventure Journal
 
+2018-12-25 (Tuesday)
+x   Getting back to basics.
+x   "restart" or "undo" commands
+    x   To restart the game means creating a new World struct.  But the
+        World struct *is* the game struct; there's no way a method can
+        mutate the World to create a new World.
+        x   Implies that we need a game struct that owns the World, and that
+            we pass the Game to the systems.  Then the player_control system
+            can define an entirely new World.
+        x   We probably also want a "Scene" object or function pointer,
+            with which the game is configured, that's used to create the
+            new world.
+        x   For "restart" we don't need to preserve the player data or
+            a state of the World (we can simply recreate the whole thing)
+            but for "undo" we would need to.  That means that the World
+            needs to support clone().
+    
+
 2018-12-24 (Monday)
 x   Command Processing
     x   Input parsing
@@ -12,13 +30,13 @@ x   Command Processing
             x   However, some situations should clear the queue.
                 x   Command errors.
         x   Other punctuation should be removed, e.g., commas.
-        x   Finally, each command is broken on whitespace into a list of 
+        x   Finally, each command is broken on whitespace into a list of
             words.
-    x   Command simplification 
-        x   Once a command has been discovered, it needs to be prepared 
+    x   Command simplification
+        x   Once a command has been discovered, it needs to be prepared
             for execution.
         x   Strip articles (a, an, the) as they do not affect the sense.
-        x   Replace synonyms with canonical words, e.g., from "n" to 
+        x   Replace synonyms with canonical words, e.g., from "n" to
             "north", from "x" to "examine", from "take" to "get".
             x   Simplifies the pattern matcher.
             x   We need a mapping from synonyms to canonical words
@@ -55,7 +73,7 @@ x   Command Processing
             x   Perform the verb on the noun.
         x   [verb, noun:usable]
             x   "read"
-            x   The noun must be available for use.  As a rule, 
+            x   The noun must be available for use.  As a rule,
                 a noun is available for use if it is:
                 x   visible
                 x   If portable, then held.
@@ -76,7 +94,7 @@ x   Ideas:
         x   Absolutely compute which things are "visible" once.
         x   Then provide predicates for other conditions, e.g.,
             held, gettable, usable, portable, etc.
-    x   This all seems to be part of the inventory system. 
+    x   This all seems to be part of the inventory system.
         x   Or, maybe call it the "stuff" system.
 x   Action Items:
     x   Define input parsing and command simplification
