@@ -1,5 +1,23 @@
 Bonaventure Journal
 
+2018-12-25 (Tuesday)
+x   Getting back to basics.
+x   "restart" or "undo" commands
+    x   To restart the game means creating a new World struct.  But the
+        World struct *is* the game struct; there's no way a method can
+        mutate the World to create a new World.
+        x   Implies that we need a game struct that owns the World, and that
+            we pass the Game to the systems.  Then the player_control system
+            can define an entirely new World.
+        x   We probably also want a "Scene" object or function pointer,
+            with which the game is configured, that's used to create the
+            new world.
+        x   For "restart" we don't need to preserve the player data or
+            a state of the World (we can simply recreate the whole thing)
+            but for "undo" we would need to.  That means that the World
+            needs to support clone().
+    
+
 2018-12-24 (Monday)
 x   Command Processing
     x   Input parsing
