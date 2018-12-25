@@ -23,7 +23,11 @@ use crate::world::*;
 /// TODO: Ultimately, this will live somewhere else; and it will contain data that persists
 /// from scene to scene.
 pub struct Game {
+    // THe current world
     world: World,
+
+    // Undo information
+    undo_info: Option<World>,
 }
 
 impl Default for Game {
@@ -36,7 +40,8 @@ impl Game {
     /// Create the game object
     pub fn new() -> Game {
         Game {
-            world: scenario::build()
+            world: scenario::build(),
+            undo_info: None,
         }
     }
 
@@ -53,6 +58,22 @@ impl Game {
     pub fn restart(&mut self) {
         self.world = scenario::build();
         self.introduce();
+    }
+
+    /// Saves the world state for later undo.
+    pub fn save_for_undo(&mut self, undo_info: World) {
+        // At present, we save only one turn.
+        self.undo_info = Some(undo_info);
+    }
+
+    /// Is there any undo info?
+    pub fn has_undo(&self) -> bool {
+        self.undo_info.is_some()
+    }
+
+    pub fn undo(&mut self) {
+        assert!(self.has_undo(), "Cannot undo; no undo info");
+        self.world = self.undo_info.take().unwrap();
     }
 }
 

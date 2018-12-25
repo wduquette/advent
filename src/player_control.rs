@@ -12,11 +12,26 @@ use crate::command;
 use crate::command::Command;
 use crate::Game;
 
-/// A status result on Ok(Normal)
+/// A status result.  Indicates the general category of the change.
+///
+/// TODO:
+///
+/// * We probably want to distinguish between significant changes and other commands, as to
+///   whether we save undo info or not.  I.e., "look" and "examine" take time, but make no
+///   other change; we probably don't want to undo just for them, but back to the previous
+///   move, get, drop, etc.
+/// * Might also be cool to remember the commands as they are undone, so that as we undo
+///   we can tell the user what they are undoing.
 #[derive(Copy,Clone,Debug)]
 enum Status {
+    /// Normal response: the world has been updated, and the change can be undone.
     Normal,
-    Restart
+
+    /// Restart response; the game should be restarted from scratch.
+    Restart,
+
+    /// Undo the last command
+    Undo
 }
 
 /// An error result
@@ -24,15 +39,22 @@ type CmdResult = Result<Status, String>;
 
 /// The Player Control system.  Processes player commands.
 pub fn system(game: &mut Game, input: &str) {
-    // FIRST, get the player.  We'll save any changes at the end.
+    // FIRST, get the current game state, for later undo.
+    let undo_info = game.world.clone();
+
+    // NEXT, get the player.  We'll save any changes at the end.
     let player = &mut game.world.player();
 
     // NEXT, handle the input
     let result = handle_input(game, player, input);
     match result {
         Err(msg) => visual::error(&msg),
-        Ok(Normal) => player.save(&mut game.world),
-        Ok(Restart) => (),
+        Ok(Normal) => {
+            player.save(&mut game.world);
+            game.save_for_undo(undo_info);
+        }
+        Ok(Restart) => game.restart(),
+        Ok(Undo) => game.undo(),
     }
 }
 
@@ -73,8 +95,9 @@ fn handle_normal_command(game: &mut Game, player: &mut PlayerView, cmd: &Command
         ["drop", name] => cmd_drop(world, player, name),
         ["wash", "hands"] => cmd_wash_hands(world, player),
         ["wash", _] => Err("Whatever for?".into()),
-        ["restart"] => cmd_restart(game),
-        ["quit"] => cmd_quit(world),
+        ["undo"] => cmd_undo(game),
+        ["restart"] => cmd_restart(),
+        ["quit"] => cmd_quit(),
 
         // Error
         _ => Err("I don't understand.".into()),
@@ -252,15 +275,24 @@ fn cmd_drop(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult
     }
 }
 
+/// Undo the last command the game
+fn cmd_undo(game: &mut Game) -> CmdResult {
+    if game.has_undo() {
+        visual::act("Undone.");
+        Ok(Undo)
+    } else {
+        Err("Nothing to undo.".into())
+    }
+}
+
 /// Restart the game
-fn cmd_restart(game: &mut Game) -> CmdResult {
+fn cmd_restart() -> CmdResult {
     visual::act("Restarting...");
-    game.restart();
     Ok(Restart)
 }
 
 /// Quit the game.
-fn cmd_quit(_world: &World) -> CmdResult {
+fn cmd_quit() -> CmdResult {
     visual::act("Bye, then.");
     ::std::process::exit(0);
 }
