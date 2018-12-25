@@ -1,5 +1,6 @@
 //! The Player Control System
 
+use self::Status::*;
 use crate::debug;
 use crate::entity::PlayerView;
 use crate::visual;
@@ -9,38 +10,46 @@ use crate::types::*;
 use crate::world::*;
 use crate::command;
 use crate::command::Command;
+use crate::Game;
+
+/// A status result on Ok(Normal)
+#[derive(Copy,Clone,Debug)]
+enum Status {
+    Normal,
+    Restart
+}
 
 /// An error result
-type CmdResult = Result<(), String>;
+type CmdResult = Result<Status, String>;
 
 /// The Player Control system.  Processes player commands.
-pub fn system(world: &mut World, input: &str) {
+pub fn system(game: &mut Game, input: &str) {
     // FIRST, get the player.  We'll save any changes at the end.
-    let player = &mut world.get(world.pid).as_player();
+    let player = &mut game.world.player();
 
     // NEXT, handle the input
-    match handle_input(world, player, input) {
+    let result = handle_input(game, player, input);
+    match result {
         Err(msg) => visual::error(&msg),
-        _ => player.save(world),
+        Ok(Normal) => player.save(&mut game.world),
+        Ok(Restart) => (),
     }
 }
 
-fn handle_input(world: &mut World, player: &mut PlayerView, input: &str) -> CmdResult {
+fn handle_input(game: &mut Game, player: &mut PlayerView, input: &str) -> CmdResult {
     // FIRST, parse the input.
-    let cmd = command::parse(world, input)?;
+    let cmd = command::parse(&game.world, input)?;
 
     if cmd.is_debug {
-        handle_debug_command(world, player, &cmd)?;
+        handle_debug_command(game, player, &cmd)
     } else {
-        handle_normal_command(world, player, &cmd)?;
+        handle_normal_command(game, player, &cmd)
     }
-
-    // NEXT, all is good
-    Ok(())
 }
 
-fn handle_normal_command(world: &mut World, player: &mut PlayerView, cmd: &Command) -> CmdResult {
+fn handle_normal_command(game: &mut Game, player: &mut PlayerView, cmd: &Command) -> CmdResult {
     let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
+    let world = &mut game.world;
 
     // TODO: parser should handle two-word verb synonyms.
     match words.as_slice() {
@@ -64,6 +73,7 @@ fn handle_normal_command(world: &mut World, player: &mut PlayerView, cmd: &Comma
         ["drop", name] => cmd_drop(world, player, name),
         ["wash", "hands"] => cmd_wash_hands(world, player),
         ["wash", _] => Err("Whatever for?".into()),
+        ["restart"] => cmd_restart(game),
         ["quit"] => cmd_quit(world),
 
         // Error
@@ -71,8 +81,9 @@ fn handle_normal_command(world: &mut World, player: &mut PlayerView, cmd: &Comma
     }
 }
 
-fn handle_debug_command(world: &mut World, player: &mut PlayerView, cmd: &Command) -> CmdResult {
+fn handle_debug_command(game: &mut Game, player: &mut PlayerView, cmd: &Command) -> CmdResult {
     let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
+    let world = &mut game.world;
 
     match words.as_slice() {
         ["list"] => cmd_debug_list(world),
@@ -101,7 +112,7 @@ fn cmd_go(world: &mut World, player: &mut PlayerView, dir: Dir) -> CmdResult {
         }
 
         player.flags.set(Seen(dest));
-        Ok(())
+        Ok(Normal)
     } else {
         Err("You can't go that way.".into())
     }
@@ -116,26 +127,26 @@ You know.  Like that.
     "
     );
 
-    Ok(())
+    Ok(Normal)
 }
 
 /// Re-describe the current location.
 fn cmd_look(world: &World, player: &PlayerView) -> CmdResult {
     visual::room(world, player.location);
-    Ok(())
+    Ok(Normal)
 }
 
 /// Re-describe the current location.
 fn cmd_inventory(world: &World) -> CmdResult {
     visual::player_inventory(world);
-    Ok(())
+    Ok(Normal)
 }
 
 /// Describe a thing in the current location.
 fn cmd_examine(world: &World, player: &PlayerView, name: &str) -> CmdResult {
     if let Some(id) = find_visible_thing(world, player, name) {
         visual::thing(world, id);
-        Ok(())
+        Ok(Normal)
     } else {
         Err("You don't see any such thing.".into())
     }
@@ -154,7 +165,7 @@ fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
         // If he's holding it, or it's scenery, then he can read it.
         if thing.location == player.id || thing.flags.has(Scenery) {
             visual::book(world, id);
-            Ok(())
+            Ok(Normal)
         } else {
             Err("You don't have it.".into())
         }
@@ -168,7 +179,7 @@ fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
 fn cmd_examine_self(world: &World) -> CmdResult {
     visual::player(world);
 
-    Ok(())
+    Ok(Normal)
 }
 
 // TODO: As currently implemented, this should be a scenario command, not a
@@ -185,7 +196,7 @@ fn cmd_wash_hands(world: &mut World, player: &mut PlayerView) -> CmdResult {
         .para();
     player.flags.unset(DirtyHands);
 
-    Ok(())
+    Ok(Normal)
 }
 
 /// Gets a thing from the location's inventory.
@@ -212,7 +223,7 @@ fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult 
         thing.save(world);
 
         visual::act("Taken.");
-        Ok(())
+        Ok(Normal)
     } else {
         Err("You don't see any such thing.".into())
     }
@@ -233,12 +244,19 @@ fn cmd_drop(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult
         thing.save(world);
 
         visual::act("Dropped.");
-        Ok(())
+        Ok(Normal)
     } else if find_in_inventory(world, &room.inventory, name).is_some() {
         Err("You aren't carrying that.".into())
     } else {
         Err("You don't see any such thing.".into())
     }
+}
+
+/// Restart the game
+fn cmd_restart(game: &mut Game) -> CmdResult {
+    visual::act("Restarting...");
+    game.restart();
+    Ok(Restart)
 }
 
 /// Quit the game.
@@ -276,14 +294,14 @@ fn parse_id(world: &World, token: &str) -> Result<ID, String> {
 /// List all of the available entities.
 fn cmd_debug_list(world: &World) -> CmdResult {
     debug::list_world(world);
-    Ok(())
+    Ok(Normal)
 }
 
 /// Dump information about the given entity, provided the ID string is valid.
 fn cmd_debug_dump(world: &World, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
     debug::dump_entity(world, id);
-    Ok(())
+    Ok(Normal)
 }
 
 /// Describe the room as though the player were in it.
@@ -291,7 +309,7 @@ fn cmd_debug_look(world: &World, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
     if world.get(id).is_room() {
         visual::room(world, id);
-        Ok(())
+        Ok(Normal)
     } else {
         Err(format!("Entity {} is not a room.", id))
     }
@@ -302,7 +320,7 @@ fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
     if world.get(id).is_thing() {
         visual::thing(world, id);
-        Ok(())
+        Ok(Normal)
     } else {
         Err(format!("Entity {} is not a thing.", id))
     }
@@ -314,7 +332,7 @@ fn cmd_debug_go(world: &World, player: &mut PlayerView, id_arg: &str) -> CmdResu
     if world.get(id).is_room() {
         player.location = id;
         visual::room(world, id);
-        Ok(())
+        Ok(Normal)
     } else {
         Err(format!("Entity {} is not a room.", id))
     }

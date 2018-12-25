@@ -20,18 +20,47 @@ use crate::world::*;
 
 /// The main game object.  The Game contains the world, and any other data that
 /// change when the world changes.
+/// TODO: Ultimately, this will live somewhere else; and it will contain data that persists
+/// from scene to scene.
 pub struct Game {
     world: World,
+}
+
+impl Default for Game {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Game {
+    /// Create the game object
+    pub fn new() -> Game {
+        Game {
+            world: scenario::build()
+        }
+    }
+
+    /// Introduce the game: print a welcome message, and visualize the initial location
+    pub fn introduce(&self) {
+        println!("Welcome to Bonaventure!\n");
+
+        let player = self.world.player();
+
+        visual::room(&self.world, player.location);
+    }
+
+    /// Restart the game: recreate the initial scenario.
+    pub fn restart(&mut self) {
+        self.world = scenario::build();
+        self.introduce();
+    }
 }
 
 /// Runs the program.
 pub fn run() {
     // FIRST, create the game world.
-    let mut the_world: World = scenario::build();
-    let world = &mut the_world;
-
-    // NEXT, Print the introduction
-    print_introduction(world);
+    let mut game = Game::new();
+    game.introduce();
 
     // NEXT, enter the game loop.
     let mut con = console::Console::new();
@@ -41,23 +70,15 @@ pub fn run() {
         let cmd = con.readline("> ");
 
         // NEXT, let the player do what he does.
-        player_control::system(world, &cmd);
+        player_control::system(&mut game, &cmd);
 
         // NEXT, handle rules
-        rule::system(world);
+        rule::system(&mut game.world);
 
         // NEXT, Increment the clock
         // TODO: Probably don't want to do this here.  Some commands should
         // take time, and some shouldn't.  This should probably be in the
         // player_control system.
-        world.clock += 1;
+        game.world.clock += 1;
     }
-}
-
-fn print_introduction(world: &World) {
-    println!("Welcome to Advent!\n");
-
-    let player = world.player();
-
-    visual::room(world, player.location);
 }

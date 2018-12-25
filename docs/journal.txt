@@ -16,7 +16,29 @@ x   "restart" or "undo" commands
             a state of the World (we can simply recreate the whole thing)
             but for "undo" we would need to.  That means that the World
             needs to support clone().
-    
+x   Implemented a Game struct and a "restart" command, but it isn't right yet.
+    x   "restart" does indeed recreate the game.
+    x   BUT, the player view is saved when the command ends; and it is no
+        longer valid.
+    x   We end up with the new World, but the old Player.  This is no good.
+        x   Which, I suppose, is not surprising; this bug is inherent in the
+            view scheme I'm using.
+    x   However, I need to handle this.  What are my options?
+        x   Option A: reset PlayerView
+            x   On restart, set the read-write fields of the PlayerView
+                to match the new world.  Then when they get written back,
+                there's no problem.
+            x   ISSUE: I can't change what the system's player variable
+                points to, so I can't restore the PlayerView wholesale.
+            x   I'd have to set the particular fields, which is fragile;
+                later on I'll add one, and forget to reset it on restart.
+                No good.
+        x   Option B: Make/save PlayerView explicitly
+            x   Each command acquires and saves PlayerView.  This is safer,
+                but tedious; and I'm likely to forget a save() at some point.
+        x   Option C: Special OK returns
+            x   At present, OK returns ().  But I could make it an Enum
+                for the different special cases, e.g., Restart, Undo.
 
 2018-12-24 (Monday)
 x   Command Processing
