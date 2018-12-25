@@ -12,6 +12,7 @@ pub const LIMBO: ID = 0;
 /// constitute a low-level interface for interacting with the world; e.g., `set_location()`
 /// will set the player's location, but that's all it does.  The game logic for entering a new
 /// room should be implemented elsewhere.
+#[derive(Clone)]
 pub struct World {
     // The entity vector
     pub entities: Vec<Entity>,
@@ -52,7 +53,7 @@ impl World {
 
         // NEXT, add the standard verbs and synonyms
         world.add_verb("go");
-        
+
         world.add_verb("north");
         world.add_syn("north", "n");
 

@@ -39,6 +39,19 @@ x   Implemented a Game struct and a "restart" command, but it isn't right yet.
         x   Option C: Special OK returns
             x   At present, OK returns ().  But I could make it an Enum
                 for the different special cases, e.g., Restart, Undo.
+    x   Option C appears to work pretty well.
+x   Made World cloneable
+    x   Just had to derive Clone for World and Entity.
+x   Next:
+    x   Figure out where Game struct should go.
+    x   Undo
+x   Undo
+    x   At beginning of player_control::system(), clone the world.
+    x   On Ok(Normal), push the clone onto the undo stack.
+    x   On Ok(Undo), set the world to the state at the top of the stack.
+    x   On Ok(Restart), clear the stack.
+        x   The actual restart should be done on Ok(Restart), not in the
+            cmd_restart routine.  In fact, "restart" => Ok(Restart).
 
 2018-12-24 (Monday)
 x   Command Processing

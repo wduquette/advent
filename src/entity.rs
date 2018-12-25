@@ -7,6 +7,7 @@ use crate::world::World;
 use std::collections::HashSet;
 
 /// The entity type: a set of optional components defining an entity in the game.
+#[derive(Clone)]
 pub struct Entity {
     /// The entity's ID, which identifies it uniquely.
     pub id: ID,
