@@ -57,6 +57,7 @@ impl Game {
     /// Restart the game: recreate the initial scenario.
     pub fn restart(&mut self) {
         self.world = scenario::build();
+        self.undo_info = None;
         self.introduce();
     }
 

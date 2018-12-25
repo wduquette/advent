@@ -13,15 +13,6 @@ use crate::command::Command;
 use crate::Game;
 
 /// A status result.  Indicates the general category of the change.
-///
-/// TODO:
-///
-/// * We probably want to distinguish between significant changes and other commands, as to
-///   whether we save undo info or not.  I.e., "look" and "examine" take time, but make no
-///   other change; we probably don't want to undo just for them, but back to the previous
-///   move, get, drop, etc.
-/// * Might also be cool to remember the commands as they are undone, so that as we undo
-///   we can tell the user what they are undoing.
 #[derive(Copy,Clone,Debug)]
 enum Status {
     /// Normal response: the world has been updated, and the change can be undone.
@@ -30,7 +21,7 @@ enum Status {
     /// Restart response; the game should be restarted from scratch.
     Restart,
 
-    /// Undo the last command
+    /// Undo the last command (plus anything that happened after, e.g., rule firings)
     Undo
 }
 

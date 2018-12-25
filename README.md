@@ -36,15 +36,11 @@ Also, see docs/journal.txt.
     prose in the basic description, and maybe of some scenery items as
     well.
     * Need articles for things.
-* Need "undo" command.
-  * Allows wrong actions to cause horrific results without requiring
-    the player to start over from the beginning.
-  * Means that the World needs to be cloneable.
-  * Consider defining the World's components into read-only and read-write.
-    * Minimizes the amount of data that needs to be saved/restored on
-      undo or game save/restore, and allows a deeper undo stack.
-    * Either use two entities vectors, or invert, with a distinct vector
-      or map for each component.
+* Consider defining the World's components into read-only and read-write.
+  * Minimizes the amount of data that needs to be saved/restored on
+    undo or game save/restore, and allows a deeper undo stack.
+  * Either use two entities vectors, or invert, with a distinct vector
+    or map for each component.
 * Consider replacing the entities vector with a set of component hash
   tables.
   * Might help if we want to split components into read-only and read-write.
@@ -115,6 +111,17 @@ The entities themselves have very little logic attached to them.
   player's commands are processed (the `player_control` system), etc.
 
 ## Ideas for the Future
+
+### Fancy Undo
+
+At present Bonaventure supports undoing the very last command.  This is
+problematic, as it doesn't distinguish between commands that mutate the world
+and commands that don't; and in fact, it's difficult to distinguish between
+the two.  Even "look" takes time and so updates the clock; and a rule might
+fire or an NPC move during that time.
+
+Consequently, we may want a multi-level undo; and if so, we certainly need to
+tell the user what was undone.
 
 ### NPCs and Monsters
 

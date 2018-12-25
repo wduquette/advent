@@ -112,7 +112,7 @@ impl PlayerView {
     }
 
     /// Creates a PlayerView for the Entity.  For use by Entity::as_player().
-    fn from(this: &Entity) -> PlayerView {
+    pub fn from(this: &Entity) -> PlayerView {
         assert!(this.is_player(), "Not a player: [{}] {}", this.id, this.tag);
         let thing = &this.thing_info.as_ref().unwrap();
 
@@ -160,7 +160,7 @@ impl RoomView {
     }
 
     /// Creates a RoomView for the Entity.  For use by Entity::as_room().
-    fn from(this: &Entity) -> RoomView {
+    pub fn from(this: &Entity) -> RoomView {
         assert!(
             RoomView::is_room(this),
             "Not a room: [{}] {}",
@@ -212,7 +212,7 @@ impl ThingView {
     }
 
     /// Creates a ThingView for the Entity.  For use by Entity::as_thing().
-    fn from(this: &Entity) -> ThingView {
+    pub fn from(this: &Entity) -> ThingView {
         assert!(
             ThingView::is_thing(this),
             "Not a thing: [{}] {}",
@@ -261,7 +261,7 @@ impl RuleView {
     }
 
     /// Creates a RuleView for the Entity.  For use by Entity::as_rule().
-    fn from(this: &Entity) -> RuleView {
+    pub fn from(this: &Entity) -> RuleView {
         assert!(this.is_rule(), "Not a rule: [{}] {}", this.id, this.tag);
 
         let rule_info = this.rule_info.as_ref().unwrap().clone();
@@ -302,7 +302,7 @@ impl BookView {
     }
 
     /// Creates a BookView for the Entity.  For use by Entity::as_book().
-    fn from(this: &Entity) -> BookView {
+    pub fn from(this: &Entity) -> BookView {
         assert!(this.is_book(), "Not book: [{}] {}", this.id, this.tag);
         let book_info = this.book_info.as_ref().unwrap();
         BookView {

@@ -52,6 +52,7 @@ x   Undo
     x   On Ok(Restart), clear the stack.
         x   The actual restart should be done on Ok(Restart), not in the
             cmd_restart routine.  In fact, "restart" => Ok(Restart).
+x   Did all that.
 
 2018-12-24 (Monday)
 x   Command Processing

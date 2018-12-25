@@ -173,9 +173,59 @@ impl World {
     //--------------------------------------------------------------------------------------------
     // Helpers
 
+    /// Can this entity function as a player?
+    pub fn is_player(&self, id: ID) -> bool {
+        PlayerView::is_player(&self.entities[id])
+    }
+
+    /// Retrieve a view of the entity as a Player
+    pub fn as_player(&self, id: ID) -> PlayerView {
+        PlayerView::from(&self.entities[id])
+    }
+
+    /// Can this entity function as a room?  I.e., a place the player can be?
+    pub fn is_room(&self, id: ID) -> bool {
+        RoomView::is_room(&self.entities[id])
+    }
+
+    /// Retrieve a view of the entity as a Room
+    pub fn as_room(&self, id: ID) -> RoomView {
+        RoomView::from(&self.entities[id])
+    }
+
+    /// Can this entity function as a thing?  I.e., as a noun?
+    pub fn is_thing(&self, id: ID) -> bool {
+        ThingView::is_thing(&self.entities[id])
+    }
+
+    /// Retrieve a view of the entity as a Thing
+    pub fn as_thing(&self, id: ID) -> ThingView {
+        ThingView::from(&self.entities[id])
+    }
+
+    /// Is this entity a rule?
+    pub fn is_rule(&self, id: ID) -> bool {
+        RuleView::is_rule(&self.entities[id])
+    }
+
+    /// Retrieve a view of the entity as a Rule
+    pub fn as_rule(&self, id: ID) -> RuleView {
+        RuleView::from(&self.entities[id])
+    }
+
+    /// Does this entity have prose?
+    pub fn is_book(&self, id: ID) -> bool {
+        BookView::is_book(&self.entities[id])
+    }
+
+    /// Retrieve a view of the entity as a Book
+    pub fn as_book(&self, id: ID) -> BookView {
+        BookView::from(&self.entities[id])
+    }
+
     /// Gets a view of the player entity
     pub fn player(&self) -> PlayerView {
-        self.entities[self.pid].as_player()
+        self.as_player(self.pid)
     }
 
     /// Retrieve a reference to the given entity.  Usually used in tandom with an
