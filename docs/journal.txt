@@ -98,6 +98,81 @@ x   "Environment" system:
                 pick up something slippery.
     x   Probably want to wait on this until I've got a better idea
         of what will be needed.
+x   Gaps: Things text adventures do that I haven't implemented yet.
+    x   Monsters
+        x   Things that act on their own, and might frustrate you
+    x   NPCs
+        x   Characters that you can interact with, and might or might
+            not act on their own.
+        x   Text-oriented dialogs.
+            x   Should affect the prompt.
+    x   Doors (locked and otherwise)
+    x   Containers (locked and otherwise)
+    x   Windows
+x   Wild ideas: how to make this a real game.
+    x   Nobody needs a standard text adventure framework; that (very small)
+        niche is covered.  Plus, I'm not a great I/F author.
+    x   So what could I do?
+    x   More of a combat-oriented, dungeon crawling thing, with puzzles.
+        x   i.e., sort of a text-oriented Zelda
+    x   Maybe with some character visuals: maps and things.
+    x   Amazingly retro, yet not really like anything that's been done.
+        x   Except maybe by MUDs
+    x   A game with missions
+x   So what would I want to see?
+    x   Beautiful descriptions
+    x   Interesting characters
+    x   Worthwhile loot
+    x   Replay-ability
+        x   Some randomness
+        x   Multiple playing styles
+    x   Player has equipment
+    x   Missions to go on.
+    x   Vehicles, and places you can only go in them.
+    x   Distinct places to go
+        x   The player moves from "world" to "world".
+        x   All we need to save is the player.
+    x   Monsters to kill, so weapons, etc...but more like Hack than Angband.
+    x   Could use termion, quite reasonably.
+        x   Displays current status and location
+        x   Could have mini-games that use keystrokes for movement,
+            i.e., a mixture of rogue-like and text adventure.
+        x   Could display maps
+    x   Memory of things you've learned.
+x   How should it start?
+    x   With a tutorial.  You've got some equipment, some monsters,
+        goal is to get to safety.
+    x   Should help you along in the usual way.
+    x   Collect weapons, fight some bad guys.
+    x   Hack your way through the jungle.
+    x   Use the password from the note once you manage to read it?
+x   Mechanism: events
+    x   Different actions trigger different events.  I.e., taking the
+        note with dirty hands gets it dirty; taking the sword from the
+        stone (the emotional support sword) makes the stone suddenly and
+        softly vanish away.
+    x   Perhaps user actions can "send events", which can trigger rules.
+x   Architecture
+    x   Game owns player and current scene
+    x   Game knows about other worlds
+    x   Only one world is active at a time.
+    x   The player becomes an entity in the current scene.
+        x   Copy in, copy out.
+    x   Entities will clearly need to be dynamic.
+    x   Hmmm.  Items, weapons, etc., are entities as well.  Need to
+        be preserved across worlds (at least the ones carried by the user).
+        x   How to manage this?
+        x   Could keep persistent entities in a different list.
+        x   Could simply copy the player and his belongings into a
+            new vector, and use it as the base for the next world.
+            x   Probably this.
+        x   Use BTreeMap instead of Vec, so that we never need to
+            defrag.
+        x   Wrap it into an EntityMap, which keeps track of the next
+            index.
+        x   Alternatively, just use Vec; then on return to the home area
+            begin by building a new vec with just the player and his things
+            (equipment and inventory).
 
 2018-12-23 (Sunday)
 x   Text formatting plan
