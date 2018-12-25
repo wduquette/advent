@@ -96,11 +96,26 @@ x   Ideas:
             held, gettable, usable, portable, etc.
     x   This all seems to be part of the inventory system.
         x   Or, maybe call it the "stuff" system.
-x   Action Items:
-    x   Define input parsing and command simplification
-        x   Define Command struct; that's where the data goes.
-        x   Define synonym mapping
-        x   Leave multiple commands/command queue for later.
+x   Defined input parsing and command simplification
+    x   Defined Command struct; that's where the data goes.
+    x   Defined article and punctation stripping.
+    x   Defined synonym mapping
+    x   Leaving multiple commands/command queue for later.
+    x   DONE.
+x   Added "readline" support using rustyline.  Very nice.
+x   Fancy command patterns (e.g., matching against "noun:held"), etc.,
+    should wait until I have the "stuff"/"inventory"/"environment"
+    system implemented.
+x   "Environment" system:
+    x   Queries and summarizes the environment from the standpoint of
+        an agent (i.e., the player or an NPC)
+        x   What things are visible
+        x   Aspects of those things: Held, Usable, Gettable
+            x   Need ability to do magic things, i.e.,
+                "It slips from your fingers" error when you try to
+                pick up something slippery.
+    x   Probably want to wait on this until I've got a better idea
+        of what will be needed.
 
 2018-12-23 (Sunday)
 x   Text formatting plan

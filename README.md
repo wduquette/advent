@@ -7,26 +7,35 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Add `environment` system
+* The Game
+  * Add puzzle to make water flow in the stream.
+  * Extend the world.
+  * Add some more things and more puzzles.
+  * Add more story.
+  * Add NPCs, monsters.
+    * Maybe less of a standard text adventure, more of a text-based
+      RPG?
+  * Add winning condition.
+* Add save/restore
+* Add `stuff` system
   * For finding and listing things in the local environment.
   * Can support queries of various kinds.
+  * Goal is to simplify the command handlers.
+  * Don't try to do too much too quickly.
 * Improve vocabulary and grammar management
-  * Strip punctuation and articles
-  * Convert synonyms to preferred verbs/nouns
-    * Including two-word synonyms for verbs.
-  * Possibly, compile commands to action lists.
-  * Allow scenario to define verbs.
+  * Support inputs containing multiple commands, with command queue.
+  * Allow two-word synonyms for verbs as part of basic parsing.
+  * Allow scenario to define verbs and custom command handlers.
   * Support simple patterns, e.g.,
     * ["drop", noun]
     * ["give", noun,"to", npc]
     * ["hit", npc, "with", noun]
+  * Possibly, compile commands to action lists.
 * Extend `visual` system
   * `visual::room()` should include descriptions of portable things as
     prose in the basic description, and maybe of some scenery items as
     well.
-  * Need articles for things.
-* Need command history, and ideally readline support.
-  * rustyline appears to be the best choice.
+    * Need articles for things.
 * Need "undo" command.
   * Allows wrong actions to cause horrific results without requiring
     the player to start over from the beginning.
@@ -38,12 +47,7 @@ Also, see docs/journal.txt.
       or map for each component.
 * Consider replacing the entities vector with a set of component hash
   tables.
-  * Only if it would simplify the code.
-* Add puzzle to make water flow
-* Extend the world.
-* Add some puzzles.
-* Add more story.
-* Add winning condition.
+  * Might help if we want to split components into read-only and read-write.
 
 ## Background
 
@@ -191,7 +195,7 @@ There might be some crate that provides this.
     documentation is lacking.
   * `pupil` is only arithmetic
 
-There are some scripting language possibilities.  These would also allow 
+There are some scripting language possibilities.  These would also allow
 writing rule and command actions in the scenario.
 
 * `rhai`
