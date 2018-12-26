@@ -138,6 +138,8 @@ impl World {
 
         world.add_verb("read");
 
+        world.add_verb("restart");
+        world.add_verb("undo");
         world.add_verb("quit");
         world.add_syn("quit", "exit");
         world.add_syn("quit", "bye");
