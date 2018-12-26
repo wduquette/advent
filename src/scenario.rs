@@ -120,9 +120,10 @@ and gosh, this doesn't look anything like the toy aisle.
 
 fn player_gets_note_dirty(world: &World) -> bool {
     let player = world.player();
-    let note = world.lookup(NOTE).as_thing();
+    let id = world.lookup_id(NOTE).unwrap();
+    let note = world.as_thing(id);
 
-    player.inventory.contains(&note.id)
+    player.inventory.contains(&id)
         && player.flags.has(DirtyHands)
         && !note.flags.has(Dirty)
 }
@@ -139,7 +140,7 @@ fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -
 /// Links are not bidirectional.  If you want links both ways, you
 /// have to add them.
 fn oneway(world: &mut World, dir: Dir, from: ID, to: ID) {
-    let room = &mut world.get(from).as_room();
+    let room = &mut world.as_room(from);
     room.links.insert(dir, to);
     room.save(world);
 }

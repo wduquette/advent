@@ -37,38 +37,6 @@ pub struct Entity {
     pub rule_info: Option<RuleInfo>,
 }
 
-impl Entity {
-    /// Can this entity function as a player?
-    pub fn is_player(&self) -> bool {
-        PlayerView::is_player(&self)
-    }
-
-    /// Retrieve a view of the entity as a Player
-    pub fn as_player(&self) -> PlayerView {
-        PlayerView::from(self)
-    }
-
-    /// Can this entity function as a room?  I.e., a place the player can be?
-    pub fn is_room(&self) -> bool {
-        RoomView::is_room(&self)
-    }
-
-    /// Retrieve a view of the entity as a Room
-    pub fn as_room(&self) -> RoomView {
-        RoomView::from(self)
-    }
-
-    /// Can this entity function as a thing?  I.e., as a noun?
-    pub fn is_thing(&self) -> bool {
-        ThingView::is_thing(&self)
-    }
-
-    /// Retrieve a view of the entity as a Thing
-    pub fn as_thing(&self) -> ThingView {
-        ThingView::from(self)
-    }
-}
-
 //------------------------------------------------------------------------------------------------
 // Player View
 

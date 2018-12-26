@@ -23,7 +23,7 @@ pub enum Flag {
 }
 
 /// A set of flag values.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct FlagSet {
     set: HashSet<Flag>
 }

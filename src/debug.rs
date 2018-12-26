@@ -49,7 +49,7 @@ pub fn dump_entity(world: &World, id: ID) {
 
     if let Some(inventory) = &world.entities[id].inventory {
         for tid in inventory {
-            let thing = world.get(*tid).as_thing();
+            let thing = world.as_thing(*tid);
             println!("  Contains: [{}] {}", thing.id, thing.name);
         }
     }

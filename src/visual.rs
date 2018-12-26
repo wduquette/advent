@@ -72,7 +72,7 @@ pub fn room_brief(world: &World, id: ID) {
 /// * A brief description omits the visual; it's used for rooms that the player has visited
 ///   before.
 fn print_room(world: &World, id: ID, detail: Detail) {
-    let room = world.get(id).as_room();
+    let room = world.as_room(id);
 
     // FIRST, display the room's description
     if detail == Detail::Full {
@@ -95,7 +95,7 @@ fn print_room(world: &World, id: ID, detail: Detail) {
 
 /// Outputs a description of a thing.
 pub fn thing(world: &World, id: ID) {
-    let thing = world.get(id).as_thing();
+    let thing = world.as_thing(id);
 
     // FIRST, display the thing's description
     para(&thing.visual);
@@ -146,7 +146,7 @@ fn invent_list(world: &World, inventory: &Inventory) -> String {
     let mut list = String::new();
 
     for id in inventory {
-        let thing = world.get(*id).as_thing();
+        let thing = world.as_thing(*id);
 
         if !thing.flags.has(Scenery) {
             if !list.is_empty() {

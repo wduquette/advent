@@ -199,7 +199,7 @@ fn cmd_examine_self(world: &World) -> CmdResult {
 // TODO: As currently implemented, this should be a scenario command, not a
 // built-in command.
 fn cmd_wash_hands(world: &mut World, player: &mut PlayerView) -> CmdResult {
-    let room = world.get(player.location).as_room();
+    let room = world.as_room(player.location);
 
     if !room.flags.has(HasWater) {
         return Err("That'd be a neat trick.".into());
@@ -215,7 +215,7 @@ fn cmd_wash_hands(world: &mut World, player: &mut PlayerView) -> CmdResult {
 
 /// Gets a thing from the location's inventory.
 fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult {
-    let room = &mut world.get(player.location).as_room();
+    let room = &mut world.as_room(player.location);
 
     // Does he already have it?
     if find_in_inventory(world, &player.inventory, name).is_some() {
@@ -223,7 +223,7 @@ fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult 
     }
 
     if let Some(id) = find_in_inventory(world, &room.inventory, name) {
-        let thing = &mut world.get(id).as_thing();
+        let thing = &mut world.as_thing(id);
         if thing.flags.has(Scenery) {
             return Err("You can't take that!".into());
         }
@@ -245,10 +245,10 @@ fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult 
 
 /// Drops a thing you're carrying
 fn cmd_drop(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult {
-    let room = &mut world.get(player.location).as_room();
+    let room = &mut world.as_room(player.location);
 
     if let Some(id) = find_in_inventory(world, &player.inventory, name) {
-        let thing = &mut world.get(id).as_thing();
+        let thing = &mut world.as_thing(id);
 
         player.inventory.remove(&thing.id);
         room.inventory.insert(thing.id);
@@ -330,7 +330,7 @@ fn cmd_debug_dump(world: &World, id_arg: &str) -> CmdResult {
 /// Describe the room as though the player were in it.
 fn cmd_debug_look(world: &World, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
-    if world.get(id).is_room() {
+    if world.is_room(id) {
         visual::room(world, id);
         Ok(Normal)
     } else {
@@ -341,7 +341,7 @@ fn cmd_debug_look(world: &World, id_arg: &str) -> CmdResult {
 /// Examine the thing fully, as though the player could see it.
 fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
-    if world.get(id).is_thing() {
+    if world.is_thing(id) {
         visual::thing(world, id);
         Ok(Normal)
     } else {
@@ -352,7 +352,7 @@ fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
 /// Take the player to the location.
 fn cmd_debug_go(world: &World, player: &mut PlayerView, id_arg: &str) -> CmdResult {
     let id = parse_id(world, id_arg)?;
-    if world.get(id).is_room() {
+    if world.is_room(id) {
         player.location = id;
         visual::room(world, id);
         Ok(Normal)
@@ -367,7 +367,7 @@ fn cmd_debug_go(world: &World, player: &mut PlayerView, id_arg: &str) -> CmdResu
 /// Looks for a thing with the given name in the given inventory list.
 fn find_in_inventory(world: &World, inventory: &Inventory, name: &str) -> Option<ID> {
     for id in inventory {
-        let thing = world.get(*id).as_thing();
+        let thing = world.as_thing(*id);
         if thing.name == name {
             return Some(thing.id);
         }
@@ -384,7 +384,7 @@ fn find_visible_thing(world: &World, player: &PlayerView, name: &str) -> Option<
     }
 
     // NEXT, is it in this room?
-    let room = &world.get(player.location).as_room();
+    let room = &world.as_room(player.location);
 
     if let Some(id) = find_in_inventory(world, &room.inventory, name) {
         return Some(id);
