@@ -8,7 +8,7 @@ use crate::world::*;
 use crate::entity::rule::Action::*;
 
 // Important Constants
-const NOTE: &str = "note-clean";
+const NOTE: &str = "note.clean";
 
 /// Build the initial state of the game world.
 pub fn build() -> World {
@@ -84,7 +84,7 @@ step!
     world.put_in(clean_note, clearing);
 
     let dirty_note = world
-        .add("note-dirty")
+        .add("note.dirty")
         .thing(
             "note",
             "note",
@@ -93,14 +93,13 @@ step!
         .book("You've gotten it too dirty to read.")
         .id();
 
-    // TODO: Not working yet
-    // world
-    //     .add("rule-dirty-note")
-    //     .always(&|world| player_gets_note_dirty(world))
-    //     .action(Print(
-    //         "The dirt from your hands got all over the note.".into(),
-    //     ))
-    //     .action(Swap(clean_note, dirty_note));
+    world
+        .add("rule-dirty-note")
+        .always(&|world| player_gets_note_dirty(world))
+        .action(Print(
+            "The dirt from your hands got all over the note.".into(),
+        ))
+        .action(Swap(clean_note, dirty_note));
 
     // Stories: Rules that supply backstory to the player.
     world
@@ -128,8 +127,7 @@ fn player_gets_note_dirty(world: &World) -> bool {
     let id = world.lookup_id(NOTE).unwrap();
     let notev = world.as_thing(id);
 
-    // TODO: consider adding methods to InventoryComponent!
-    playerv.inventory.things.contains(&id) &&
+    playerv.inventory.has(id) &&
     playerv.flag_set.has(DirtyHands) &&
     !notev.flag_set.has(Dirty)
 }

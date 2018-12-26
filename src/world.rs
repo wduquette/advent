@@ -166,6 +166,7 @@ impl World {
 
         let tc = TagComponent::new(id, tag);
         self.tags.insert(id, tc);
+        self.tag_map.insert(tag.into(), id);
 
         EBuilder {
             world: self,
@@ -257,6 +258,10 @@ impl World {
         self.as_player(self.pid)
     }
 
+
+    //--------------------------------------------------------------------------------------------
+    // Low-level entity queries and manipulations.
+
     /// Looks up an entity's ID in the tag map.
     /// TODO: Make this just "lookup".  Might want two variants, one that returns
     /// Option and one that panics.
@@ -267,9 +272,6 @@ impl World {
             None
         }
     }
-
-    //--------------------------------------------------------------------------------------------
-    // Low-level entity queries and manipulations.
 
     /// Returns the location of the thing with the given ID
     pub fn loc(&self, id: ID) -> ID {
