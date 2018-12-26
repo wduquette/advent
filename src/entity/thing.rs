@@ -48,7 +48,7 @@ pub struct ThingView {
 impl ThingView {
     /// Creates a ThingView for the entity.
     pub fn from(world: &World, id: ID) -> ThingView {
-        let tc = world.tags.get(&id).unwrap();
+        let tc = &world.tags[&id];
         assert!(
             world.is_thing(id),
             "Not a thing: [{}] {}", tc.id, tc.tag,
@@ -57,8 +57,8 @@ impl ThingView {
         ThingView {
             id: tc.id,
             tag: tc.tag.clone(),
-            thing: world.things.get(&id).unwrap().clone(),
-            flag_set: world.flag_sets.get(&id).unwrap().clone(),
+            thing: world.things[&id].clone(),
+            flag_set: world.flag_sets[&id].clone(),
         }
     }
 

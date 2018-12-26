@@ -36,7 +36,7 @@ pub struct PlayerView {
 impl PlayerView {
     /// Creates a PlayerView for the entity.
     pub fn from(world: &World, id: ID) -> PlayerView {
-        let tc = world.tags.get(&id).unwrap();
+        let tc = &world.tags[&id];
         assert!(
             world.is_player(id),
             "Not a player: [{}] {}", tc.id, tc.tag,
@@ -45,10 +45,10 @@ impl PlayerView {
         PlayerView {
             id: tc.id,
             tag: tc.tag.clone(),
-            player: world.players.get(&id).unwrap().clone(),
-            thing: world.things.get(&id).unwrap().clone(),
-            inventory: world.inventories.get(&id).unwrap().clone(),
-            flag_set: world.flag_sets.get(&id).unwrap().clone(),
+            player: world.players[&id].clone(),
+            thing: world.things[&id].clone(),
+            inventory: world.inventories[&id].clone(),
+            flag_set: world.flag_sets[&id].clone(),
         }
     }
 

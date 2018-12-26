@@ -76,7 +76,7 @@ pub struct RuleView {
 impl RuleView {
     /// Creates a RuleView for the entity.
     pub fn from(world: &World, id: ID) -> RuleView {
-        let tc = world.tags.get(&id).unwrap();
+        let tc = &world.tags[&id];
         assert!(
             world.is_rule(id),
             "Not a rule: [{}] {}", tc.id, tc.tag,
@@ -85,7 +85,7 @@ impl RuleView {
         RuleView {
             id: tc.id,
             tag: tc.tag.clone(),
-            rule: world.rules.get(&id).unwrap().clone(),
+            rule: world.rules[&id].clone(),
         }
     }
 

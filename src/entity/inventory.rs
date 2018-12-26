@@ -59,7 +59,7 @@ pub struct InventoryView {
 impl InventoryView {
     /// Creates a InventoryView for the entity.
     pub fn from(world: &World, id: ID) -> InventoryView {
-        let tc = world.tags.get(&id).unwrap();
+        let tc = &world.tags[&id];
         assert!(
             world.is_inventory(id),
             "Not an inventory: [{}] {}", tc.id, tc.tag,
@@ -68,7 +68,7 @@ impl InventoryView {
         InventoryView {
             id: tc.id,
             tag: tc.tag.clone(),
-            inventory: world.inventories.get(&id).unwrap().clone(),
+            inventory: world.inventories[&id].clone(),
         }
     }
 

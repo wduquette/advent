@@ -46,7 +46,7 @@ pub struct RoomView {
 impl RoomView {
     /// Creates a RoomView for the entity.
     pub fn from(world: &World, id: ID) -> RoomView {
-        let tc = world.tags.get(&id).unwrap();
+        let tc = &world.tags[&id];
         assert!(
             world.is_room(id),
             "Not a room: [{}] {}", tc.id, tc.tag,
@@ -55,9 +55,9 @@ impl RoomView {
         RoomView {
             id: tc.id,
             tag: tc.tag.clone(),
-            room: world.rooms.get(&id).unwrap().clone(),
-            inventory: world.inventories.get(&id).unwrap().clone(),
-            flag_set: world.flag_sets.get(&id).unwrap().clone(),
+            room: world.rooms[&id].clone(),
+            inventory: world.inventories[&id].clone(),
+            flag_set: world.flag_sets[&id].clone(),
         }
     }
 

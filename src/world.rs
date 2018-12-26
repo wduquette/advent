@@ -319,7 +319,7 @@ impl World {
     pub fn follow(&self, loc: ID, dir: Dir) -> Option<ID> {
         assert!(self.is_room(loc) "Not a room: [{}]", loc);
 
-        let rc = self.rooms.get(&loc).unwrap();
+        let rc = &self.rooms[&loc];
 
         rc.links.get(&dir).cloned()
     }
@@ -369,7 +369,7 @@ impl World {
     #[allow(dead_code)]
     pub fn has_flag(&self, id: ID, flag: Flag) -> bool {
         assert!(self.is_flag_set(id) "Not a flag set: [{}]", id);
-        let fc = self.flag_sets.get(&id).unwrap();
+        let fc = &self.flag_sets[&id];
 
         fc.has(flag)
     }
@@ -387,7 +387,7 @@ pub struct EBuilder<'a> {
 
 impl<'a> EBuilder<'a> {
     /// Adds an inventory component to the entity if it doesn't already have one.
-    pub fn inventory(mut self) -> EBuilder<'a> {
+    pub fn inventory(self) -> EBuilder<'a> {
         if self.world.inventories.get(&self.id).is_none() {
             self.world.inventories.insert(self.id, InventoryComponent::new());
         }
@@ -396,7 +396,7 @@ impl<'a> EBuilder<'a> {
     }
 
     /// Adds a flag component to the entity if it doesn't already have one.
-    pub fn flag_set(mut self) -> EBuilder<'a> {
+    pub fn flag_set(self) -> EBuilder<'a> {
         if self.world.flag_sets.get(&self.id).is_none() {
             self.world.flag_sets.insert(self.id, FlagSetComponent::new());
         }
