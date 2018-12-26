@@ -7,6 +7,8 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
+* Read up on the Iterator traits, and improve the components that
+  support .iter().
 * The Game
   * Add puzzle to make water flow in the stream.
   * Extend the world.

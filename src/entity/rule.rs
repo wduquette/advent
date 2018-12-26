@@ -1,7 +1,7 @@
 //! Rule Data
 
-use crate::types::flags::Flag;
-use crate::types::ID;
+use crate::types::Flag;
+use crate::entity::ID;
 use crate::world::World;
 
 /// A rule predicate
@@ -61,4 +61,36 @@ pub enum Action {
 
     /// Swap an item in the world for one in LIMBO
     Swap(ID, ID),
+}
+
+//------------------------------------------------------------------------------------------------
+// Rule View
+
+/// Rule view: A view of an entity as a Rule
+pub struct RuleView {
+    pub id: ID,
+    pub tag: String,
+    pub rule: RuleComponent,
+}
+
+impl RuleView {
+    /// Creates a RuleView for the entity.
+    pub fn from(world: &World, id: ID) -> RuleView {
+        let tc = world.tags.get(&id).unwrap();
+        assert!(
+            world.is_rule(id),
+            "Not a rule: [{}] {}", tc.id, tc.tag,
+        );
+
+        RuleView {
+            id: tc.id,
+            tag: tc.tag.clone(),
+            rule: world.rules.get(&id).unwrap().clone(),
+        }
+    }
+
+    /// Save the rule back to the world.  Replaces the links and inventory.
+    pub fn save(&self, world: &mut World) {
+        world.rules.insert(self.id, self.rule.clone());
+    }
 }
