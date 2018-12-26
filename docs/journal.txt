@@ -1,5 +1,15 @@
 Bonaventure Journal
 
+2018-12-26 (Wednesday)
+x   LOTS of work done so far today.
+    x   Completely refactored the entity data structures.
+    x   Components are stored in component-specific hash maps; there is
+        no longer any Entity struct.
+    x   Every component has a *Component struct; these are in
+        crate::entity submodules.
+    x   It seems to be working, but I need to do lots of testing
+        (and add test suites where appropriate).
+
 2018-12-25 (Tuesday)
 x   Getting back to basics.
 x   "restart" or "undo" commands

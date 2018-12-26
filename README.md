@@ -44,11 +44,6 @@ Also, see docs/journal.txt.
 * Consider defining the World's components into read-only and read-write.
   * Minimizes the amount of data that needs to be saved/restored on
     undo or game save/restore, and allows a deeper undo stack.
-  * Either use two entities vectors, or invert, with a distinct vector
-    or map for each component.
-* Consider replacing the entities vector with a set of component hash
-  tables.
-  * Might help if we want to split components into read-only and read-write.
 
 ## Background
 
@@ -81,33 +76,30 @@ There are also a couple of debugging commands.
 
 ## The Internals
 
-The game world consists of a vector of "entities".  Each entity has a tag,
-which is used for debugging, and can also be used to look up the entity's
-ID; entities may also have the following components:
+The game world consists of entities, each of which is made up of
+components.  Each entity has an integer ID; an entity's components are
+stored in a set of hash tables.  An entity may have the following
+components:
 
-* A player component, for the player entity.
-* A room component, for entities that can be linked together into the
-  room network.  This includes the room's name, visual description,
-  and links.
-* A thing component, for entities that can be placed in a room or
-  (in some cases) the player's inventory.
-* A flags component, for flags that can be set on the entity.
-* An inventory component, to contain things found within the entity
-  (a room, the player, a box).
-* A book component, for things that have readable text.
-* A rule component: for rule entities, that make things happen.
+* The TagComponent, which contains the entity's ID and a string tag
+  used for lookups and as a debugging aid.  Every entity has a
+  TagComponent
+* A PlayerComponent, for the player entity
+* A RoomComponent, for places a player can be
+* A ThingComponent, for things a player can interact with
+* Etc.
 
-These components are not classes in the OO sense; they can be composed
-as desired.  A normal thing will not have a room component, and a normal
-room will not have a thing component, but a vehicle could have both:
-it's a thing that can appear in a room, but that the user can get in.
+We build up complex
+entity types not by class-based inheritance, but by composing the entity
+out of components, e.g., a vehicle is a thing in a room AND a room the
+player can be in; it will have both a ThingComponent and a RoomComponent.
 
 The entities themselves have very little logic attached to them.
 
 * The World struct (which contains the entities) provides convenience
   methods for querying and mutating the game world at a very low level.
 
-* The Entity struct allows for acquiring "view" objects focussed on a
+* The World struct allows for acquiring "view" objects focussed on a
   particular role, e.g., `as_room()` and `as_thing()`.  Views can be
   mutated and the result saved back into the World.  
 
@@ -213,11 +205,3 @@ writing rule and command actions in the scenario.
 * `rhai`
 * gluon-lang/gluon
 * PistonDevelopers/dyon
-
-### Action Syntax
-
-At present actions are used only by Rules, and there's only one Action:
-PrintProse.  If the scenario file can specify custom commands (e.g.,
-"wind clock") then we'll need some standard actions to implement them.
-We probably want to flesh out the Action enum, and define the standard
-commands in terms of Actions.
