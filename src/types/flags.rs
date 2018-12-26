@@ -1,6 +1,6 @@
 //! Flags and FlagSets
-use std::collections::HashSet;
 use super::ID;
+use std::collections::HashSet;
 
 #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
 #[allow(dead_code)]
@@ -25,7 +25,7 @@ pub enum Flag {
 /// A set of flag values.
 #[derive(Debug, Clone, Default)]
 pub struct FlagSet {
-    set: HashSet<Flag>
+    set: HashSet<Flag>,
 }
 
 impl FlagSet {
@@ -43,7 +43,7 @@ impl FlagSet {
     }
 
     /// Determines whether the set has the given flag setting.
-    pub fn has(&self, flag: Flag) -> bool{
+    pub fn has(&self, flag: Flag) -> bool {
         self.set.contains(&flag)
     }
 
@@ -81,8 +81,8 @@ impl FlagSet {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::Flag::*;
+    use super::*;
 
     #[test]
     fn new() {

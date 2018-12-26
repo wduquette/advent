@@ -1,10 +1,19 @@
 //! The Entity Data Type and Builder
 
-use std::collections::HashMap;
-use crate::types::*;
 use crate::types::flags::*;
+use crate::types::*;
 use crate::world::World;
+use std::collections::HashMap;
 use std::collections::HashSet;
+
+pub mod inventory;
+pub mod player;
+pub mod room;
+pub mod rule;
+pub mod tag;
+pub mod thing;
+pub mod flag;
+pub mod book;
 
 /// The entity type: a set of optional components defining an entity in the game.
 #[derive(Clone)]
@@ -61,7 +70,12 @@ impl PlayerView {
 
     /// Creates a PlayerView for the Entity.  For use by Entity::as_player().
     pub fn from(this: &Entity) -> PlayerView {
-        assert!(Self::is_player(this), "Not a player: [{}] {}", this.id, this.tag);
+        assert!(
+            Self::is_player(this),
+            "Not a player: [{}] {}",
+            this.id,
+            this.tag
+        );
         let thing = &this.thing_info.as_ref().unwrap();
 
         PlayerView {
@@ -210,7 +224,12 @@ impl RuleView {
 
     /// Creates a RuleView for the Entity.  For use by Entity::as_rule().
     pub fn from(this: &Entity) -> RuleView {
-        assert!(Self::is_rule(this), "Not a rule: [{}] {}", this.id, this.tag);
+        assert!(
+            Self::is_rule(this),
+            "Not a rule: [{}] {}",
+            this.id,
+            this.tag
+        );
 
         let rule_info = this.rule_info.as_ref().unwrap().clone();
         RuleView {

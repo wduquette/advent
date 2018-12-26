@@ -1,6 +1,5 @@
 //! Type definitions for this app.
 
-
 use crate::world::LIMBO;
 use crate::world::*;
 use std::collections::hash_map::HashMap;
@@ -12,9 +11,6 @@ pub mod flags;
 
 //------------------------------------------------------------------------------------------------
 // Basic Types
-
-/// The entity ID type: an integer.
-pub type ID = usize;
 
 /// Directions
 #[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
@@ -30,9 +26,11 @@ pub enum Dir {
     Out,
 }
 
-
 /// An Inventory is the set of things contained with the current entity.
 pub type Inventory = HashSet<ID>;
+
+/// The entity ID type: an integer.
+pub type ID = usize;
 
 //------------------------------------------------------------------------------------------------
 // Player Info

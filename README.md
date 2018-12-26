@@ -23,6 +23,9 @@ Also, see docs/journal.txt.
   * Goal is to simplify the command handlers.
   * Don't try to do too much too quickly.
 * Improve vocabulary and grammar management
+  * Consider design where verbs (operations) depend on
+    species, i.e., each thing knows what verbs can be
+    used on it.
   * Support inputs containing multiple commands, with command queue.
   * Allow two-word synonyms for verbs as part of basic parsing.
   * Allow scenario to define verbs and custom command handlers.

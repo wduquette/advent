@@ -1,7 +1,16 @@
 //! The game world
+use crate::entity::inventory::InventoryComponent;
+use crate::entity::player::PlayerComponent;
+use crate::entity::room::RoomComponent;
+use crate::entity::book::BookComponent;
+use crate::entity::rule::RuleComponent;
+use crate::entity::tag::TagComponent;
+use crate::entity::flag::FlagComponent;
+use crate::entity::thing::ThingComponent;
 use crate::entity::*;
-use crate::types::*;
 use crate::types::flags::*;
+use crate::types::*;
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -14,23 +23,61 @@ pub const LIMBO: ID = 0;
 /// room should be implemented elsewhere.
 #[derive(Clone, Default)]
 pub struct World {
-    // The entity vector
-    pub entities: Vec<Entity>,
+    //--------------------------------------------------------------------------------------------
+    // World-Global Data
 
-    /// The hash map
+    /// A map from tags to entity IDs
     pub tag_map: HashMap<String, ID>,
+
+    // The player's entity ID.
+    pub pid: ID,
 
     // The game clock
     pub clock: usize,
 
-    // The player's entity ID.
-    pub pid: ID,
+    //--------------------------------------------------------------------------------------------
+    // Entity Components
+
+    /// Tag Components: Identifiers for the entities.  This is a BTreeMap so that we can
+    /// easily reference entities in creation order, and can easily determine the next available
+    /// ID.
+    pub tags: BTreeMap<ID, TagComponent>,
+
+    /// Flags, used for storing arbitrary data about the entity.  This is mostly for use by
+    /// scenarios; infrastructure data should be stored in the regular components.
+    pub flags: HashMap<ID, FlagComponent>,
+
+    /// Inventory Components: This is broken out separately because many kinds of entity can
+    /// own or contain things.
+    pub inventories: HashMap<ID, InventoryComponent>,
+
+    /// Player Components: There should be only one, but it's easier to treat it like the others.
+    pub players: HashMap<ID, PlayerComponent>,
+
+    /// Room Components: Information about locations in which the player or NPCs can be.
+    pub rooms: HashMap<ID, RoomComponent>,
+
+    /// Thing Components: Information about things that the player can interact with.
+    pub things: HashMap<ID, ThingComponent>,
+
+    /// Additional information about things that can be read.
+    pub books: HashMap<ID, BookComponent>,
+
+    /// Rule Components: Rules that can fire.
+    pub rules: HashMap<ID, RuleComponent>,
+
+
+    // The entity vector: OBSOLETE.
+    pub entities: Vec<Entity>,
+
+    //--------------------------------------------------------------------------------------------
+    // Resources
 
     // The valid verbs
     pub verbs: HashSet<String>,
 
     // Mapping from verb synonyms to verbs
-    pub synonyms: HashMap<String,String>,
+    pub synonyms: HashMap<String, String>,
 }
 
 impl World {
@@ -40,10 +87,18 @@ impl World {
     /// Creates a new instance of the World
     pub fn new() -> World {
         let mut world = World {
-            entities: Vec::new(),
             tag_map: HashMap::new(),
-            clock: 0,
             pid: 0,
+            clock: 0,
+            tags: BTreeMap::new(),
+            flags: HashMap::new(),
+            inventories: HashMap::new(),
+            players: HashMap::new(),
+            rooms: HashMap::new(),
+            things: HashMap::new(),
+            books: HashMap::new(),
+            rules: HashMap::new(),
+            entities: Vec::new(),
             verbs: HashSet::new(),
             synonyms: HashMap::new(),
         };

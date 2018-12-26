@@ -1,19 +1,19 @@
 //! The Player Control System
 
 use self::Status::*;
-use crate::debug;
-use crate::entity::PlayerView;
-use crate::visual;
-use crate::types::Dir::*;
-use crate::types::flags::Flag::*;
-use crate::types::*;
-use crate::world::*;
 use crate::command;
 use crate::command::Command;
+use crate::debug;
+use crate::entity::PlayerView;
+use crate::types::flags::Flag::*;
+use crate::types::Dir::*;
+use crate::types::*;
+use crate::visual;
+use crate::world::*;
 use crate::Game;
 
 /// A status result.  Indicates the general category of the change.
-#[derive(Copy,Clone,Debug)]
+#[derive(Copy, Clone, Debug)]
 enum Status {
     /// Normal response: the world has been updated, and the change can be undone.
     Normal,
@@ -22,7 +22,7 @@ enum Status {
     Restart,
 
     /// Undo the last command (plus anything that happened after, e.g., rule firings)
-    Undo
+    Undo,
 }
 
 /// An error result
@@ -111,7 +111,6 @@ fn handle_debug_command(game: &mut Game, player: &mut PlayerView, cmd: &Command)
     }
 }
 
-
 // User Commands
 
 /// Move the player in the given direction
@@ -138,7 +137,7 @@ fn cmd_help() -> CmdResult {
         "\
 You've got the usual commands: n, s, e, w, look, get, drop, quit.
 You know.  Like that.
-    "
+    ",
     );
 
     Ok(Normal)

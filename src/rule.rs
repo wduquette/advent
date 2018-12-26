@@ -2,15 +2,14 @@
 
 use crate::entity::RuleView;
 use crate::types::*;
-use crate::world::*;
 use crate::visual;
+use crate::world::*;
 
 /// The Rule System.  Processes all rules, executing those that should_fire.
 pub fn system(world: &mut World) {
     // TODO: Need to provide an interator over IDs; or, world.rules(), an interator over a
     // set of IDs.
-    let rules: Vec<RuleView> =
-        (1..world.entities.len())
+    let rules: Vec<RuleView> = (1..world.entities.len())
         .filter(|id| world.is_rule(*id))
         .map(|id| world.as_rule(id))
         .collect();

@@ -2,7 +2,6 @@
 /// Bonaventure is a simple text adventure framework.  At present, it is used to
 /// implement a single game; see src/scenario.rs.  Eventually it might support
 /// multiple games.
-
 mod command;
 mod conmark;
 #[macro_use]

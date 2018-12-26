@@ -1,7 +1,6 @@
 //! The Command System
 /// This system is for parsing commands and preparing them for execution,
 /// not for executing them.
-
 use crate::world::World;
 
 pub struct Command {
@@ -26,7 +25,7 @@ impl Command {
     }
 }
 
-pub fn parse(world: &World, input: &str) -> Result<Command,String> {
+pub fn parse(world: &World, input: &str) -> Result<Command, String> {
     // FIRST, remove extraneous characters.
     let input = input.trim();
     let mut text = String::new();
@@ -37,14 +36,12 @@ pub fn parse(world: &World, input: &str) -> Result<Command,String> {
             '.' => {
                 return Err("Input contains '.'; multiple commands not yet support.".into());
             }
-            _ => text.push(c)
+            _ => text.push(c),
         }
     }
 
     // NEXT, split into words
-    let raw_words: Vec<&str> = text
-        .split_whitespace()
-        .collect();
+    let raw_words: Vec<&str> = text.split_whitespace().collect();
 
     // NEXT, strip articles and translate synonyms.
     let mut words: Vec<String> = Vec::new();

@@ -4,13 +4,12 @@
 
 use crate::conmark::*;
 
-use rustyline::Editor;
 use rustyline::error::ReadlineError;
-
+use rustyline::Editor;
 
 /// A console input abstraction, wrapping the rustyline input processor.
 pub struct Console {
-    rusty: Editor<()>
+    rusty: Editor<()>,
 }
 
 impl Console {

@@ -10,9 +10,9 @@
 // doing its work all at once.
 
 use crate::console::para;
-use crate::world::World;
-use crate::types::*;
 use crate::types::flags::Flag::*;
+use crate::types::*;
+use crate::world::World;
 
 //-----------------------------------------------------------------------------
 // Types
@@ -125,7 +125,10 @@ pub fn player(world: &World) {
     // TODO: This stuff is scenario-dependent.  There really ought to be
     // a mechanism for this.
     prose(&player.visual)
-        .when(player.flags.has(DirtyHands), "Your hands are kind of dirty, though")
+        .when(
+            player.flags.has(DirtyHands),
+            "Your hands are kind of dirty, though",
+        )
         .when(!player.flags.has(DirtyHands), "Plus, they're clean bits!")
         .para();
 }
@@ -170,7 +173,9 @@ pub struct Buffer {
 impl Buffer {
     /// Creates an empty buffer.  Prefer visual::prose().
     pub fn new() -> Buffer {
-        Buffer { buff: String::new() }
+        Buffer {
+            buff: String::new(),
+        }
     }
 
     /// Adds a text string to the buffer, adding a blank if necessary.
