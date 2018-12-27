@@ -1,4 +1,5 @@
 //! The game world
+use crate::types::EntityStringHook;
 use crate::entity::book::*;
 use crate::entity::flag::*;
 use crate::entity::inventory::*;
@@ -437,7 +438,7 @@ impl<'a> EBuilder<'a> {
     }
 
     /// Adds the essential trimmings for a player.
-    pub fn player(mut self, visual: &str) -> EBuilder<'a> {
+    pub fn player(mut self) -> EBuilder<'a> {
         assert!(
             !self.world.players.get(&self.id).is_some(),
             "Tried to add player component twice: [{}] {}",
@@ -452,7 +453,7 @@ impl<'a> EBuilder<'a> {
         self.world.players.insert(self.id, PlayerComponent::new());
         self.world
             .things
-            .insert(self.id, ThingComponent::new("Yourself", "self", visual));
+            .insert(self.id, ThingComponent::new("Yourself", "self"));
 
         self
     }
@@ -476,7 +477,7 @@ impl<'a> EBuilder<'a> {
     }
 
     /// Adds the essential trimmings for a thing.
-    pub fn thing(mut self, name: &str, noun: &str, visual: &str) -> EBuilder<'a> {
+    pub fn thing(mut self, name: &str, noun: &str) -> EBuilder<'a> {
         assert!(
             !self.world.things.get(&self.id).is_some(),
             "Tried to add thing component twice: [{}] {}",
@@ -488,7 +489,37 @@ impl<'a> EBuilder<'a> {
 
         self.world
             .things
-            .insert(self.id, ThingComponent::new(name, noun, visual));
+            .insert(self.id, ThingComponent::new(name, noun));
+
+        self
+    }
+
+    /// Adds a visual to the thing.
+    pub fn thing_visual(self, hook: EntityStringHook) -> EBuilder<'a> {
+        assert!(
+            self.world.things.get(&self.id).is_some(),
+            "Tried to add thing-visual to non-thing: [{}] {}",
+            self.id,
+            self.tag
+        );
+
+        self.world.things.get_mut(&self.id).unwrap().visual =
+            Visual::Hook(VisualHook::new(hook));
+
+        self
+    }
+
+    /// Adds visual prose to the thing.
+    pub fn thing_prose(self, prose: &str) -> EBuilder<'a> {
+        assert!(
+            self.world.things.get(&self.id).is_some(),
+            "Tried to add thing-visual to non-thing: [{}] {}",
+            self.id,
+            self.tag
+        );
+
+        self.world.things.get_mut(&self.id).unwrap().visual =
+            Visual::Prose(prose.to_string());
 
         self
     }

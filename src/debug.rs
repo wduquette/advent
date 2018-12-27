@@ -30,7 +30,7 @@ pub fn dump_entity(world: &World, id: ID) {
         println!("  Thing name: {}", thingc.name);
         println!("    Noun: {}", thingc.noun);
         println!("    Location: {}", thingc.location);
-        println!("    Visual: {}", thingc.visual);
+        println!("    Visual: {}", thingc.visual.as_string(world, id));
     }
 
     // NEXT, if it's a room display the room info.

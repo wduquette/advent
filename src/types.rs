@@ -42,7 +42,7 @@ pub enum Flag {
 }
 
 /// A clojure to produce a string from an entity
-type EntityStringHook = &'static Fn(&World, ID) -> String;
+pub type EntityStringHook = &'static Fn(&World, ID) -> String;
 
 /// A Visual Hook: Computes the visual for an entity.
 #[derive(Clone)]
@@ -72,6 +72,7 @@ impl fmt::Debug for VisualHook {
 #[allow(dead_code)]
 #[derive(Clone,Debug)]
 pub enum Visual {
+    Default,
     Prose(String),
     Hook(VisualHook)
 }
@@ -80,6 +81,7 @@ impl Visual {
     /// Converts the visual to an actual string.
     pub fn as_string(&self, world: &World, id: ID) -> String {
         match self {
+            Visual::Default => "You don't see anything special.".to_string(),
             Visual::Prose(str) => str.to_string(),
             Visual::Hook(hook) => hook.call(world, id),
         }

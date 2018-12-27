@@ -99,7 +99,7 @@ pub fn thing(world: &World, id: ID) {
     let thingv = world.as_thing(id);
 
     // FIRST, display the thing's description
-    para(&thingv.thing.visual);
+    para(&thingv.thing.visual.as_string(world, id));
 
     // TODO: eventually we will want to describe its contents, if it has
     // contents, or other changeable state.
@@ -115,23 +115,12 @@ pub fn book(world: &World, id: ID) {
 // Player Visuals
 
 /// Outputs a visual of the player.
-///
-/// TODO: figure out how to handle optional content, e.g., dirty hands.
 pub fn player(world: &World) {
     let playerv = world.player();
 
-    // TODO: This stuff is scenario-dependent.  There really ought to be
-    // a mechanism for this.
-    prose(&playerv.thing.visual)
-        .when(
-            playerv.flag_set.has(DirtyHands),
-            "Your hands are kind of dirty, though",
-        )
-        .when(
-            !playerv.flag_set.has(DirtyHands),
-            "Plus, they're clean bits!",
-        )
-        .para();
+    para(&playerv.thing.visual.as_string(world, world.pid));
+
+    // TODO: Could add inventory.
 }
 
 /// Outputs the player's inventory
@@ -195,6 +184,11 @@ impl Buffer {
         } else {
             self
         }
+    }
+
+    /// Converts the buffer to a string.
+    pub fn get(self) -> String {
+        self.buff
     }
 
     /// Outputs the constructed message as a para.

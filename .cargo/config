@@ -1,2 +1,2 @@
 [alias]
-doc = "devdoc --no-deps --document-private-items --open"
+devdoc = "doc --document-private-items --open"

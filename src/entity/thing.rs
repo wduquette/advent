@@ -1,5 +1,6 @@
 //! Thing Data
 
+use crate::types::Visual;
 use crate::entity::flag::FlagSetComponent;
 use crate::entity::ID;
 use crate::world::World;
@@ -19,17 +20,17 @@ pub struct ThingComponent {
     pub location: ID,
 
     /// The thing's base description.
-    pub visual: String,
+    pub visual: Visual,
 }
 
 impl ThingComponent {
     /// Create a new room with a name, noun, visual, and related info.
-    pub fn new(name: &str, noun: &str, visual: &str) -> ThingComponent {
+    pub fn new(name: &str, noun: &str) -> ThingComponent {
         ThingComponent {
             name: name.into(),
             noun: noun.into(),
             location: LIMBO,
-            visual: visual.trim().into(),
+            visual: Visual::Default,
         }
     }
 }

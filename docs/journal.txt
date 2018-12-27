@@ -161,6 +161,9 @@ x   Testing.
     x   Found bug in World::put_in.  Fixed.
 x   Moved "connect()" and "oneway" from scenario.rs to world.rs as
     World::twoway() and World::oneway.
+x   Looked at using termion in Bonaventure.
+    x   Tricky.  I'd need to format!() the control strings into
+        variables, and then build up my output myself.
 
 2018-12-25 (Tuesday)
 x   Getting back to basics.

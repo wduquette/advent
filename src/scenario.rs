@@ -1,9 +1,11 @@
 //! Scenario definition
 
+use crate::entity::ID;
 use crate::entity::rule::Action::*;
 use crate::types::Dir::*;
 use crate::types::Flag::*;
 use crate::world::World;
+use crate::visual::Buffer;
 
 // Important Constants
 const NOTE: &str = "note.clean";
@@ -17,7 +19,8 @@ pub fn build() -> World {
     // // NEXT, Make the player
     world.pid = world
         .add("self")
-        .player("You've got all the usual bits.")
+        .player()
+        .thing_visual(&|world, id| player_visual(world, id))
         .flag(DirtyHands)
         .id();
 
@@ -52,9 +55,8 @@ The trail crosses a small stream here.  You can go east or west.
 
     let stream = world
         .add("stream")
-        .thing(
-            "stream",
-            "stream",
+        .thing("stream", "stream")
+        .thing_prose(
             "\
 The stream comes from the north, down a little waterfall, and runs
 away under the bridge.  It looks surprisingly deep, considering
@@ -72,7 +74,8 @@ how narrow it is.
     // The note
     let clean_note = world
         .add(NOTE)
-        .thing("note", "note", "A note, on plain paper.")
+        .thing("note", "note")
+        .thing_prose("A note, on plain paper.")
         .book(
             "\
 Welcome, dear friend.  Your mission, should you choose to
@@ -86,11 +89,8 @@ step!
 
     let dirty_note = world
         .add("note.dirty")
-        .thing(
-            "note",
-            "note",
-            "A note, on plain paper.  It looks pretty grubby.",
-        )
+        .thing("note", "note",)
+        .thing_prose("A note, on plain paper.  It looks pretty grubby.")
         .book("You've gotten it too dirty to read.")
         .id();
 
@@ -121,6 +121,23 @@ and gosh, this doesn't look anything like the toy aisle.
 
     // NEXT, return the world.
     the_world
+}
+
+/// Returns the player's current appearance.
+fn player_visual(world: &World, _id: ID) -> String {
+    let playerv = world.player();
+
+    Buffer::new()
+        .add("You've got all the usual bits.")
+        .when(
+            playerv.flag_set.has(DirtyHands),
+            "Your hands are kind of dirty, though.",
+        )
+        .when(
+            !playerv.flag_set.has(DirtyHands),
+            "Plus, they're clean bits!",
+        )
+        .get()
 }
 
 fn player_gets_note_dirty(world: &World) -> bool {
