@@ -25,6 +25,8 @@ pub fn build() -> World {
         .flag(DirtyHands)
         .id();
 
+    let pid = world.pid;
+
     // NEXT, make the rooms.
 
     // Room: Clearing
@@ -97,6 +99,20 @@ and gosh, this doesn't look anything like the toy aisle.
             .into(),
         ));
 
+
+    world
+        .add("fairy-godmother-rule")
+        .always(&|world| player_is_dead(world))
+        .action(Print(
+            "\
+A fairy godmother hovers over your limp body.  She frowns;
+then, apparently against her better judgment, she waves
+her wand.  There's a flash, and she disappears.
+||*** You are alive! ***
+            ".into()
+        ))
+        .action(ClearFlag(pid, Dead));
+
     // NEXT, set the starting location.
     world.set_room(world.pid, clearing);
     world.set_flag(world.pid, Seen(clearing));
@@ -128,6 +144,10 @@ fn player_gets_note_dirty(world: &World) -> bool {
     let notev = world.as_thing(id);
 
     playerv.inventory.has(id) && playerv.flag_set.has(DirtyHands) && !notev.flag_set.has(Dirty)
+}
+
+fn player_is_dead(world: &World) -> bool {
+    world.has_flag(world.pid, Dead)
 }
 
 fn note_thing_prose(world: &World, id: ID) -> String {

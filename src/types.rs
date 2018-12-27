@@ -24,6 +24,9 @@ pub enum Dir {
 #[allow(dead_code)]
 /// Game flags.  At present this is a mixture of engine flags and scenario flags.
 pub enum Flag {
+    /// Has the entity been killed?
+    Dead,
+    
     /// Has this entity been seen by the player?  Used mostly for locations.
     Seen(ID),
 
