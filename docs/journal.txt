@@ -1,5 +1,153 @@
 Bonaventure Journal
 
+2018-12-27 (Thursday)
+x   Three related issues:
+    x   Interface between the scenario and the engine
+    x   Event guards and hooks
+        x   I.e, actions taken before and after an event occurs:
+            x   Guard: Kill the player if they touch the sword with dirty hands.
+                x   Or, simply don't let them take it.
+            x   Hook: Soil the note if they take it with dirty hands.
+    x   Custom visuals
+        x   How you look depends on whether your hands are dirty or not.
+x   Scenario/engine Interface
+    x   Logic required by the scenario can be supported by the engine in one
+        of two ways:
+        x   By simply being part of how the world works, e.g.,
+            the engine naturally supports getting and dropping things, and
+            moving from location to location.
+        x   By providing hooks and other mechanisms for extending the logic.
+            x   Ultimately, this should be driven by data rather than Rust
+                code, so that the scenario can be entirely saved to a
+                scenario file.
+    x   At present, the game includes the following logic that is "out of
+        place":
+        x   HasWater, DirtyHands, and Dirty flags.
+            x   These are scenario-specific, but are hard-coded into the
+                Flag type.
+        x   visual::player() method
+            x   Description of the player changes based on DirtyHands flag.
+        x   "wash", "wash hands" commands
+            x   These are scenario-specific, but implemented in the
+                player control system.
+    x   How to handle scenario flags?
+        x   Custom Flags
+            x   Add a flag Flag(&'static str)
+                x   The user can add as many of these as needed, using
+                    a constant string as the associated data.
+            x   Add a flag EntFlag(ID, &'static str)
+                x   Similar, for flags associated with a given entity.
+        x   Note: For a pure-Rust implementation, Flag(&'static str) makes
+            more sense, since you'll want to use a const &str.  If scenarios
+            can be read from a scenario file, it will need to be String.
+    x   How to handle custom descriptions?
+        x   Need a description hook of some kind.  It should be used whenever
+            the entity is described.  And there are probably flavors.
+        x   What are the flavors?
+            x   Extend visual
+            x   Replace visual
+            x   Do nothing
+    x   How to handle command-specific code?
+        x   Custom command handlers
+            x   E.g., "wash hands" can work even if there is no thing with
+                noun "hands".
+        x   Entity Event guards and hooks
+            x   An Entity Event is an event that involves the player and an
+                entity, e.g.,
+                x   Get<thisObject>
+                x   Enter<thisRoom>
+                x   Note: call them Events instead of Actions to distinguish
+                    them from rule/command actions.
+            x   An event guard indicates whether or not the given event should
+                be allowed or denied, e.g., Get(sword). Can return Allow or
+                Deny.
+                x   Can take other actions as well: If you try to take the
+                    sword with dirty hands, it kills you.
+                x   Returns Allow/Deny rather than OK/Err, because Deny is not
+                    an error: it just means that the guard has done everything
+                    that needs to be done, and the remainder of the event
+                    need not occur.
+            x   An event hook takes effect *after* the event occurs, i.e.,
+                after the note is taken.  It is like a rule that is triggered
+                by the event.  It might output a message and take various
+                actions.
+                x   If you take the note with dirty hands, the note becomes
+                    illegible.
+                    x   This is better than a rule that fires every turn.
+            x   How to represent event guards and hooks?
+                x   Option A: As part of the ThingComponent.
+                    x   ThingComponent has guard: HashMap<Event>
+                        and hook: HashMap<Event>
+                    x   When acting on a thing, the relevant engine code looks
+                        for the guard and hook and uses them as appropriate.
+                    x   Issue: both rooms and things can have guards and hooks,
+                        just with different events.
+                x   Option B: As distinct entities.
+                    x   Each guard and hook is a distinct entity with a
+                        GuardComponent or HookComponent
+                    x   On Get(SWORD), the relevant engine code
+                        looks through the entities for a Get(SWORD) guard/hook.
+                    x   Issue: could have multiple guards/hooks for a given
+                        entity and event.  That's probably not what we want.
+                    x   Issue: have to search through all entities to find the
+                        relevant guard/hook.
+                x   Option C: As distinct entities, referenced by ID
+                    x   I.e., the "sword" entity has the ID of the Get(sword)
+                        guard entity.
+                    x   Issue: Every software problem can be solved by adding
+                        another level of indirection, but that doesn't make it
+                        a good idea.
+                x   Option D: As GuardComponent/HookComponent on the entity
+                    itself.
+                    x   Like A, but can be added to any kind of entity.
+                    x   This kind of thing always involves an event on a
+                        specific entity, so having the components on that
+                        entity makes sense.
+                x   Conclusion: Use Option D.
+            x   Non-repeating Guards/Hooks
+                x   Sometimes a Guard or Hook only applies for a short time,
+                    e.g., the first time you pick up the note.
+                x   Two ways to handle this:
+                    x   Thing swapping, as we do with note.clean and note.dirty.
+                        x   The thing that gets swapped in lacks the hook.
+                    x   Custom flags
+                        x   The hook sets a custom flag that prevents it from
+                            firing again.
+            x   Guard Definition
+                x   A guard is a closure |world, id, event| -> GuardResult,
+                    where GuardResult is an enum Allow, Deny
+                    x   Or, Allow(Vec<Action>), Deny(Vec<Action>) if we want
+                        to define it in a data-driven way.
+            x   Hook Definition
+                x   A hook is a closure |world, id, event| -> ()
+                    x   Or, -> Vec<Action> for a data-driven solution
+                x   A hook doesn't change the basic event; it just adds
+                    additional behavior *after* the event occurs.
+        x   How to implement Visual Hooks
+            x   These need to be attached to ThingComponent and RoomComponent,
+                since they have distinct visuals.
+            x   The visual can be a sum type: Prose(String), Hook(closure).
+                x   closure: |world, id| -> (): the closure is responsible
+                    for printing the text using visual::<tbd>
+                x   Note, the closure can also take actions, e.g., set flags.
+                    x   Examining a note can set a flag allowing the player
+                        to access a particular dictionary entry.
+                x   For data driven, could return Vec<Action>
+            x   Possibly define VisualComponent, with map of different kinds
+                of visuals?
+                x   Nah.  Seems unnecessary.
+x   Best order to make these changes?
+    x   Do the visual hook first, as it doesn't require affecting the command
+        logic.
+    x   Then, add event hooks, and replace the dirty note rule with one.
+    x   Then, add event guard, and a sword that kills you if you touch it
+        with dirty hands.
+    x   Do the custom flag types last; that implementation doesn't make sense
+        until the custom flags are all referenced in a single module.
+    x   Then, consider making the hooks data driven.
+    x   And then, scrub the resulting scenario code: try to make it
+        easier for the scenario designer.
+
 2018-12-26 (Wednesday)
 x   LOTS of work done so far today.
     x   Completely refactored the entity data structures.
