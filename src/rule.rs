@@ -7,18 +7,16 @@ use crate::world::World;
 
 /// The Rule System.  Processes all rules, executing those that should_fire.
 pub fn system(world: &mut World) {
-    // TODO: Need to provide an interator over IDs; or, world.rules(), an interator over a
-    // set of IDs.
     let rules: Vec<RuleView> = world
         .rules
         .keys()
         .cloned()
-        .filter(|id| world.is_rule(*id))
         .map(|id| world.as_rule(id))
+        .filter(|rv| !rv.rule.fired)
         .collect();
 
     for mut rulev in rules {
-        if !rulev.rule.fired && (rulev.rule.predicate)(world) {
+        if (rulev.rule.predicate)(world) {
             fire_rule(world, &rulev);
             mark_fired(world, &mut rulev);
         }
