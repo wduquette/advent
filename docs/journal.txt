@@ -9,6 +9,10 @@ x   LOTS of work done so far today.
         crate::entity submodules.
     x   It seems to be working, but I need to do lots of testing
         (and add test suites where appropriate).
+x   Testing.
+    x   Found bug in World::put_in.  Fixed.
+x   Moved "connect()" and "oneway" from scenario.rs to world.rs as
+    World::twoway() and World::oneway.
 
 2018-12-25 (Tuesday)
 x   Getting back to basics.

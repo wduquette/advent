@@ -327,6 +327,29 @@ impl World {
         rc.links.get(&dir).cloned()
     }
 
+    /// Links one room to another in the given direction.
+    /// Links are not bidirectional.  If you want links both ways, you
+    /// have to add them.
+    pub fn oneway(&mut self, from: ID, dir: Dir, to: ID) {
+        assert!(self.is_room(from) "Not a room: [{}]", from);
+        assert!(self.is_room(to) "Not a room: [{}]", to);
+
+        let fromc = self.rooms.get_mut(&from).unwrap();
+        fromc.links.insert(dir, to);
+    }
+
+    /// Links two rooms in the given directions.
+    pub fn twoway(&mut self, a: ID, to_b: Dir, to_a: Dir, b: ID) {
+        assert!(self.is_room(a) "Not a room: [{}]", a);
+        assert!(self.is_room(b) "Not a room: [{}]", b);
+
+        let fromc = self.rooms.get_mut(&a).unwrap();
+        fromc.links.insert(to_b, b);
+
+        let toc = self.rooms.get_mut(&b).unwrap();
+        toc.links.insert(to_a, a);
+    }
+
     //--------------------------------------------------------------------------------------------
     // Verbs
 

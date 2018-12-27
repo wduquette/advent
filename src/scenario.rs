@@ -52,21 +52,20 @@ The trail crosses a small stream here.  You can go east or west.
         .flag(HasWater)
         .id();
 
-    make_scenery(
-        world,
-        bridge,
-        "stream-1",
-        "stream",
-        "\
+    let stream = world
+        .add("stream")
+        .thing("stream", "stream", "\
 The stream comes from the north, down a little waterfall, and runs
 away under the bridge.  It looks surprisingly deep, considering
 how narrow it is.
-        ",
-    );
+        ")
+        .flag(Scenery)
+        .id();
+    world.put_in(stream, bridge);
 
     // Links
-    connect(world, East, clearing, West, trail);
-    connect(world, East, trail, West, bridge);
+    world.twoway(clearing, East, West, trail);
+    world.twoway(trail, East, West, bridge);
 
     // The note
     let clean_note = world
@@ -131,34 +130,4 @@ fn player_gets_note_dirty(world: &World) -> bool {
     playerv.inventory.has(id) &&
     playerv.flag_set.has(DirtyHands) &&
     !notev.flag_set.has(Dirty)
-}
-
-/// Makes a scenery object, and returns its ID.
-fn make_scenery(world: &mut World, loc: ID, tag: &str, name: &str, text: &str) -> ID {
-    let id = world
-        .add(tag)
-        .thing(name, name, text)
-        .flag(Scenery)
-        .id();
-    world.put_in(id, loc);
-
-    id
-}
-
-// TODO: oneway and connect should be world methods link() and bilink(); we should also have
-// unlink() and unbilink().
-
-/// Links one room to another in the given direction.
-/// Links are not bidirectional.  If you want links both ways, you
-/// have to add them.
-fn oneway(world: &mut World, dir: Dir, from: ID, to: ID) {
-    let roomv = &mut world.as_room(from);
-    roomv.room.links.insert(dir, to);
-    roomv.save(world);
-}
-
-/// Establishes a bidirectional link between two rooms.
-fn connect(world: &mut World, from_dir: Dir, from: ID, to_dir: Dir, to: ID) {
-    oneway(world, from_dir, from, to);
-    oneway(world, to_dir, to, from);
 }
