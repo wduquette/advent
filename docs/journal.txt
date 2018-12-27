@@ -139,6 +139,8 @@ x   Scenario/engine Interface
 x   Best order to make these changes?
     x   Do the visual hook first, as it doesn't require affecting the command
         logic.
+        x   DONE. For Things
+        x   For Rooms
     x   Then, add event hooks, and replace the dirty note rule with one.
     x   Then, add event guard, and a sword that kills you if you touch it
         with dirty hands.
