@@ -1,14 +1,14 @@
 //! The game world
-use crate::entity::ID;
-use crate::entity::rule::Action;
+use crate::entity::book::*;
+use crate::entity::flag::*;
 use crate::entity::inventory::*;
 use crate::entity::player::*;
 use crate::entity::room::*;
-use crate::entity::book::*;
+use crate::entity::rule::Action;
 use crate::entity::rule::*;
 use crate::entity::tag::*;
-use crate::entity::flag::*;
 use crate::entity::thing::*;
+use crate::entity::ID;
 use crate::types::*;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -25,7 +25,6 @@ pub const LIMBO: ID = 0;
 pub struct World {
     //--------------------------------------------------------------------------------------------
     // World-Global Data
-
     /// The next entity ID
     next_id: ID,
 
@@ -40,7 +39,6 @@ pub struct World {
 
     //--------------------------------------------------------------------------------------------
     // Entity Components
-
     /// Tag Components: Identifiers for the entities.  This is a BTreeMap so that we can
     /// easily reference entities in creation order, and can easily determine the next available
     /// ID.
@@ -195,13 +193,12 @@ impl World {
         InventoryView::from(&self, id)
     }
 
-
     /// Can this entity function as a player?
     pub fn is_player(&self, id: ID) -> bool {
-        self.players.get(&id).is_some() &&
-        self.things.get(&id).is_some() &&
-        self.inventories.get(&id).is_some() &&
-        self.flag_sets.get(&id).is_some()
+        self.players.get(&id).is_some()
+            && self.things.get(&id).is_some()
+            && self.inventories.get(&id).is_some()
+            && self.flag_sets.get(&id).is_some()
     }
 
     /// Retrieve a view of the entity as a Player
@@ -211,9 +208,9 @@ impl World {
 
     /// Can this entity function as a room?  I.e., a place the player can be?
     pub fn is_room(&self, id: ID) -> bool {
-        self.rooms.get(&id).is_some() &&
-        self.inventories.get(&id).is_some() &&
-        self.flag_sets.get(&id).is_some()
+        self.rooms.get(&id).is_some()
+            && self.inventories.get(&id).is_some()
+            && self.flag_sets.get(&id).is_some()
     }
 
     /// Retrieve a view of the entity as a Room
@@ -223,8 +220,7 @@ impl World {
 
     /// Can this entity function as a thing?  I.e., as a noun?
     pub fn is_thing(&self, id: ID) -> bool {
-        self.things.get(&id).is_some() &&
-        self.flag_sets.get(&id).is_some()
+        self.things.get(&id).is_some() && self.flag_sets.get(&id).is_some()
     }
 
     /// Retrieve a view of the entity as a Thing
@@ -244,8 +240,7 @@ impl World {
 
     /// Does this entity have prose?
     pub fn is_book(&self, id: ID) -> bool {
-        self.is_thing(id) &&
-        self.books.get(&id).is_some()
+        self.is_thing(id) && self.books.get(&id).is_some()
     }
 
     /// Retrieve a view of the entity as a Book
@@ -257,7 +252,6 @@ impl World {
     pub fn player(&self) -> PlayerView {
         self.as_player(self.pid)
     }
-
 
     //--------------------------------------------------------------------------------------------
     // Low-level entity queries and manipulations.
@@ -415,7 +409,9 @@ impl<'a> EBuilder<'a> {
     /// Adds an inventory component to the entity if it doesn't already have one.
     pub fn inventory(self) -> EBuilder<'a> {
         if self.world.inventories.get(&self.id).is_none() {
-            self.world.inventories.insert(self.id, InventoryComponent::new());
+            self.world
+                .inventories
+                .insert(self.id, InventoryComponent::new());
         }
 
         self
@@ -424,7 +420,9 @@ impl<'a> EBuilder<'a> {
     /// Adds a flag component to the entity if it doesn't already have one.
     pub fn flag_set(self) -> EBuilder<'a> {
         if self.world.flag_sets.get(&self.id).is_none() {
-            self.world.flag_sets.insert(self.id, FlagSetComponent::new());
+            self.world
+                .flag_sets
+                .insert(self.id, FlagSetComponent::new());
         }
 
         self
@@ -452,8 +450,9 @@ impl<'a> EBuilder<'a> {
 
         self.world.pid = self.id;
         self.world.players.insert(self.id, PlayerComponent::new());
-        self.world.things.insert(self.id,
-            ThingComponent::new("Yourself", "self", visual));
+        self.world
+            .things
+            .insert(self.id, ThingComponent::new("Yourself", "self", visual));
 
         self
     }
@@ -467,7 +466,9 @@ impl<'a> EBuilder<'a> {
             self.tag
         );
 
-        self.world.rooms.insert(self.id, RoomComponent::new(name, visual));
+        self.world
+            .rooms
+            .insert(self.id, RoomComponent::new(name, visual));
         self = self.inventory();
         self = self.flag_set();
 
@@ -485,7 +486,9 @@ impl<'a> EBuilder<'a> {
 
         self = self.flag_set();
 
-        self.world.things.insert(self.id, ThingComponent::new(name, noun, visual));
+        self.world
+            .things
+            .insert(self.id, ThingComponent::new(name, noun, visual));
 
         self
     }
@@ -513,7 +516,9 @@ impl<'a> EBuilder<'a> {
             self.tag
         );
 
-        self.world.rules.insert(self.id, RuleComponent::once(predicate));
+        self.world
+            .rules
+            .insert(self.id, RuleComponent::once(predicate));
 
         self
     }
@@ -527,7 +532,9 @@ impl<'a> EBuilder<'a> {
             self.tag
         );
 
-        self.world.rules.insert(self.id, RuleComponent::always(predicate));
+        self.world
+            .rules
+            .insert(self.id, RuleComponent::always(predicate));
 
         self
     }

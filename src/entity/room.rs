@@ -1,10 +1,10 @@
 //! The Room Component
 
-use crate::world::World;
-use crate::entity::inventory::InventoryComponent;
 use crate::entity::flag::FlagSetComponent;
-use crate::types::Dir;
+use crate::entity::inventory::InventoryComponent;
 use crate::entity::ID;
+use crate::types::Dir;
+use crate::world::World;
 use std::collections::HashMap;
 
 /// Information specific to rooms.
@@ -47,10 +47,7 @@ impl RoomView {
     /// Creates a RoomView for the entity.
     pub fn from(world: &World, id: ID) -> RoomView {
         let tc = &world.tags[&id];
-        assert!(
-            world.is_room(id),
-            "Not a room: [{}] {}", tc.id, tc.tag,
-        );
+        assert!(world.is_room(id), "Not a room: [{}] {}", tc.id, tc.tag,);
 
         RoomView {
             id: tc.id,

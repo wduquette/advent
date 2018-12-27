@@ -1,10 +1,10 @@
 //! Player Data Module
 
-use crate::entity::thing::ThingComponent;
-use crate::world::World;
+use super::ID;
 use crate::entity::flag::FlagSetComponent;
 use crate::entity::inventory::InventoryComponent;
-use super::ID;
+use crate::entity::thing::ThingComponent;
+use crate::world::World;
 
 /// Information specific to Player Entities
 #[derive(Debug, Clone, Default)]
@@ -16,7 +16,7 @@ pub struct PlayerComponent {
 impl PlayerComponent {
     /// Create a new PlayerComponent
     pub fn new() -> Self {
-       Self {}
+        Self {}
     }
 }
 
@@ -37,10 +37,7 @@ impl PlayerView {
     /// Creates a PlayerView for the entity.
     pub fn from(world: &World, id: ID) -> PlayerView {
         let tc = &world.tags[&id];
-        assert!(
-            world.is_player(id),
-            "Not a player: [{}] {}", tc.id, tc.tag,
-        );
+        assert!(world.is_player(id), "Not a player: [{}] {}", tc.id, tc.tag,);
 
         PlayerView {
             id: tc.id,

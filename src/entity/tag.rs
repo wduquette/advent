@@ -21,7 +21,7 @@ impl TagComponent {
     pub fn new(id: ID, tag: &str) -> Self {
         Self {
             id,
-            tag: tag.into()
+            tag: tag.into(),
         }
     }
 }

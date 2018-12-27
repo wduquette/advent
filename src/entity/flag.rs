@@ -1,9 +1,9 @@
 //! Entity Flags
 
-use crate::types::Flag;
-use std::collections::HashSet;
-use crate::world::World;
 use crate::entity::ID;
+use crate::types::Flag;
+use crate::world::World;
+use std::collections::HashSet;
 
 /// Inventories of Things
 #[derive(Debug, Clone, Default)]
@@ -80,7 +80,9 @@ impl FlagSetView {
         let tc = &world.tags[&id];
         assert!(
             world.is_flag_set(id),
-            "Not a flag set: [{}] {}", tc.id, tc.tag,
+            "Not a flag set: [{}] {}",
+            tc.id,
+            tc.tag,
         );
 
         FlagSetView {
@@ -98,8 +100,8 @@ impl FlagSetView {
 
 #[cfg(test)]
 mod tests {
-    use crate::types::Flag::*;
     use super::*;
+    use crate::types::Flag::*;
 
     #[test]
     fn new() {

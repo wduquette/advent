@@ -1,7 +1,7 @@
 //! Rule Data
 
-use crate::types::Flag;
 use crate::entity::ID;
+use crate::types::Flag;
 use crate::world::World;
 
 /// A rule predicate
@@ -77,10 +77,7 @@ impl RuleView {
     /// Creates a RuleView for the entity.
     pub fn from(world: &World, id: ID) -> RuleView {
         let tc = &world.tags[&id];
-        assert!(
-            world.is_rule(id),
-            "Not a rule: [{}] {}", tc.id, tc.tag,
-        );
+        assert!(world.is_rule(id), "Not a rule: [{}] {}", tc.id, tc.tag,);
 
         RuleView {
             id: tc.id,

@@ -1,14 +1,14 @@
 //! The Player Control System
 
-use crate::entity::inventory::InventoryComponent;
-use crate::entity::ID;
 use self::Status::*;
 use crate::command;
 use crate::command::Command;
 use crate::debug;
+use crate::entity::inventory::InventoryComponent;
 use crate::entity::player::PlayerView;
-use crate::types::Flag::*;
+use crate::entity::ID;
 use crate::types::Dir::*;
+use crate::types::Flag::*;
 use crate::types::*;
 use crate::visual;
 use crate::world::*;
@@ -207,7 +207,10 @@ fn cmd_wash_hands(world: &mut World, player: &mut PlayerView) -> CmdResult {
     }
 
     visual::prose("You wash your hands in the water.")
-        .when(player.flag_set.has(DirtyHands), "They look much cleaner now.")
+        .when(
+            player.flag_set.has(DirtyHands),
+            "They look much cleaner now.",
+        )
         .para();
     player.flag_set.unset(DirtyHands);
 

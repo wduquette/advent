@@ -1,7 +1,7 @@
 //! Inventory
 
-use crate::world::World;
 use crate::entity::ID;
+use crate::world::World;
 use std::collections::BTreeSet;
 
 /// Inventories of Things
@@ -62,7 +62,9 @@ impl InventoryView {
         let tc = &world.tags[&id];
         assert!(
             world.is_inventory(id),
-            "Not an inventory: [{}] {}", tc.id, tc.tag,
+            "Not an inventory: [{}] {}",
+            tc.id,
+            tc.tag,
         );
 
         InventoryView {

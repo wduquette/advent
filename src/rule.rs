@@ -1,7 +1,7 @@
 //! Rule System
 
-use crate::entity::rule::*;
 use crate::entity::rule::Action::*;
+use crate::entity::rule::*;
 use crate::visual;
 use crate::world::World;
 
@@ -9,7 +9,10 @@ use crate::world::World;
 pub fn system(world: &mut World) {
     // TODO: Need to provide an interator over IDs; or, world.rules(), an interator over a
     // set of IDs.
-    let rules: Vec<RuleView> = world.rules.keys().cloned()
+    let rules: Vec<RuleView> = world
+        .rules
+        .keys()
+        .cloned()
         .filter(|id| world.is_rule(*id))
         .map(|id| world.as_rule(id))
         .collect();

@@ -9,9 +9,9 @@
 // appropriate moments in processing; thus, this module is called as needed, rather than
 // doing its work all at once.
 
+use crate::console::para;
 use crate::entity::inventory::InventoryComponent;
 use crate::entity::ID;
-use crate::console::para;
 use crate::types::Flag::*;
 use crate::world::World;
 
@@ -127,7 +127,10 @@ pub fn player(world: &World) {
             playerv.flag_set.has(DirtyHands),
             "Your hands are kind of dirty, though",
         )
-        .when(!playerv.flag_set.has(DirtyHands), "Plus, they're clean bits!")
+        .when(
+            !playerv.flag_set.has(DirtyHands),
+            "Plus, they're clean bits!",
+        )
         .para();
 }
 

@@ -1,8 +1,8 @@
 //! Thing Data
 
-use crate::world::World;
 use crate::entity::flag::FlagSetComponent;
 use crate::entity::ID;
+use crate::world::World;
 use crate::world::LIMBO;
 
 /// Information specific to things.
@@ -49,10 +49,7 @@ impl ThingView {
     /// Creates a ThingView for the entity.
     pub fn from(world: &World, id: ID) -> ThingView {
         let tc = &world.tags[&id];
-        assert!(
-            world.is_thing(id),
-            "Not a thing: [{}] {}", tc.id, tc.tag,
-        );
+        assert!(world.is_thing(id), "Not a thing: [{}] {}", tc.id, tc.tag,);
 
         ThingView {
             id: tc.id,

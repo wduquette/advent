@@ -1,9 +1,9 @@
 //! Scenario definition
 
-use crate::types::Flag::*;
-use crate::types::Dir::*;
-use crate::world::World;
 use crate::entity::rule::Action::*;
+use crate::types::Dir::*;
+use crate::types::Flag::*;
+use crate::world::World;
 
 // Important Constants
 const NOTE: &str = "note.clean";
@@ -52,11 +52,15 @@ The trail crosses a small stream here.  You can go east or west.
 
     let stream = world
         .add("stream")
-        .thing("stream", "stream", "\
+        .thing(
+            "stream",
+            "stream",
+            "\
 The stream comes from the north, down a little waterfall, and runs
 away under the bridge.  It looks surprisingly deep, considering
 how narrow it is.
-        ")
+        ",
+        )
         .flag(Scenery)
         .id();
     world.put_in(stream, bridge);
@@ -111,7 +115,6 @@ and gosh, this doesn't look anything like the toy aisle.
             .into(),
         ));
 
-
     // NEXT, set the starting location.
     world.set_room(world.pid, clearing);
     world.set_flag(world.pid, Seen(clearing));
@@ -125,7 +128,5 @@ fn player_gets_note_dirty(world: &World) -> bool {
     let id = world.lookup_id(NOTE).unwrap();
     let notev = world.as_thing(id);
 
-    playerv.inventory.has(id) &&
-    playerv.flag_set.has(DirtyHands) &&
-    !notev.flag_set.has(Dirty)
+    playerv.inventory.has(id) && playerv.flag_set.has(DirtyHands) && !notev.flag_set.has(Dirty)
 }

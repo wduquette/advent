@@ -1,9 +1,9 @@
 //! Books: Things that can be read.
 
-use crate::world::World;
 use crate::entity::flag::FlagSetComponent;
 use crate::entity::thing::ThingComponent;
 use crate::entity::ID;
+use crate::world::World;
 
 /// Books: things that can be read.
 #[derive(Debug, Clone)]
@@ -14,9 +14,7 @@ pub struct BookComponent {
 impl BookComponent {
     /// Creates a new component.
     pub fn new(text: &str) -> Self {
-        Self {
-            text: text.into(),
-        }
+        Self { text: text.into() }
     }
 }
 
@@ -37,10 +35,7 @@ impl BookView {
     pub fn from(world: &World, id: ID) -> BookView {
         let tc = &world.tags[&id];
 
-        assert!(
-            world.is_book(id),
-            "Not a book: [{}] {}", tc.id, tc.tag,
-        );
+        assert!(world.is_book(id), "Not a book: [{}] {}", tc.id, tc.tag,);
 
         BookView {
             id: tc.id,
