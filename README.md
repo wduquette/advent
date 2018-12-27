@@ -7,9 +7,14 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Read up on the Iterator traits, and improve the components that
-  support .iter().
+* Define Event guards and hooks
+  * The dirty-note rule should be a Get hook.
+  * The note Book prose hook could be a Read guard.
 * The Game
+  * Add emotional comfort sword.
+    * Kills you (sort of) if you draw it when your hands are dirty.
+      * Tells you it kills you, but then tells you that a fairy
+        godmother has revived you.
   * Add puzzle to make water flow in the stream.
   * Extend the world.
   * Add some more things and more puzzles.
