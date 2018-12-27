@@ -307,10 +307,11 @@ impl World {
     pub fn take_out(&mut self, thing: ID) {
         assert!(self.is_thing(thing) "Not a thing: [{}]", id);
         let tc = self.things.get_mut(&thing).unwrap();
+
         let container = tc.location;
 
         if container != LIMBO {
-            let ic = self.inventories.get_mut(&thing).unwrap();
+            let ic = self.inventories.get_mut(&container).unwrap();
             ic.things.remove(&thing);
             tc.location = LIMBO;
         }

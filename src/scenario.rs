@@ -117,6 +117,7 @@ and gosh, this doesn't look anything like the toy aisle.
 
     // NEXT, set the starting location.
     world.set_room(world.pid, clearing);
+    world.set_flag(world.pid, Seen(clearing));
 
     // NEXT, return the world.
     the_world
