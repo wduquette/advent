@@ -1,5 +1,6 @@
 //! Scenario definition
 
+use crate::entity::prose::ProseType::*;
 use crate::entity::ID;
 use crate::entity::rule::Action::*;
 use crate::types::Dir::*;
@@ -20,7 +21,7 @@ pub fn build() -> World {
     world.pid = world
         .add("self")
         .player()
-        .thing_visual(&|world, id| player_visual(world, id))
+        .prose_hook(Thing, &|world, id| player_visual(world, id))
         .flag(DirtyHands)
         .id();
 
@@ -29,34 +30,29 @@ pub fn build() -> World {
     // Room: Clearing
     let clearing = world
         .add("clearing")
-        .room("Clearing", "A wide spot in the woods.  You can go east.")
+        .room("Clearing")
+        .prose(Room, "A wide spot in the woods.  You can go east.")
         .id();
 
     // Room: Trail
     let trail = world
         .add("trail")
-        .room(
-            "Trail",
-            "A trail from hither to yon.  You can go east or west.",
-        )
+        .room("Trail")
+        .prose(Room, "A trail from hither to yon.  You can go east or west.")
         .id();
 
     // Room: Bridge
     let bridge = world
         .add("bridge")
-        .room(
-            "Bridge",
-            "\
-The trail crosses a small stream here.  You can go east or west.
-        ",
-        )
+        .room("Bridge")
+        .prose(Room, "The trail crosses a small stream here.  You can go east or west.")
         .flag(HasWater)
         .id();
 
     let stream = world
         .add("stream")
         .thing("stream", "stream")
-        .thing_prose(
+        .prose(Thing,
             "\
 The stream comes from the north, down a little waterfall, and runs
 away under the bridge.  It looks surprisingly deep, considering
@@ -75,7 +71,7 @@ how narrow it is.
     let clean_note = world
         .add(NOTE)
         .thing("note", "note")
-        .thing_prose("A note, on plain paper.")
+        .prose(Thing, "A note, on plain paper.")
         .book(
             "\
 Welcome, dear friend.  Your mission, should you choose to
@@ -90,7 +86,7 @@ step!
     let dirty_note = world
         .add("note.dirty")
         .thing("note", "note",)
-        .thing_prose("A note, on plain paper.  It looks pretty grubby.")
+        .prose(Thing, "A note, on plain paper.  It looks pretty grubby.")
         .book("You've gotten it too dirty to read.")
         .id();
 

@@ -4,6 +4,7 @@ use crate::entity::book::*;
 use crate::entity::flag::*;
 use crate::entity::inventory::*;
 use crate::entity::player::*;
+use crate::entity::prose::*;
 use crate::entity::room::*;
 use crate::entity::rule::Action;
 use crate::entity::rule::*;
@@ -53,6 +54,9 @@ pub struct World {
     /// own or contain things.
     pub inventories: HashMap<ID, InventoryComponent>,
 
+    /// Prose Components: contains all the different kinds of prose an entity can have.
+    pub proses: HashMap<ID, ProseComponent>,
+
     /// Player Components: There should be only one, but it's easier to treat it like the others.
     pub players: HashMap<ID, PlayerComponent>,
 
@@ -63,6 +67,7 @@ pub struct World {
     pub things: HashMap<ID, ThingComponent>,
 
     /// Additional information about things that can be read.
+    /// TODO: This will be replaced by the prose component.
     pub books: HashMap<ID, BookComponent>,
 
     /// Rule Components: Rules that can fire.
@@ -92,6 +97,7 @@ impl World {
             tags: BTreeMap::new(),
             flag_sets: HashMap::new(),
             inventories: HashMap::new(),
+            proses: HashMap::new(),
             players: HashMap::new(),
             rooms: HashMap::new(),
             things: HashMap::new(),
@@ -189,9 +195,19 @@ impl World {
         self.inventories.get(&id).is_some()
     }
 
-    /// Retrieve a view of the entity as a flag set
+    /// Retrieve a view of the entity as an inventory
     pub fn as_inventory(&self, id: ID) -> InventoryView {
         InventoryView::from(&self, id)
+    }
+
+    /// Can this entity function as an inventory
+    pub fn is_prose(&self, id: ID) -> bool {
+        self.proses.get(&id).is_some()
+    }
+
+    /// Retrieve a view of the entity as a collection of prose
+    pub fn as_prose(&self, id: ID) -> ProseView {
+        ProseView::from(&self, id)
     }
 
     /// Can this entity function as a player?
@@ -345,6 +361,19 @@ impl World {
         toc.links.insert(to_a, a);
     }
 
+    /// Get the specific type of prose from the entity
+    pub fn prose(&self, id: ID, prose_type: ProseType) -> String {
+        assert!(self.is_prose(id) "Not prose: [{}]", id);
+
+        let prosec = &self.proses[&id];
+
+        if let Some(prose) = &prosec.types.get(&prose_type) {
+            prose.as_string(self, id)
+        } else {
+            "You don't see anything special.".to_string()
+        }
+    }
+
     //--------------------------------------------------------------------------------------------
     // Verbs
 
@@ -437,6 +466,44 @@ impl<'a> EBuilder<'a> {
         self
     }
 
+    /// Adds a prose description of the given type to the entity.
+    pub fn prose(self, prose_type: ProseType, text: &str) -> EBuilder<'a> {
+        if self.world.proses.get(&self.id).is_none() {
+            self.world
+                .proses
+                .insert(self.id, ProseComponent::new());
+        }
+
+        self
+            .world
+            .proses
+            .get_mut(&self.id)
+            .unwrap()
+            .types
+            .insert(prose_type, Prose::Prose(text.into()));
+
+        self
+    }
+
+    /// Adds a prose description of the given type to the entity.
+    pub fn prose_hook(self, prose_type: ProseType, hook: EntityStringHook) -> EBuilder<'a> {
+        if self.world.proses.get(&self.id).is_none() {
+            self.world
+                .proses
+                .insert(self.id, ProseComponent::new());
+        }
+
+        self
+            .world
+            .proses
+            .get_mut(&self.id)
+            .unwrap()
+            .types
+            .insert(prose_type, Prose::Hook(ProseHook::new(hook)));
+
+        self
+    }
+
     /// Adds the essential trimmings for a player.
     pub fn player(mut self) -> EBuilder<'a> {
         assert!(
@@ -459,7 +526,7 @@ impl<'a> EBuilder<'a> {
     }
 
     /// Adds the essential trimmings for a room.
-    pub fn room(mut self, name: &str, visual: &str) -> EBuilder<'a> {
+    pub fn room(mut self, name: &str) -> EBuilder<'a> {
         assert!(
             !self.world.rooms.get(&self.id).is_some(),
             "Tried to add room component twice: [{}] {}",
@@ -469,7 +536,7 @@ impl<'a> EBuilder<'a> {
 
         self.world
             .rooms
-            .insert(self.id, RoomComponent::new(name, visual));
+            .insert(self.id, RoomComponent::new(name));
         self = self.inventory();
         self = self.flag_set();
 
@@ -490,36 +557,6 @@ impl<'a> EBuilder<'a> {
         self.world
             .things
             .insert(self.id, ThingComponent::new(name, noun));
-
-        self
-    }
-
-    /// Adds a visual to the thing.
-    pub fn thing_visual(self, hook: EntityStringHook) -> EBuilder<'a> {
-        assert!(
-            self.world.things.get(&self.id).is_some(),
-            "Tried to add thing-visual to non-thing: [{}] {}",
-            self.id,
-            self.tag
-        );
-
-        self.world.things.get_mut(&self.id).unwrap().visual =
-            Visual::Hook(VisualHook::new(hook));
-
-        self
-    }
-
-    /// Adds visual prose to the thing.
-    pub fn thing_prose(self, prose: &str) -> EBuilder<'a> {
-        assert!(
-            self.world.things.get(&self.id).is_some(),
-            "Tried to add thing-visual to non-thing: [{}] {}",
-            self.id,
-            self.tag
-        );
-
-        self.world.things.get_mut(&self.id).unwrap().visual =
-            Visual::Prose(prose.to_string());
 
         self
     }

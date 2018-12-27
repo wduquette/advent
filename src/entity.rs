@@ -4,6 +4,7 @@ pub mod book;
 pub mod flag;
 pub mod inventory;
 pub mod player;
+pub mod prose;
 pub mod room;
 pub mod rule;
 pub mod tag;

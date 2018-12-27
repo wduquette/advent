@@ -13,6 +13,7 @@ use crate::console::para;
 use crate::entity::inventory::InventoryComponent;
 use crate::entity::ID;
 use crate::types::Flag::*;
+use crate::entity::prose::ProseType;
 use crate::world::World;
 
 //-----------------------------------------------------------------------------
@@ -77,7 +78,7 @@ fn print_room(world: &World, id: ID, detail: Detail) {
 
     // FIRST, display the room's description
     if detail == Detail::Full {
-        para!("{}|{}", roomv.room.name, roomv.room.visual);
+        para!("{}|{}", roomv.room.name, world.prose(id, ProseType::Room))
     } else {
         para(&roomv.room.name);
     }
@@ -96,10 +97,8 @@ fn print_room(world: &World, id: ID, detail: Detail) {
 
 /// Outputs a description of a thing.
 pub fn thing(world: &World, id: ID) {
-    let thingv = world.as_thing(id);
-
     // FIRST, display the thing's description
-    para(&thingv.thing.visual.as_string(world, id));
+    para(&world.prose(id, ProseType::Thing));
 
     // TODO: eventually we will want to describe its contents, if it has
     // contents, or other changeable state.
@@ -116,9 +115,7 @@ pub fn book(world: &World, id: ID) {
 
 /// Outputs a visual of the player.
 pub fn player(world: &World) {
-    let playerv = world.player();
-
-    para(&playerv.thing.visual.as_string(world, world.pid));
+    para(&world.prose(world.pid, ProseType::Thing));
 
     // TODO: Could add inventory.
 }

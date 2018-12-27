@@ -1,6 +1,5 @@
 //! Thing Data
 
-use crate::types::Visual;
 use crate::entity::flag::FlagSetComponent;
 use crate::entity::ID;
 use crate::world::World;
@@ -18,9 +17,6 @@ pub struct ThingComponent {
     /// The thing's current location, or LIMBO if it isn't currently
     /// present in any location
     pub location: ID,
-
-    /// The thing's base description.
-    pub visual: Visual,
 }
 
 impl ThingComponent {
@@ -30,7 +26,6 @@ impl ThingComponent {
             name: name.into(),
             noun: noun.into(),
             location: LIMBO,
-            visual: Visual::Default,
         }
     }
 }

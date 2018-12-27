@@ -2,7 +2,6 @@
 
 use crate::world::World;
 use crate::entity::ID;
-use std::fmt;
 
 //------------------------------------------------------------------------------------------------
 // Basic Types
@@ -41,49 +40,5 @@ pub enum Flag {
     Dirty,
 }
 
-/// A clojure to produce a string from an entity
+/// A closure to produce a string from an entity
 pub type EntityStringHook = &'static Fn(&World, ID) -> String;
-
-/// A Visual Hook: Computes the visual for an entity.
-#[derive(Clone)]
-pub struct VisualHook {
-    hook: EntityStringHook,
-}
-
-impl VisualHook {
-    /// Creates the hook
-    pub fn new(hook: EntityStringHook) -> Self {
-        Self { hook }
-    }
-
-    /// Call the hook
-    pub fn call(&self, world: &World, id: ID) -> String {
-        (self.hook)(world, id)
-    }
-}
-
-impl fmt::Debug for VisualHook {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "VisualHook(...)")
-    }
-}
-
-/// A Visual: how to produce a visual string for an entity.
-#[allow(dead_code)]
-#[derive(Clone,Debug)]
-pub enum Visual {
-    Default,
-    Prose(String),
-    Hook(VisualHook)
-}
-
-impl Visual {
-    /// Converts the visual to an actual string.
-    pub fn as_string(&self, world: &World, id: ID) -> String {
-        match self {
-            Visual::Default => "You don't see anything special.".to_string(),
-            Visual::Prose(str) => str.to_string(),
-            Visual::Hook(hook) => hook.call(world, id),
-        }
-    }
-}
