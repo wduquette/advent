@@ -48,9 +48,9 @@ impl Game {
     pub fn introduce(&self) {
         println!("Welcome to Bonaventure!\n");
 
-        let player = self.world.player();
+        let playerv = self.world.player();
 
-        visual::room(&self.world, player.location);
+        visual::room(&self.world, playerv.thing.location);
     }
 
     /// Restart the game: recreate the initial scenario.

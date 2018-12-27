@@ -10,8 +10,9 @@
 // doing its work all at once.
 
 use crate::console::para;
-use crate::types::flags::Flag::*;
-use crate::types::*;
+use crate::entity::inventory::InventoryComponent;
+use crate::entity::ID;
+use crate::types::Flag::*;
 use crate::world::World;
 
 //-----------------------------------------------------------------------------
@@ -72,18 +73,18 @@ pub fn room_brief(world: &World, id: ID) {
 /// * A brief description omits the visual; it's used for rooms that the player has visited
 ///   before.
 fn print_room(world: &World, id: ID, detail: Detail) {
-    let room = world.as_room(id);
+    let roomv = world.as_room(id);
 
     // FIRST, display the room's description
     if detail == Detail::Full {
-        para!("{}|{}", room.name, room.visual);
+        para!("{}|{}", roomv.room.name, roomv.room.visual);
     } else {
-        para(&room.name);
+        para(&roomv.room.name);
     }
 
     // NEXT, list any objects in the room's inventory.  (We don't list
     // scenary; presumably that's in the description.)
-    let list = invent_list(world, &room.inventory);
+    let list = invent_list(world, &roomv.inventory);
 
     if !list.is_empty() {
         para!("You see: {}.", list);
@@ -95,10 +96,10 @@ fn print_room(world: &World, id: ID, detail: Detail) {
 
 /// Outputs a description of a thing.
 pub fn thing(world: &World, id: ID) {
-    let thing = world.as_thing(id);
+    let thingv = world.as_thing(id);
 
     // FIRST, display the thing's description
-    para(&thing.visual);
+    para(&thingv.thing.visual);
 
     // TODO: eventually we will want to describe its contents, if it has
     // contents, or other changeable state.
@@ -106,8 +107,8 @@ pub fn thing(world: &World, id: ID) {
 
 /// Outputs the content of a book.
 pub fn book(world: &World, id: ID) {
-    let book = world.as_book(id);
-    para(&book.text);
+    let bookv = world.as_book(id);
+    para(&bookv.book.text);
 }
 
 //-----------------------------------------------------------------------------
@@ -117,45 +118,45 @@ pub fn book(world: &World, id: ID) {
 ///
 /// TODO: figure out how to handle optional content, e.g., dirty hands.
 pub fn player(world: &World) {
-    let player = world.player();
-
-    let mut msg = String::new();
-    msg.push_str(&player.visual);
+    let playerv = world.player();
 
     // TODO: This stuff is scenario-dependent.  There really ought to be
     // a mechanism for this.
-    prose(&player.visual)
+    prose(&playerv.thing.visual)
         .when(
-            player.flags.has(DirtyHands),
+            playerv.flag_set.has(DirtyHands),
             "Your hands are kind of dirty, though",
         )
-        .when(!player.flags.has(DirtyHands), "Plus, they're clean bits!")
+        .when(
+            !playerv.flag_set.has(DirtyHands),
+            "Plus, they're clean bits!",
+        )
         .para();
 }
 
 /// Outputs the player's inventory
 pub fn player_inventory(world: &World) {
-    let player = world.player();
+    let playerv = world.player();
 
-    if player.inventory.is_empty() {
+    if playerv.inventory.is_empty() {
         para("You aren't carrying anything.");
     } else {
-        para!("You have: {}.\n", invent_list(world, &player.inventory));
+        para!("You have: {}.\n", invent_list(world, &playerv.inventory));
     }
 }
 
 /// List the names of the entities, separated by commas.  Omits scenery.
-fn invent_list(world: &World, inventory: &Inventory) -> String {
+fn invent_list(world: &World, inventory: &InventoryComponent) -> String {
     let mut list = String::new();
 
-    for id in inventory {
-        let thing = world.as_thing(*id);
+    for id in inventory.iter() {
+        let thingv = world.as_thing(*id);
 
-        if !thing.flags.has(Scenery) {
+        if !thingv.flag_set.has(Scenery) {
             if !list.is_empty() {
                 list.push_str(", ");
             }
-            list.push_str(&thing.name);
+            list.push_str(&thingv.thing.name);
         }
     }
 

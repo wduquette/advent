@@ -1,48 +1,49 @@
 //! Rule System
 
-use crate::entity::RuleView;
-use crate::types::*;
+use crate::entity::rule::Action::*;
+use crate::entity::rule::*;
 use crate::visual;
-use crate::world::*;
+use crate::world::World;
 
 /// The Rule System.  Processes all rules, executing those that should_fire.
 pub fn system(world: &mut World) {
-    // TODO: Need to provide an interator over IDs; or, world.rules(), an interator over a
-    // set of IDs.
-    let rules: Vec<RuleView> = (1..world.entities.len())
-        .filter(|id| world.is_rule(*id))
+    let rules: Vec<RuleView> = world
+        .rules
+        .keys()
+        .cloned()
         .map(|id| world.as_rule(id))
+        .filter(|rv| !rv.rule.fired)
         .collect();
 
-    for mut rule in rules {
-        if !rule.fired && (rule.predicate)(world) {
-            fire_rule(world, &rule);
-            mark_fired(world, &mut rule);
+    for mut rulev in rules {
+        if (rulev.rule.predicate)(world) {
+            fire_rule(world, &rulev);
+            mark_fired(world, &mut rulev);
         }
     }
 }
 
 /// Execute the given rule
-fn fire_rule(world: &mut World, rule: &RuleView) {
-    for action in &rule.actions {
+fn fire_rule(world: &mut World, rulev: &RuleView) {
+    for action in &rulev.rule.actions {
         match action {
             // Print the rule's visual
-            Action::Print(visual) => {
+            Print(visual) => {
                 visual::info(visual);
             }
 
             // Set the flag on the entity's flag set
-            Action::SetFlag(id, flag) => {
+            SetFlag(id, flag) => {
                 world.set_flag(*id, *flag);
             }
 
             // Clear the flag on the entity's flag set
-            Action::ClearFlag(id, flag) => {
-                world.unset_flag(*id, flag);
+            ClearFlag(id, flag) => {
+                world.unset_flag(*id, *flag);
             }
 
             // Swap a, in a place, with b, in LIMBO
-            Action::Swap(a, b) => {
+            Swap(a, b) => {
                 let loc = world.loc(*a);
                 world.take_out(*a);
                 world.put_in(*b, loc);
@@ -52,10 +53,10 @@ fn fire_rule(world: &mut World, rule: &RuleView) {
 }
 
 // Mark the rule fired (if it's once_only).
-fn mark_fired(world: &mut World, rule: &mut RuleView) {
-    if rule.once_only {
-        rule.fired = true;
+fn mark_fired(world: &mut World, rulev: &mut RuleView) {
+    if rulev.rule.once_only {
+        rulev.rule.fired = true;
     }
 
-    rule.save(world);
+    rulev.save(world);
 }
