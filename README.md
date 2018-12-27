@@ -13,9 +13,11 @@ Also, see docs/journal.txt.
   * The note Book prose hook could be a Read guard.
 * The Game
   * Add emotional comfort sword.
-    * Kills you (sort of) if you draw it when your hands are dirty.
-      * Tells you it kills you, but then tells you that a fairy
-        godmother has revived you.
+    * Kills you if you draw it when your hands are dirty.
+      * But the fairy godmother will revive you.
+  * Main loop should halt if you're dead at the end of it.
+  * Rules map should possibly be BTreeMap, so that the order of
+    rule execution is predictable.
   * Add puzzle to make water flow in the stream.
   * Extend the world.
   * Add some more things and more puzzles.
