@@ -106,8 +106,7 @@ pub fn thing(world: &World, id: ID) {
 
 /// Outputs the content of a book.
 pub fn book(world: &World, id: ID) {
-    let bookv = world.as_book(id);
-    para(&bookv.book.text);
+    para(&world.prose(id, ProseType::Book));
 }
 
 //-----------------------------------------------------------------------------

@@ -6,6 +6,7 @@ use crate::command::Command;
 use crate::debug;
 use crate::entity::inventory::InventoryComponent;
 use crate::entity::player::PlayerView;
+use crate::entity::prose::ProseType;
 use crate::entity::ID;
 use crate::types::Dir::*;
 use crate::types::Flag::*;
@@ -173,7 +174,7 @@ fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
         let thingv = world.as_thing(id);
 
         // If it has no prose, it can't be read
-        if !world.is_book(id) {
+        if !world.has_prose(id, ProseType::Book) {
             return Err("You can't read that.".into());
         }
 

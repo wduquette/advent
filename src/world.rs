@@ -1,6 +1,5 @@
 //! The game world
 use crate::types::EntityStringHook;
-use crate::entity::book::*;
 use crate::entity::flag::*;
 use crate::entity::inventory::*;
 use crate::entity::player::*;
@@ -66,10 +65,6 @@ pub struct World {
     /// Thing Components: Information about things that the player can interact with.
     pub things: HashMap<ID, ThingComponent>,
 
-    /// Additional information about things that can be read.
-    /// TODO: This will be replaced by the prose component.
-    pub books: HashMap<ID, BookComponent>,
-
     /// Rule Components: Rules that can fire.
     pub rules: HashMap<ID, RuleComponent>,
 
@@ -101,7 +96,6 @@ impl World {
             players: HashMap::new(),
             rooms: HashMap::new(),
             things: HashMap::new(),
-            books: HashMap::new(),
             rules: HashMap::new(),
             verbs: HashSet::new(),
             synonyms: HashMap::new(),
@@ -205,6 +199,12 @@ impl World {
         self.proses.get(&id).is_some()
     }
 
+    /// Does this entity have prose of a given type?
+    pub fn has_prose(&self, id: ID, prose_type: ProseType) -> bool {
+        self.proses.get(&id).is_some() &&
+        self.proses[&id].types.get(&prose_type).is_some()
+    }
+
     /// Retrieve a view of the entity as a collection of prose
     pub fn as_prose(&self, id: ID) -> ProseView {
         ProseView::from(&self, id)
@@ -253,16 +253,6 @@ impl World {
     /// Retrieve a view of the entity as a Rule
     pub fn as_rule(&self, id: ID) -> RuleView {
         RuleView::from(&self, id)
-    }
-
-    /// Does this entity have prose?
-    pub fn is_book(&self, id: ID) -> bool {
-        self.is_thing(id) && self.books.get(&id).is_some()
-    }
-
-    /// Retrieve a view of the entity as a Book
-    pub fn as_book(&self, id: ID) -> BookView {
-        BookView::from(&self, id)
     }
 
     /// Gets a view of the player entity
@@ -557,20 +547,6 @@ impl<'a> EBuilder<'a> {
         self.world
             .things
             .insert(self.id, ThingComponent::new(name, noun));
-
-        self
-    }
-
-    /// Adds a book component to the entity.
-    pub fn book(self, text: &str) -> EBuilder<'a> {
-        assert!(
-            self.world.things.get(&self.id).is_some(),
-            "Tried to add book component to non-thing: [{}] {}",
-            self.id,
-            self.tag
-        );
-
-        self.world.books.insert(self.id, BookComponent::new(text));
 
         self
     }

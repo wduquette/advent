@@ -139,8 +139,6 @@ x   Scenario/engine Interface
 x   Best order to make these changes?
     x   Do the visual hook first, as it doesn't require affecting the command
         logic.
-        x   DONE. For Things
-        x   For Rooms
     x   Then, add event hooks, and replace the dirty note rule with one.
     x   Then, add event guard, and a sword that kills you if you touch it
         with dirty hands.
@@ -149,6 +147,17 @@ x   Best order to make these changes?
     x   Then, consider making the hooks data driven.
     x   And then, scrub the resulting scenario code: try to make it
         easier for the scenario designer.
+x   Things done:
+    x   Implemented the Visual enum and hook for Things.
+    x   Got a better idea: A ProseComponent whose content is a map of
+        prose by prose type (room, thing, book, etc.).  Each prose type
+        can have as its value a text string or a hook.
+    x   The ProseComponent cannot be edited.  Use a ProseHook to change
+        the prose.
+    x   Implemented this for things and rooms (which includes the player);
+        removed the old visual values completely.
+    x   Replaced the two notes with a single note with a prose hook.
+    x   Replaced the Book component with prose.
 
 2018-12-26 (Wednesday)
 x   LOTS of work done so far today.

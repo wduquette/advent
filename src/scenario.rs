@@ -9,7 +9,7 @@ use crate::world::World;
 use crate::visual::Buffer;
 
 // Important Constants
-const NOTE: &str = "note.clean";
+const NOTE: &str = "note";
 
 /// Build the initial state of the game world.
 pub fn build() -> World {
@@ -68,27 +68,13 @@ how narrow it is.
     world.twoway(trail, East, West, bridge);
 
     // The note
-    let clean_note = world
+    let note = world
         .add(NOTE)
         .thing("note", "note")
-        .prose(Thing, "A note, on plain paper.")
-        .book(
-            "\
-Welcome, dear friend.  Your mission, should you choose to
-accept it, is to figure out how to get to the end of
-the trail.  You've already taken the first big
-step!
-         ",
-        )
+        .prose_hook(Thing, &|world, id| note_thing_prose(world, id))
+        .prose_hook(Book, &|world, id| note_book_prose(world, id))
         .id();
-    world.put_in(clean_note, clearing);
-
-    let dirty_note = world
-        .add("note.dirty")
-        .thing("note", "note",)
-        .prose(Thing, "A note, on plain paper.  It looks pretty grubby.")
-        .book("You've gotten it too dirty to read.")
-        .id();
+    world.put_in(note, clearing);
 
     world
         .add("rule-dirty-note")
@@ -96,7 +82,7 @@ step!
         .action(Print(
             "The dirt from your hands got all over the note.".into(),
         ))
-        .action(Swap(clean_note, dirty_note));
+        .action(SetFlag(note, Dirty));
 
     // Stories: Rules that supply backstory to the player.
     world
@@ -142,4 +128,29 @@ fn player_gets_note_dirty(world: &World) -> bool {
     let notev = world.as_thing(id);
 
     playerv.inventory.has(id) && playerv.flag_set.has(DirtyHands) && !notev.flag_set.has(Dirty)
+}
+
+fn note_thing_prose(world: &World, id: ID) -> String {
+    let flagv = world.as_flag_set(id);
+
+    if flagv.flag_set.has(Dirty) {
+        "A note, on plain paper.  It looks pretty grubby; someone's been mishandling it.".into()
+    } else {
+        "A note, on plain paper".into()
+    }
+}
+
+fn note_book_prose(world: &World, id: ID) -> String {
+    let flagv = world.as_flag_set(id);
+
+    if flagv.flag_set.has(Dirty) {
+        "You've gotten it too dirty to read.".into()
+    } else {
+            "\
+Welcome, dear friend.  Your mission, should you choose to
+accept it, is to figure out how to get to the end of
+the trail.  You've already taken the first big
+step!
+         ".into()
+    }
 }
