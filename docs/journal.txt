@@ -1,5 +1,29 @@
 Bonaventure Journal
 
+2018-12-28 (Friday)
+x   Event hooks, guards, and closures
+    x   Problems
+        x   Mutation
+            x   Using a closure as a world mutator is annoying; the borrow
+                checker doesn't like it.  I've got it working, but I don't
+                completely understand the implications.  That is not good.
+        x   Timing
+            x   The timing of event mutators is critical, relative to the
+                changes to other entities (e.g., the player).  If I don't
+                control that, I'll have subtle bugs.  This will take some
+                thought.
+    x   Handling mutation
+        x   If a closure isn't doing the mutation, then hook needs to return
+            a data value that determines what the mutation is, i.e.,
+            a rule's vector of actions.
+            x   Possibly package up a vector of actions as an ActionScript.
+        x   Option A: Pre-defined ActionScript
+            x   The hook has a pre-defined ActionScript, just as a Rule
+                does.
+        x   Option B: Computed ActionScript
+            x   The hook has a closure that computes and returns an
+                ActionScript.
+
 2018-12-27 (Thursday)
 x   Three related issues:
     x   Interface between the scenario and the engine
