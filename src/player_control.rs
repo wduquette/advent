@@ -242,6 +242,8 @@ fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult 
         roomv.save(world);
         thingv.save(world);
 
+        world.call_event_hook(id, EventType::Get);
+
         visual::act("Taken.");
         Ok(Normal)
     } else {

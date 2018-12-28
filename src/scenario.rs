@@ -5,8 +5,10 @@ use crate::entity::ID;
 use crate::entity::rule::Action::*;
 use crate::types::Dir::*;
 use crate::types::Flag::*;
+use crate::types::EventType;
 use crate::world::World;
 use crate::visual::Buffer;
+use crate::visual;
 
 // Important Constants
 const NOTE: &str = "note";
@@ -75,16 +77,17 @@ how narrow it is.
         .thing("note", "note")
         .prose_hook(Thing, &|world, id| note_thing_prose(world, id))
         .prose_hook(Book, &|world, id| note_book_prose(world, id))
+        .event_hook(EventType::Get, &|world, id, event_type| on_note_get(world, id, event_type))
         .id();
     world.put_in(note, clearing);
 
-    world
-        .add("rule-dirty-note")
-        .always(&|world| player_gets_note_dirty(world))
-        .action(Print(
-            "The dirt from your hands got all over the note.".into(),
-        ))
-        .action(SetFlag(note, Dirty));
+    // world
+    //     .add("rule-dirty-note")
+    //     .always(&|world| player_gets_note_dirty(world))
+    //     .action(Print(
+    //         "The dirt from your hands got all over the note.".into(),
+    //     ))
+    //     .action(SetFlag(note, Dirty));
 
     // Stories: Rules that supply backstory to the player.
     world
@@ -136,6 +139,13 @@ fn player_visual(world: &World, _id: ID) -> String {
             "Plus, they're clean bits!",
         )
         .get()
+}
+
+fn on_note_get(world: &mut World, note: ID, _: EventType) {
+    if world.has_flag(world.pid, DirtyHands) && !world.has_flag(note, Dirty) {
+        visual::info("The dirt from your hands got all over the note.");
+        world.set_flag(note, Dirty);
+    }
 }
 
 fn player_gets_note_dirty(world: &World) -> bool {

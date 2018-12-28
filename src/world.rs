@@ -1,5 +1,6 @@
 //! The game world
 use crate::types::EntityStringHook;
+use crate::entity::event::*;
 use crate::entity::flag::*;
 use crate::entity::inventory::*;
 use crate::entity::player::*;
@@ -56,6 +57,9 @@ pub struct World {
     /// Prose Components: contains all the different kinds of prose an entity can have.
     pub proses: HashMap<ID, ProseComponent>,
 
+    /// Event Components: contains guards and hooks for entity events.
+    pub events: HashMap<ID, EventComponent>,
+
     /// Player Components: There should be only one, but it's easier to treat it like the others.
     pub players: HashMap<ID, PlayerComponent>,
 
@@ -92,6 +96,7 @@ impl World {
             tags: BTreeMap::new(),
             flag_sets: HashMap::new(),
             inventories: HashMap::new(),
+            events: HashMap::new(),
             proses: HashMap::new(),
             players: HashMap::new(),
             rooms: HashMap::new(),
@@ -208,6 +213,22 @@ impl World {
     /// Retrieve a view of the entity as a collection of prose
     pub fn as_prose(&self, id: ID) -> ProseView {
         ProseView::from(&self, id)
+    }
+
+    /// Can this entity function as an entity event handler?
+    pub fn is_event(&self, id: ID) -> bool {
+        self.events.get(&id).is_some()
+    }
+
+    /// Does this entity have an event hook of a given type?
+    pub fn has_event_hook(&self, id: ID, event_type: EventType) -> bool {
+        self.events.get(&id).is_some() &&
+        self.events[&id].hooks.get(&event_type).is_some()
+    }
+
+    /// Retrieve a view of the entity as a collection of event guards and hooks
+    pub fn as_event(&self, id: ID) -> EventView {
+        EventView::from(&self, id)
     }
 
     /// Can this entity function as a player?
@@ -413,6 +434,14 @@ impl World {
 
         fc.has(flag)
     }
+
+    //--------------------------------------------------------------------------------------------
+    // Event Hooks and Guards
+
+    pub fn call_event_hook(&mut self, id: ID, event_type: EventType) {
+        let mut eventv = self.as_event(id);
+        eventv.event.call_hook(self, id, event_type);
+    }
 }
 
 /// # EBuilder -- A tool for building entities
@@ -490,6 +519,25 @@ impl<'a> EBuilder<'a> {
             .unwrap()
             .types
             .insert(prose_type, Prose::Hook(ProseHook::new(hook)));
+
+        self
+    }
+
+    /// Adds an entity event hook of the given type to the entity.
+    pub fn event_hook(self, event_type: EventType, hook: EntityEventHook) -> EBuilder<'a> {
+        if self.world.events.get(&self.id).is_none() {
+            self.world
+                .events
+                .insert(self.id, EventComponent::new());
+        }
+
+        self
+            .world
+            .events
+            .get_mut(&self.id)
+            .unwrap()
+            .hooks
+            .insert(event_type, EventHook::new(hook));
 
         self
     }

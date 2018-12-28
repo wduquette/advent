@@ -1,5 +1,6 @@
 //! The Entity Data Type and Builder
 
+pub mod event;
 pub mod flag;
 pub mod inventory;
 pub mod player;
