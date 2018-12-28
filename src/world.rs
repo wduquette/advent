@@ -10,6 +10,7 @@ use crate::entity::rule_component::*;
 use crate::entity::tag_component::*;
 use crate::entity::thing_component::*;
 use crate::entity::ID;
+use crate::phys;
 use crate::types::EntityStringHook;
 use crate::types::*;
 use std::collections::BTreeMap;
@@ -422,10 +423,10 @@ impl<'a> EBuilder<'a> {
     /// It will initially be put in LIMBO.
     pub fn location(self) -> EBuilder<'a> {
         if self.world.locations.get(&self.id).is_none() {
-            self.world.inventories.get_mut(&LIMBO).unwrap().add(self.id);
             self.world
                 .locations
                 .insert(self.id, LocationComponent::new());
+            phys::put_in(self.world, self.id, LIMBO);
         }
 
         self
@@ -433,19 +434,7 @@ impl<'a> EBuilder<'a> {
 
     /// Puts the thing in the given location.
     pub fn put_in(self, loc: ID) -> EBuilder<'a> {
-        assert!(self.world.has_location(self.id),
-            "Entity has no location component: [{}] {}",
-            self.id,
-            self.tag);
-        assert!(
-            self.world.has_inventory(loc),
-            "Tried to put in non-location {}: [{}] {}",
-            loc,
-            self.id,
-            self.tag
-        );
-
-        self.world.put_in(self.id, loc);
+        phys::put_in(self.world, self.id, loc);
 
         self
     }

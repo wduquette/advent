@@ -5,6 +5,7 @@ use crate::command;
 use crate::command::Command;
 use crate::debug;
 use crate::entity::ID;
+use crate::phys;
 use crate::types::Dir::*;
 use crate::types::Flag::*;
 use crate::types::ProseType;
@@ -43,7 +44,7 @@ pub fn system(game: &mut Game, input: &str) {
     // NEXT, get the player's context
     let player = Player {
         id: game.world.pid,
-        loc: game.world.loc(game.world.pid),
+        loc: phys::loc(&game.world, game.world.pid),
     };
 
     // NEXT, handle the input

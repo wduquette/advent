@@ -131,6 +131,13 @@ x   Things done:
         x   World::put_in does an implicit World::take_out.
             x   It's now only necessary to call "take_out" if you're
                 going to leave something in LIMBO.
+x   Next:
+    x   Modify player_control.rs and rule_monitor.rs to use phys::
+    x   As part of this, the player should be in the current location's
+        inventory as a normal piece of scenery.
+    x   The player_control module should decide what's wanted, and should
+        output errors, but the physical system should carry it out, and
+        trigger any guards and hooks.
 
 2018-12-27 (Thursday)
 x   Three related issues:

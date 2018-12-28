@@ -7,8 +7,10 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
+* Complete the physical system, phys::, and use it through out.
+  * And then remove the relevant methods out of World.
+* Move rule_component::Action to types::
 * Debug commands shouldn't advance the clock.
-* Move ProseType to types.rs.
 * Define Event guards and hooks
   * The dirty-note rule should be a Get hook.
   * The note Book prose hook could be a Read guard.
@@ -17,7 +19,7 @@ Also, see docs/journal.txt.
     * Kills you if you draw it when your hands are dirty.
       * But the fairy godmother will revive you.
   * Main loop should halt if you're dead at the end of it.
-  * Rules map should possibly be BTreeMap, so that the order of
+  * Rules map should be BTreeMap, so that the order of
     rule execution is predictable.
   * Add puzzle to make water flow in the stream.
   * Extend the world.
@@ -50,9 +52,6 @@ Also, see docs/journal.txt.
     prose in the basic description, and maybe of some scenery items as
     well.
     * Need articles for things.
-* Consider defining the World's components into read-only and read-write.
-  * Minimizes the amount of data that needs to be saved/restored on
-    undo or game save/restore, and allows a deeper undo stack.
 
 ## Background
 
