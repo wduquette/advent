@@ -220,11 +220,6 @@ impl World {
             && self.things.get(&id).is_some()
     }
 
-    /// Retrieve a view of the entity as a Player
-    pub fn as_player(&self, id: ID) -> PlayerView {
-        PlayerView::from(&self, id)
-    }
-
     /// Can this entity function as a room?  I.e., a place the player can be?
     pub fn is_room(&self, id: ID) -> bool {
         self.rooms.get(&id).is_some()
@@ -243,11 +238,6 @@ impl World {
     pub fn is_rule(&self, id: ID) -> bool {
         self.rules.get(&id).is_some()
             && self.is_flag_set(id)
-    }
-
-    /// Gets a view of the player entity
-    pub fn player(&self) -> PlayerView {
-        self.as_player(self.pid)
     }
 
     //--------------------------------------------------------------------------------------------

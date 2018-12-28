@@ -121,12 +121,12 @@ pub fn player(world: &World) {
 
 /// Outputs the player's inventory
 pub fn player_inventory(world: &World) {
-    let playerv = world.player();
+    let invc = &world.inventories[&world.pid];
 
-    if playerv.inventory.is_empty() {
+    if invc.is_empty() {
         para("You aren't carrying anything.");
     } else {
-        para!("You have: {}.\n", invent_list(world, &playerv.inventory));
+        para!("You have: {}.\n", invent_list(world, invc));
     }
 }
 

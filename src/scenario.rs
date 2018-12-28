@@ -122,17 +122,15 @@ her wand.  There's a flash, and she disappears.
 }
 
 /// Returns the player's current appearance.
-fn player_visual(world: &World, _id: ID) -> String {
-    let playerv = world.player();
-
+fn player_visual(world: &World, pid: ID) -> String {
     Buffer::new()
         .add("You've got all the usual bits.")
         .when(
-            playerv.flag_set.has(DirtyHands),
+            world.has_flag(pid, DirtyHands),
             "Your hands are kind of dirty, though.",
         )
         .when(
-            !playerv.flag_set.has(DirtyHands),
+            !world.has_flag(pid, DirtyHands),
             "Plus, they're clean bits!",
         )
         .get()

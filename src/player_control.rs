@@ -4,7 +4,6 @@ use self::Status::*;
 use crate::command;
 use crate::command::Command;
 use crate::debug;
-use crate::entity::player::PlayerView;
 use crate::types::ProseType;
 use crate::entity::ID;
 use crate::types::Dir::*;
@@ -30,18 +29,25 @@ enum Status {
 /// An error result
 type CmdResult = Result<Status, String>;
 
+/// Player Context: ID and initial location.
+struct Player {
+    pub id: ID,
+    pub loc: ID,
+}
+
 /// The Player Control system.  Processes player commands.
 pub fn system(game: &mut Game, input: &str) {
     // FIRST, get the current game state, for later undo.
     let undo_info = game.world.clone();
 
-    // NEXT, get the player.
-    // TODO: Instead of getting the player, create a context struct:
-    // the player's ID and location, and maybe some other things.
-    let player = &mut game.world.player();
+    // NEXT, get the player's context
+    let player = Player {
+        id: game.world.pid,
+        loc: game.world.loc(game.world.pid)
+    };
 
     // NEXT, handle the input
-    let result = handle_input(game, player, input);
+    let result = handle_input(game, &player, input);
     match result {
         Err(msg) => visual::error(&msg),
         Ok(Normal) => {
@@ -52,7 +58,7 @@ pub fn system(game: &mut Game, input: &str) {
     }
 }
 
-fn handle_input(game: &mut Game, player: &PlayerView, input: &str) -> CmdResult {
+fn handle_input(game: &mut Game, player: &Player, input: &str) -> CmdResult {
     // FIRST, parse the input.
     let cmd = command::parse(&game.world, input)?;
 
@@ -63,7 +69,7 @@ fn handle_input(game: &mut Game, player: &PlayerView, input: &str) -> CmdResult 
     }
 }
 
-fn handle_normal_command(game: &mut Game, player: &PlayerView, cmd: &Command) -> CmdResult {
+fn handle_normal_command(game: &mut Game, player: &Player, cmd: &Command) -> CmdResult {
     let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
     let world = &mut game.world;
 
@@ -98,7 +104,7 @@ fn handle_normal_command(game: &mut Game, player: &PlayerView, cmd: &Command) ->
     }
 }
 
-fn handle_debug_command(game: &mut Game, player: &PlayerView, cmd: &Command) -> CmdResult {
+fn handle_debug_command(game: &mut Game, player: &Player, cmd: &Command) -> CmdResult {
     let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
     let world = &mut game.world;
 
@@ -117,9 +123,8 @@ fn handle_debug_command(game: &mut Game, player: &PlayerView, cmd: &Command) -> 
 // User Commands
 
 /// Move the player in the given direction
-fn cmd_go(world: &mut World, player: &PlayerView, dir: Dir) -> CmdResult {
-    let here = world.loc(player.id);
-    if let Some(dest) = world.follow(here, dir) {
+fn cmd_go(world: &mut World, player: &Player, dir: Dir) -> CmdResult {
+    if let Some(dest) = world.follow(player.loc, dir) {
         world.set_room(player.id, dest);
 
         if !world.has_flag(player.id, Seen(dest)) {
@@ -148,8 +153,8 @@ You know.  Like that.
 }
 
 /// Re-describe the current location.
-fn cmd_look(world: &World, player: &PlayerView) -> CmdResult {
-    visual::room(world, world.loc(player.id));
+fn cmd_look(world: &World, player: &Player) -> CmdResult {
+    visual::room(world, player.loc);
     Ok(Normal)
 }
 
@@ -160,7 +165,7 @@ fn cmd_inventory(world: &World) -> CmdResult {
 }
 
 /// Describe a thing in the current location.
-fn cmd_examine(world: &World, player: &PlayerView, name: &str) -> CmdResult {
+fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
     if let Some(id) = find_visible_thing(world, player.id, name) {
         visual::thing(world, id);
         Ok(Normal)
@@ -170,7 +175,7 @@ fn cmd_examine(world: &World, player: &PlayerView, name: &str) -> CmdResult {
 }
 
 /// Read a thing in the current location.
-fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
+fn cmd_read(world: &World, player: &Player, name: &str) -> CmdResult {
     if let Some(thing) = find_visible_thing(world, player.id, name) {
         // If it has no prose, it can't be read
         if !world.has_prose(thing, ProseType::Book) {
@@ -199,10 +204,8 @@ fn cmd_examine_self(world: &World) -> CmdResult {
 
 // TODO: As currently implemented, this should be a scenario command, not a
 // built-in command.
-fn cmd_wash_hands(world: &mut World, player: &PlayerView) -> CmdResult {
-    let here = world.loc(player.id);
-
-    if !world.has_flag(here, HasWater) {
+fn cmd_wash_hands(world: &mut World, player: &Player) -> CmdResult {
+    if !world.has_flag(player.loc, HasWater) {
         return Err("That'd be a neat trick.".into());
     }
 
@@ -218,15 +221,13 @@ fn cmd_wash_hands(world: &mut World, player: &PlayerView) -> CmdResult {
 }
 
 /// Gets a thing from the location's inventory.
-fn cmd_get(world: &mut World, player: &PlayerView, name: &str) -> CmdResult {
-    let here = world.loc(world.pid);
-
+fn cmd_get(world: &mut World, player: &Player, name: &str) -> CmdResult {
     // Does he already have it?
     if find_in_inventory(world, player.id, name).is_some() {
         return Err("You already have it.".into());
     }
 
-    if let Some(thing) = find_in_inventory(world, here, name) {
+    if let Some(thing) = find_in_inventory(world, player.loc, name) {
         if world.has_flag(thing, Scenery) {
             return Err("You can't take that!".into());
         }
@@ -243,17 +244,15 @@ fn cmd_get(world: &mut World, player: &PlayerView, name: &str) -> CmdResult {
 }
 
 /// Drops a thing you're carrying
-fn cmd_drop(world: &mut World, player: &PlayerView, name: &str) -> CmdResult {
-    let here = world.loc(world.pid);
-
+fn cmd_drop(world: &mut World, player: &Player, name: &str) -> CmdResult {
     if let Some(thing) = find_in_inventory(world, player.id, name) {
         // Drop the thing
         world.take_out(thing);
-        world.put_in(thing, here);
+        world.put_in(thing, player.loc);
 
         visual::act("Dropped.");
         Ok(Normal)
-    } else if find_in_inventory(world, here, name).is_some() {
+    } else if find_in_inventory(world, player.loc, name).is_some() {
         Err("You aren't carrying that.".into())
     } else {
         Err("You don't see any such thing.".into())
@@ -344,7 +343,7 @@ fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
 }
 
 /// Take the player to the room.
-fn cmd_debug_go(world: &mut World, player: &PlayerView, id_arg: &str) -> CmdResult {
+fn cmd_debug_go(world: &mut World, player: &Player, id_arg: &str) -> CmdResult {
     let loc = parse_id(world, id_arg)?;
     if world.is_room(loc) {
         world.set_room(player.id, loc);
