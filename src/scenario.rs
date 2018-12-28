@@ -139,11 +139,11 @@ fn player_visual(world: &World, _id: ID) -> String {
 }
 
 fn player_gets_note_dirty(world: &World) -> bool {
-    let playerv = world.player();
-    let id = world.lookup_id(NOTE).unwrap();
-    let notev = world.as_thing(id);
+    let note = world.lookup_id(NOTE).unwrap();
 
-    playerv.inventory.has(id) && playerv.flag_set.has(DirtyHands) && !notev.flag_set.has(Dirty)
+    world.owns(world.pid, note)
+        && world.has_flag(world.pid, DirtyHands)
+        && !world.has_flag(note, Dirty)
 }
 
 fn player_is_dead(world: &World) -> bool {

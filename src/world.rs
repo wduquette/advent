@@ -250,7 +250,7 @@ impl World {
     }
 
     /// Retrieve a view of the entity as a Thing
-    pub fn as_thing(&self, id: ID) -> ThingView {
+    fn as_thing(&self, id: ID) -> ThingView {
         ThingView::from(&self, id)
     }
 
@@ -268,6 +268,11 @@ impl World {
     //--------------------------------------------------------------------------------------------
     // Low-level entity queries and manipulations.
 
+    /// Returns the tag of the thing with the given ID
+    pub fn tag(&self, id: ID) -> String {
+        self.tags[&id].tag.clone()
+    }
+
     /// Looks up an entity's ID in the tag map.
     /// TODO: Make this just "lookup".  Might want two variants, one that returns
     /// Option and one that panics.
@@ -279,15 +284,16 @@ impl World {
         }
     }
 
-    /// Returns the tag of the thing with the given ID
-    pub fn tag(&self, id: ID) -> String {
-        self.tags[&id].tag.clone()
-    }
-
     /// Returns the location of the thing with the given ID
     pub fn loc(&self, id: ID) -> ID {
         assert!(self.has_location(id) "Entity has no location: {}", id);
         self.locations.get(&id).as_ref().unwrap().id
+    }
+
+    /// Returns true if the loc owns the thing, and false otherwise.
+    pub fn owns(&self, loc: ID, thing: ID) -> bool {
+        assert!(self.is_inventory(loc), "Not an inventory: {}", loc);
+        self.inventories[&loc].has(thing)
     }
 
     /// Moves the player (or some other NPC, ultimately) to a location. Performs no

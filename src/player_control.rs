@@ -364,9 +364,9 @@ fn cmd_debug_go(world: &mut World, player: &PlayerView, id_arg: &str) -> CmdResu
 /// Looks for a thing with the given name in the given inventory list.
 fn find_in_inventory(world: &World, inventory: &InventoryComponent, noun: &str) -> Option<ID> {
     for id in inventory.iter() {
-        let thingv = world.as_thing(*id);
-        if thingv.thing.noun == noun {
-            return Some(thingv.id);
+        let thingc = &world.things[id];
+        if thingc.noun == noun {
+            return Some(*id);
         }
     }
 

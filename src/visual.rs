@@ -135,13 +135,14 @@ fn invent_list(world: &World, inventory: &InventoryComponent) -> String {
     let mut list = String::new();
 
     for id in inventory.iter() {
-        let thingv = world.as_thing(*id);
+        let thingc = &world.things[id];
 
-        if !thingv.flag_set.has(Scenery) {
+        // TODO: Use physical system to get relevant content
+        if !world.has_flag(*id, Scenery) {
             if !list.is_empty() {
                 list.push_str(", ");
             }
-            list.push_str(&thingv.thing.name);
+            list.push_str(&thingc.name);
         }
     }
 
