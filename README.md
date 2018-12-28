@@ -7,8 +7,9 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Redefine event hook to use an action vector.
-* Define Event guards using action vectors.
+* Move ProseType to types.rs.
+* Define Event guards and hooks
+  * The dirty-note rule should be a Get hook.
   * The note Book prose hook could be a Read guard.
 * The Game
   * Add emotional comfort sword.

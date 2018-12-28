@@ -256,9 +256,6 @@ x   Things done:
         removed the old visual values completely.
     x   Replaced the two notes with a single note with a prose hook.
     x   Replaced the Book component with prose.
-    x   Implement EventHook using a closure, but having a long-term closure
-        that can mutate the world is causing problems with the borrow
-        checker.  Probably want to use an action vector instead.
 
 2018-12-26 (Wednesday)
 x   LOTS of work done so far today.

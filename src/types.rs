@@ -20,13 +20,6 @@ pub enum Dir {
     Out,
 }
 
-/// Entity Events
-#[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
-pub enum EventType {
-    /// The entity is being gotten by the player.
-    Get
-}
-
 /// The different kinds of prose supported by an entity.
 #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
 pub enum ProseType {
@@ -66,6 +59,3 @@ pub enum Flag {
 
 /// A closure to produce a string from an entity
 pub type EntityStringHook = &'static Fn(&World, ID) -> String;
-
-/// A Entity Event Hook closure; it can mutate the world.
-pub type EntityEventHook = &'static Fn(&mut World, ID, EventType);
