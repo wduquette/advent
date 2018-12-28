@@ -10,7 +10,7 @@ use crate::world::World;
 #[derive(Debug, Clone, Default)]
 pub struct PlayerComponent {
     // None yet; at present, this component serves only as a marker that the entity
-// is a (the) player.  This will eventually change.
+    // is a (the) player.  This will eventually change.
 }
 
 impl PlayerComponent {

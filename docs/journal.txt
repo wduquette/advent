@@ -1,6 +1,8 @@
 Bonaventure Journal
 
 2018-12-28 (Friday)
+x   Note: The "player-dead" rule could/should be an event hook on the player
+    entity with event "Dead".
 x   Event hooks, guards, and closures
     x   Problems
         x   Mutation
@@ -20,9 +22,81 @@ x   Event hooks, guards, and closures
         x   Option A: Pre-defined ActionScript
             x   The hook has a pre-defined ActionScript, just as a Rule
                 does.
-        x   Option B: Computed ActionScript
+            x   Can't use any logic to determine what the script ought
+                to be.
+                x   Would soon want to build logic into the script.
+        x   Option B: Computed ActionScript (THIS)
             x   The hook has a closure that computes and returns an
                 ActionScript.
+            x   Logic can be used to determine what the script should be.
+        x   Analysis
+            x   Option B is more flexible.
+            x   Option B is harder to fit into a "story file" architecture:
+                a story file could more easily just provide the static
+                script.
+            x   But! A story file would probably need to contain some kind
+                of scripting.
+            x   And the story file could target either option A or B.
+            x   Use Option B.
+        x   Thus:
+            x   An event hook returns an ActionScript
+            x   An event guard returns (Allow/Deny, ActionScript)
+    x   Handling Timing of Changes
+        x   The problem here is the use of "views", and in particular
+            the handling of the PlayerView in the PlayerControl system.
+            x   A view is a mutable copy of world data.
+            x   While the view is active, its state may be inconsistent
+                with the World's state.
+            x   If you execute any code that can change the viewed part
+                of the world directly while the view is open, the view
+                is now invalid.
+            x   This is a Bad Thing.
+        x   So, consider the Get event hook.
+            x   It fires because of a successful "get" of the entity.
+            x   The PlayerView hasn't been saved yet.
+            x   If the hook changes the player, those changes will be
+                overwritten when the PlayerView gets saved.
+        x   Possible Solutions
+            x   Control timing very carefully.
+                x   Redesign PlayerControl so that the event guard is
+                    called BEFORE the PlayerView is retrieved, and the
+                    event hook is called after it has been saved.
+                    x   This could be an ad hoc thing: Each command handler
+                        can just be written using a standard skeleton.
+                    x   Couldn't create and save the player automatically
+                        any more.
+                    x   I don't like the ad hoc approach: you have to
+                        remember to do things that way, and I hate having
+                        to be smart all of the time.
+            x   Stop using views for mutation.
+                x   And maybe rewrite views as struct that only provide
+                    behavior: they have a copy of the ID, and know how to
+                    take various actions given a world.
+        x   What things do we really need to change?
+            x   Flags: localized in FlagSetComponents
+            x   Inventories: localized in InventoryComponents
+            x   Locations, currently owned by ThingComponent
+                x   But could be a separate component.
+            x   Rule "fired" flag, currently owned by RuleComponent
+                x   But could be a flag.
+            x   Room links: at present we don't change these; but we could.
+                x   On the other hand, we could simulate changing links
+                    with guards of some kind, and flags.
+        x   With a proper set of guards and hooks, all we should really
+            need to change is:
+            x   Flags (and maybe some other kind of variable, e.g.,
+                scores)
+            x   Inventories and locations
+                x   These are not always connected at this point:
+                    the player isn't in the room's inventory, and
+                    LIMBO doesn't have an inventory. But they
+                    probably should be.
+                x   Then it's up to the Inventory system to let you know
+                    what's in a place, and keep it up to date, just
+                    like it's up to the visual system to display what's
+                    there.
+            x   It should be possible to keep up with this without
+                using views.
 
 2018-12-27 (Thursday)
 x   Three related issues:
