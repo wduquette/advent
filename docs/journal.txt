@@ -97,6 +97,21 @@ x   Event hooks, guards, and closures
                     there.
             x   It should be possible to keep up with this without
                 using views.
+x   Backed out the initial Event Hook implementation.  I need to lay the
+    ground work first.
+    x   Simplify Rule mechanism
+        x   A Rule has a FlagSet.
+        x   There's a Fired flag.
+        x   A rule that should only ever fire once can set the Fired
+            flag.
+        x   Rules no longer need to be mutable.
+    x   Location is a distinct component, no longer part of ThingComponent.
+    x   LIMBO has an Inventory
+    x   Physical system, which gives you info about what's in a place
+        and which moves things about.
+    x   Player goes in Inventory.
+        x   For player queries, player is removed from the list.
+    x   Stop using views.
 
 2018-12-27 (Thursday)
 x   Three related issues:
