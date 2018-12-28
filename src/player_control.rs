@@ -37,6 +37,8 @@ pub fn system(game: &mut Game, input: &str) {
     let undo_info = game.world.clone();
 
     // NEXT, get the player.  We'll save any changes at the end.
+    // TODO: Instead of getting the player, create a context struct:
+    // the player's ID and location, and maybe some other things.
     let player = &mut game.world.player();
 
     // NEXT, handle the input
@@ -117,17 +119,18 @@ fn handle_debug_command(game: &mut Game, player: &mut PlayerView, cmd: &Command)
 // User Commands
 
 /// Move the player in the given direction
-fn cmd_go(world: &mut World, player: &mut PlayerView, dir: Dir) -> CmdResult {
-    if let Some(dest) = world.follow(player.location(), dir) {
-        player.set_location(dest);
+fn cmd_go(world: &mut World, player: &PlayerView, dir: Dir) -> CmdResult {
+    let here = world.loc(player.id);
+    if let Some(dest) = world.follow(here, dir) {
+        world.set_room(player.id, dest);
 
-        if !player.flag_set.has(Seen(dest)) {
+        if !world.has_flag(player.id, Seen(dest)) {
             visual::room(world, dest);
         } else {
             visual::room_brief(world, dest);
         }
 
-        player.flag_set.set(Seen(dest));
+        world.set_flag(player.id, Seen(dest));
         Ok(Normal)
     } else {
         Err("You can't go that way.".into())
@@ -148,7 +151,7 @@ You know.  Like that.
 
 /// Re-describe the current location.
 fn cmd_look(world: &World, player: &PlayerView) -> CmdResult {
-    visual::room(world, player.location());
+    visual::room(world, world.loc(player.id));
     Ok(Normal)
 }
 
@@ -170,17 +173,15 @@ fn cmd_examine(world: &World, player: &PlayerView, name: &str) -> CmdResult {
 
 /// Read a thing in the current location.
 fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
-    if let Some(id) = find_visible_thing(world, player, name) {
-        let thingv = world.as_thing(id);
-
+    if let Some(thing) = find_visible_thing(world, player, name) {
         // If it has no prose, it can't be read
-        if !world.has_prose(id, ProseType::Book) {
+        if !world.has_prose(thing, ProseType::Book) {
             return Err("You can't read that.".into());
         }
 
         // If he's holding it, or it's scenery, then he can read it.
-        if thingv.thing.location == player.id || thingv.flag_set.has(Scenery) {
-            visual::book(world, id);
+        if world.loc(thing) == player.id || world.has_flag(thing, Scenery) {
+            visual::book(world, thing);
             Ok(Normal)
         } else {
             Err("You don't have it.".into())
@@ -200,27 +201,28 @@ fn cmd_examine_self(world: &World) -> CmdResult {
 
 // TODO: As currently implemented, this should be a scenario command, not a
 // built-in command.
-fn cmd_wash_hands(world: &mut World, player: &mut PlayerView) -> CmdResult {
-    let roomv = world.as_room(player.location());
+fn cmd_wash_hands(world: &mut World, player: &PlayerView) -> CmdResult {
+    let here = world.loc(player.id);
 
-    if !roomv.flag_set.has(HasWater) {
+    if !world.has_flag(here, HasWater) {
         return Err("That'd be a neat trick.".into());
     }
 
     visual::prose("You wash your hands in the water.")
         .when(
-            player.flag_set.has(DirtyHands),
+            world.has_flag(player.id, DirtyHands),
             "They look much cleaner now.",
         )
         .para();
-    player.flag_set.unset(DirtyHands);
+    world.unset_flag(player.id, DirtyHands);
 
     Ok(Normal)
 }
 
 /// Gets a thing from the location's inventory.
 fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult {
-    let roomv = &mut world.as_room(player.location());
+    let here = world.loc(world.pid);
+    let roomv = &mut world.as_room(here);
 
     // Does he already have it?
     if find_in_inventory(world, &player.inventory, name).is_some() {
@@ -234,10 +236,10 @@ fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult 
         }
 
         // Get the thing.
-        // TODO: use take_out, put_in
+        // TODO: get rid of views, use take_out, put_in
         roomv.inventory.remove(thingv.id);
         player.inventory.add(thingv.id);
-        thingv.thing.location = player.id;
+        world.set_room(thingv.id, player.id);
 
         roomv.save(world);
         thingv.save(world);
@@ -251,7 +253,8 @@ fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult 
 
 /// Drops a thing you're carrying
 fn cmd_drop(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult {
-    let roomv = &mut world.as_room(player.location());
+    let here = world.loc(world.pid);
+    let roomv = &mut world.as_room(here);
 
     if let Some(id) = find_in_inventory(world, &player.inventory, name) {
         let thingv = &mut world.as_thing(id);
@@ -259,7 +262,7 @@ fn cmd_drop(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult
         // TODO: use take_out and put_int
         player.inventory.remove(thingv.id);
         roomv.inventory.add(thingv.id);
-        thingv.thing.location = roomv.id;
+        world.set_room(thingv.id, here);
 
         roomv.save(world);
         thingv.save(world);
@@ -356,15 +359,15 @@ fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
     }
 }
 
-/// Take the player to the location.
-fn cmd_debug_go(world: &World, player: &mut PlayerView, id_arg: &str) -> CmdResult {
-    let id = parse_id(world, id_arg)?;
-    if world.is_room(id) {
-        player.set_location(id);
-        visual::room(world, id);
+/// Take the player to the room.
+fn cmd_debug_go(world: &mut World, player: &PlayerView, id_arg: &str) -> CmdResult {
+    let loc = parse_id(world, id_arg)?;
+    if world.is_room(loc) {
+        world.set_room(player.id, loc);
+        visual::room(world, loc);
         Ok(Normal)
     } else {
-        Err(format!("Entity {} is not a room.", id))
+        Err(format!("Entity {} is not a room.", loc))
     }
 }
 
@@ -391,7 +394,8 @@ fn find_visible_thing(world: &World, player: &PlayerView, noun: &str) -> Option<
     }
 
     // NEXT, is it in this room?
-    let roomv = &world.as_room(player.location());
+    let here = world.loc(player.id);
+    let roomv = &world.as_room(here);
 
     if let Some(id) = find_in_inventory(world, &roomv.inventory, noun) {
         return Some(id);

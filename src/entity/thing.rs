@@ -3,7 +3,6 @@
 use crate::entity::flag::FlagSetComponent;
 use crate::entity::ID;
 use crate::world::World;
-use crate::world::LIMBO;
 
 /// Information specific to things.
 #[derive(Debug, Clone)]
@@ -13,10 +12,6 @@ pub struct ThingComponent {
 
     /// The thing's noun, for use in commands
     pub noun: String,
-
-    /// The thing's current location, or LIMBO if it isn't currently
-    /// present in any location
-    pub location: ID,
 }
 
 impl ThingComponent {
@@ -25,7 +20,6 @@ impl ThingComponent {
         ThingComponent {
             name: name.into(),
             noun: noun.into(),
-            location: LIMBO,
         }
     }
 }
@@ -55,9 +49,8 @@ impl ThingView {
         }
     }
 
-    /// Save the player back to the world.  Replaces the links and inventory.
+    /// Save the thing back to the world.  Only the flags can be changed.
     pub fn save(&self, world: &mut World) {
-        world.things.insert(self.id, self.thing.clone());
         world.flag_sets.insert(self.id, self.flag_set.clone());
     }
 }

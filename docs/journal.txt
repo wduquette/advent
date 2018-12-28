@@ -112,6 +112,12 @@ x   Backed out the initial Event Hook implementation.  I need to lay the
     x   Player goes in Inventory.
         x   For player queries, player is removed from the list.
     x   Stop using views.
+x   Things done:
+    x   Simplified the rule mechanism; rules can have FireOnce and Fired
+        flags, which are managed by the rule_monitor::system().
+    x   Made location a distinct component.  ThingComponent no longer
+        has a location.
+    x   Only "get" and "drop" now depend on a mutable PlayerView.
 
 2018-12-27 (Thursday)
 x   Three related issues:

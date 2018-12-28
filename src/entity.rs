@@ -2,6 +2,7 @@
 
 pub mod flag;
 pub mod inventory;
+pub mod location;
 pub mod player;
 pub mod prose;
 pub mod room;

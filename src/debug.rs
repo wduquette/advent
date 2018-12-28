@@ -20,6 +20,11 @@ fn list_entity(world: &World, id: ID) {
 pub fn dump_entity(world: &World, id: ID) {
     list_entity(world, id);
 
+    // FIRST, display its location, if any.
+    if world.has_location(id) {
+        println!("  Location: {}", world.loc(id));
+    }
+
     // FIRST, display the player info
     if world.players.get(&id).is_some() {
         println!("  Player");
@@ -29,7 +34,6 @@ pub fn dump_entity(world: &World, id: ID) {
     if let Some(thingc) = &world.things.get(&id) {
         println!("  Thing name: {}", thingc.name);
         println!("    Noun: {}", thingc.noun);
-        println!("    Location: {}", thingc.location);
     }
 
     // NEXT, if it's a room display the room info.

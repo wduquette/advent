@@ -2,6 +2,7 @@
 use crate::types::EntityStringHook;
 use crate::entity::flag::*;
 use crate::entity::inventory::*;
+use crate::entity::location::*;
 use crate::entity::player::*;
 use crate::entity::prose::*;
 use crate::entity::room::*;
@@ -53,6 +54,9 @@ pub struct World {
     /// own or contain things.
     pub inventories: HashMap<ID, InventoryComponent>,
 
+    /// Location Components: This where things are located.
+    pub locations: HashMap<ID, LocationComponent>,
+
     /// Prose Components: contains all the different kinds of prose an entity can have.
     pub proses: HashMap<ID, ProseComponent>,
 
@@ -92,6 +96,7 @@ impl World {
             tags: BTreeMap::new(),
             flag_sets: HashMap::new(),
             inventories: HashMap::new(),
+            locations: HashMap::new(),
             proses: HashMap::new(),
             players: HashMap::new(),
             rooms: HashMap::new(),
@@ -102,7 +107,7 @@ impl World {
         };
 
         // NEXT, add LIMBO, the container for things which aren't anywhere else.
-        // TODO: At present LIMBO doesn't have an inventory; possibly it should.
+        // TODO: At present LIMBO doesn't have an inventory; it should.
         world.add("LIMBO"); // ID=0
 
         // NEXT, add the standard verbs and synonyms
@@ -157,6 +162,9 @@ impl World {
 
     //--------------------------------------------------------------------------------------------
     // Entity types
+    //
+    // TODO: Use phrasing "has_X" instead of "is_X" for things like inventory, flag_set, etc.
+    // Reserve "is_X" for things, rooms, etc.
 
     /// Add a new entity using the builder pattern.
     pub fn add(&mut self, tag: &str) -> EBuilder {
@@ -175,6 +183,7 @@ impl World {
     }
 
     /// Can this entity function as a flag set?
+    // TODO: should be has_flag_set()
     pub fn is_flag_set(&self, id: ID) -> bool {
         self.flag_sets.get(&id).is_some()
     }
@@ -185,6 +194,7 @@ impl World {
     }
 
     /// Can this entity function as an inventory
+    // TODO: should be has_inventory()
     pub fn is_inventory(&self, id: ID) -> bool {
         self.inventories.get(&id).is_some()
     }
@@ -194,7 +204,13 @@ impl World {
         InventoryView::from(&self, id)
     }
 
+    /// Does this entity have a location?
+    pub fn has_location(&self, id: ID) -> bool {
+        self.locations.get(&id).is_some()
+    }
+
     /// Can this entity function as an inventory
+    /// TODO: See if this is needed.
     pub fn is_prose(&self, id: ID) -> bool {
         self.proses.get(&id).is_some()
     }
@@ -206,6 +222,7 @@ impl World {
     }
 
     /// Retrieve a view of the entity as a collection of prose
+    /// TODO: See if this is really needed.
     pub fn as_prose(&self, id: ID) -> ProseView {
         ProseView::from(&self, id)
     }
@@ -213,9 +230,10 @@ impl World {
     /// Can this entity function as a player?
     pub fn is_player(&self, id: ID) -> bool {
         self.players.get(&id).is_some()
-            && self.things.get(&id).is_some()
+            && self.locations.get(&id).is_some()
             && self.inventories.get(&id).is_some()
             && self.flag_sets.get(&id).is_some()
+            && self.things.get(&id).is_some()
     }
 
     /// Retrieve a view of the entity as a Player
@@ -226,8 +244,8 @@ impl World {
     /// Can this entity function as a room?  I.e., a place the player can be?
     pub fn is_room(&self, id: ID) -> bool {
         self.rooms.get(&id).is_some()
-            && self.inventories.get(&id).is_some()
-            && self.flag_sets.get(&id).is_some()
+            && self.is_inventory(id)
+            && self.is_flag_set(id)
     }
 
     /// Retrieve a view of the entity as a Room
@@ -237,7 +255,9 @@ impl World {
 
     /// Can this entity function as a thing?  I.e., as a noun?
     pub fn is_thing(&self, id: ID) -> bool {
-        self.things.get(&id).is_some() && self.flag_sets.get(&id).is_some()
+        self.things.get(&id).is_some()
+            && self.has_location(id)
+            && self.is_flag_set(id)
     }
 
     /// Retrieve a view of the entity as a Thing
@@ -248,6 +268,7 @@ impl World {
     /// Is this entity a rule?
     pub fn is_rule(&self, id: ID) -> bool {
         self.rules.get(&id).is_some()
+            && self.is_flag_set(id)
     }
 
     /// Gets a view of the player entity
@@ -271,45 +292,44 @@ impl World {
 
     /// Returns the location of the thing with the given ID
     pub fn loc(&self, id: ID) -> ID {
-        assert!(self.is_thing(id) "Entity has no location: {}", id);
-        self.things.get(&id).as_ref().unwrap().location
+        assert!(self.has_location(id) "Entity has no location: {}", id);
+        self.locations.get(&id).as_ref().unwrap().id
     }
 
     /// Moves the player (or some other NPC, ultimately) to a location. Performs no
     /// game logic.
+    /// TODO: Should be handled by physical system.
     pub fn set_room(&mut self, player: ID, loc: ID) {
-        assert!(self.is_player(player) "Not a player: [{}]", id);
-        assert!(self.is_room(loc) "Not a room: [{}]", loc);
+        assert!(self.has_location(player) "Not a locatable thing: [{}]", player);
+        assert!(self.is_inventory(loc) "Not an inventory: [{}]", loc);
 
-        let thingc = self.things.get_mut(&player).unwrap();
-
-        thingc.location = loc;
+        self.locations.get_mut(&player).unwrap().id = loc;
     }
 
     /// Puts the thing in the container's inventory, and sets the thing's location.
     /// No op if the thing is already in the location.
     pub fn put_in(&mut self, thing: ID, container: ID) {
-        assert!(self.is_thing(thing) "Not a thing: [{}]", id);
+        assert!(self.has_location(thing) "Not a thing: [{}]", id);
         assert!(self.is_inventory(container) "Not an inventory: [{}]", container);
 
-        let tc = self.things.get_mut(&thing).unwrap();
+        let lc = self.locations.get_mut(&thing).unwrap();
         let ic = self.inventories.get_mut(&container).unwrap();
 
         ic.things.insert(thing);
-        tc.location = container;
+        lc.id = container;
     }
 
     /// Removes the thing from its container's inventory, and puts it in LIMBO.
     pub fn take_out(&mut self, thing: ID) {
-        assert!(self.is_thing(thing) "Not a thing: [{}]", id);
-        let tc = self.things.get_mut(&thing).unwrap();
-
-        let container = tc.location;
+        assert!(self.has_location(thing), "Not a thing: [{}]", thing);
+        let container = self.loc(thing);
 
         if container != LIMBO {
             let ic = self.inventories.get_mut(&container).unwrap();
             ic.things.remove(&thing);
-            tc.location = LIMBO;
+
+            let lc = self.locations.get_mut(&thing).unwrap();
+            lc.id = LIMBO;
         }
     }
 
@@ -421,6 +441,17 @@ pub struct EBuilder<'a> {
 }
 
 impl<'a> EBuilder<'a> {
+    /// Adds a location component to the entity if it doesn't already have one.
+    pub fn location(self) -> EBuilder<'a> {
+        if self.world.locations.get(&self.id).is_none() {
+            self.world
+                .locations
+                .insert(self.id, LocationComponent::new());
+        }
+
+        self
+    }
+
     /// Adds an inventory component to the entity if it doesn't already have one.
     pub fn inventory(self) -> EBuilder<'a> {
         if self.world.inventories.get(&self.id).is_none() {
@@ -498,6 +529,7 @@ impl<'a> EBuilder<'a> {
             self.tag
         );
 
+        self = self.location();
         self = self.inventory();
         self = self.flag_set();
 
@@ -537,6 +569,7 @@ impl<'a> EBuilder<'a> {
             self.tag
         );
 
+        self = self.location();
         self = self.flag_set();
 
         self.world

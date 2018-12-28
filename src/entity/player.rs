@@ -56,14 +56,4 @@ impl PlayerView {
         world.inventories.insert(self.id, self.inventory.clone());
         world.flag_sets.insert(self.id, self.flag_set.clone());
     }
-
-    /// Gets the player's current location, as a convenience.
-    pub fn location(&self) -> ID {
-        self.thing.location
-    }
-
-    /// Sets the player's current location, as a convenience.
-    pub fn set_location(&mut self, loc: ID) {
-        self.thing.location = loc;
-    }
 }
