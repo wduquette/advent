@@ -1,7 +1,6 @@
 //! Inventory
 
 use crate::entity::ID;
-use crate::world::World;
 use std::collections::BTreeSet;
 
 /// Inventories of Things
@@ -43,34 +42,5 @@ impl InventoryComponent {
     /// An interator over the inventory.
     pub fn iter(&self) -> std::collections::btree_set::Iter<ID> {
         self.things.iter()
-    }
-}
-
-//------------------------------------------------------------------------------------------------
-// Flag View
-
-/// Flag view: A view of an entity as a Flag set
-pub struct InventoryView {
-    pub id: ID,
-    pub tag: String,
-    pub inventory: InventoryComponent,
-}
-
-impl InventoryView {
-    /// Creates a InventoryView for the entity.
-    pub fn from(world: &World, id: ID) -> InventoryView {
-        let tc = &world.tags[&id];
-        assert!(
-            world.is_inventory(id),
-            "Not an inventory: [{}] {}",
-            tc.id,
-            tc.tag,
-        );
-
-        InventoryView {
-            id: tc.id,
-            tag: tc.tag.clone(),
-            inventory: world.inventories[&id].clone(),
-        }
     }
 }

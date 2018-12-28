@@ -194,11 +194,6 @@ impl World {
         self.inventories.get(&id).is_some()
     }
 
-    /// Retrieve a view of the entity as an inventory
-    pub fn as_inventory(&self, id: ID) -> InventoryView {
-        InventoryView::from(&self, id)
-    }
-
     /// Does this entity have a location?
     pub fn has_location(&self, id: ID) -> bool {
         self.locations.get(&id).is_some()
