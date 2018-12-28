@@ -1,6 +1,6 @@
 //! Rule Monitor System
 
-use crate::entity::rule::Action::*;
+use crate::entity::rule_component::Action::*;
 use crate::entity::ID;
 use crate::types::Flag::*;
 use crate::visual;

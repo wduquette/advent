@@ -1,14 +1,14 @@
 //! The game world
-use crate::entity::flag::*;
-use crate::entity::inventory::*;
-use crate::entity::location::*;
-use crate::entity::player::*;
-use crate::entity::prose::*;
-use crate::entity::room::*;
-use crate::entity::rule::Action;
-use crate::entity::rule::*;
-use crate::entity::tag::*;
-use crate::entity::thing::*;
+use crate::entity::flag_set_component::*;
+use crate::entity::inventory_component::*;
+use crate::entity::location_component::*;
+use crate::entity::player_component::*;
+use crate::entity::prose_component::*;
+use crate::entity::room_component::*;
+use crate::entity::rule_component::Action;
+use crate::entity::rule_component::*;
+use crate::entity::tag_component::*;
+use crate::entity::thing_component::*;
 use crate::entity::ID;
 use crate::types::EntityStringHook;
 use crate::types::*;

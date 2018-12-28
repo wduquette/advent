@@ -1,6 +1,6 @@
 //! Scenario definition
 
-use crate::entity::rule::Action::*;
+use crate::entity::rule_component::Action::*;
 use crate::entity::ID;
 use crate::types::Dir::*;
 use crate::types::Flag::*;

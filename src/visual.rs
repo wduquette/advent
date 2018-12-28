@@ -10,7 +10,7 @@
 // doing its work all at once.
 
 use crate::console::para;
-use crate::entity::inventory::InventoryComponent;
+use crate::entity::inventory_component::InventoryComponent;
 use crate::entity::ID;
 use crate::types::Flag::*;
 use crate::types::ProseType;
