@@ -1,8 +1,6 @@
 //! Entity Flags
 
-use crate::entity::ID;
 use crate::types::Flag;
-use crate::world::World;
 use std::collections::HashSet;
 
 /// Inventories of Things
@@ -61,35 +59,6 @@ impl FlagSetComponent {
 
     pub fn iter(&self) -> std::collections::hash_set::Iter<'_, Flag> {
         self.set.iter()
-    }
-}
-
-//------------------------------------------------------------------------------------------------
-// Flag View
-
-/// Flag view: A view of an entity as a Flag set
-pub struct FlagSetView {
-    pub id: ID,
-    pub tag: String,
-    pub flag_set: FlagSetComponent,
-}
-
-impl FlagSetView {
-    /// Creates a FlagSetView for the entity.
-    pub fn from(world: &World, id: ID) -> FlagSetView {
-        let tc = &world.tags[&id];
-        assert!(
-            world.is_flag_set(id),
-            "Not a flag set: [{}] {}",
-            tc.id,
-            tc.tag,
-        );
-
-        FlagSetView {
-            id: tc.id,
-            tag: tc.tag.clone(),
-            flag_set: world.flag_sets[&id].clone(),
-        }
     }
 }
 

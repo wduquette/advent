@@ -188,11 +188,6 @@ impl World {
         self.flag_sets.get(&id).is_some()
     }
 
-    /// Retrieve a view of the entity as a flag set
-    pub fn as_flag_set(&self, id: ID) -> FlagSetView {
-        FlagSetView::from(&self, id)
-    }
-
     /// Can this entity function as an inventory
     // TODO: should be has_inventory()
     pub fn is_inventory(&self, id: ID) -> bool {

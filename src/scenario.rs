@@ -151,9 +151,7 @@ fn player_is_dead(world: &World) -> bool {
 }
 
 fn note_thing_prose(world: &World, id: ID) -> String {
-    let flagv = world.as_flag_set(id);
-
-    if flagv.flag_set.has(Dirty) {
+    if world.has_flag(id, Dirty) {
         "A note, on plain paper.  It looks pretty grubby; someone's been mishandling it.".into()
     } else {
         "A note, on plain paper".into()
@@ -161,9 +159,7 @@ fn note_thing_prose(world: &World, id: ID) -> String {
 }
 
 fn note_book_prose(world: &World, id: ID) -> String {
-    let flagv = world.as_flag_set(id);
-
-    if flagv.flag_set.has(Dirty) {
+    if world.has_flag(id, Dirty) {
         "You've gotten it too dirty to read.".into()
     } else {
             "\
