@@ -73,9 +73,4 @@ impl InventoryView {
             inventory: world.inventories[&id].clone(),
         }
     }
-
-    /// Save the book back to the world.  Replaces the links and inventory.
-    pub fn save(&self, world: &mut World) {
-        world.inventories.insert(self.id, self.inventory.clone());
-    }
 }

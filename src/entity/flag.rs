@@ -91,11 +91,6 @@ impl FlagSetView {
             flag_set: world.flag_sets[&id].clone(),
         }
     }
-
-    /// Save the book back to the world.  Replaces the links and inventory.
-    pub fn save(&self, world: &mut World) {
-        world.flag_sets.insert(self.id, self.flag_set.clone());
-    }
 }
 
 #[cfg(test)]

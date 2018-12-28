@@ -53,11 +53,4 @@ impl RoomView {
             flag_set: world.flag_sets[&id].clone(),
         }
     }
-
-    /// Save the room back to the world.  Replaces the links and inventory.
-    pub fn save(&mut self, world: &mut World) {
-        world.rooms.insert(self.id, self.room.clone());
-        world.inventories.insert(self.id, self.inventory.clone());
-        world.flag_sets.insert(self.id, self.flag_set.clone());
-    }
 }

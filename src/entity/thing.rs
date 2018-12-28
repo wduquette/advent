@@ -48,9 +48,4 @@ impl ThingView {
             flag_set: world.flag_sets[&id].clone(),
         }
     }
-
-    /// Save the thing back to the world.  Only the flags can be changed.
-    pub fn save(&self, world: &mut World) {
-        world.flag_sets.insert(self.id, self.flag_set.clone());
-    }
 }
