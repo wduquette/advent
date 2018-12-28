@@ -250,11 +250,6 @@ impl World {
         self.rules.get(&id).is_some()
     }
 
-    /// Retrieve a view of the entity as a Rule
-    pub fn as_rule(&self, id: ID) -> RuleView {
-        RuleView::from(&self, id)
-    }
-
     /// Gets a view of the player entity
     pub fn player(&self) -> PlayerView {
         self.as_player(self.pid)
@@ -552,7 +547,7 @@ impl<'a> EBuilder<'a> {
     }
 
     /// Adds a predicate for a rule that will fire at most once.
-    pub fn once(self, predicate: RulePred) -> EBuilder<'a> {
+    pub fn always(mut self, predicate: RulePred) -> EBuilder<'a> {
         assert!(
             !self.world.rules.get(&self.id).is_some(),
             "Tried to add rule component twice: [{}] {}",
@@ -560,15 +555,17 @@ impl<'a> EBuilder<'a> {
             self.tag
         );
 
+        self = self.flag_set();
+
         self.world
             .rules
-            .insert(self.id, RuleComponent::once(predicate));
+            .insert(self.id, RuleComponent::new(predicate));
 
         self
     }
 
-    /// Adds a rule that will fire every time the predicate is met.
-    pub fn always(self, predicate: RulePred) -> EBuilder<'a> {
+    /// Adds a predicate for a rule that will fire at most once.
+    pub fn once(mut self, predicate: RulePred) -> EBuilder<'a> {
         assert!(
             !self.world.rules.get(&self.id).is_some(),
             "Tried to add rule component twice: [{}] {}",
@@ -576,14 +573,17 @@ impl<'a> EBuilder<'a> {
             self.tag
         );
 
+        self = self.flag(Flag::FireOnce);
+
         self.world
             .rules
-            .insert(self.id, RuleComponent::always(predicate));
+            .insert(self.id, RuleComponent::new(predicate));
 
         self
     }
 
     /// Adds an action to a rule.
+    /// TODO: Probably want to add closure that returns ActionScript.
     pub fn action(self, action: Action) -> EBuilder<'a> {
         assert!(
             self.world.rules.get(&self.id).is_some(),
@@ -603,149 +603,3 @@ impl<'a> EBuilder<'a> {
         self.id
     }
 }
-
-// /// # EntityBuilder -- A tool for building entities
-// ///
-// /// Use World.make() to create an entity and assign it a tag.  This returns an
-// /// EntityBuilder struct.  Use the EntityBuilder methods to add components to the entity.
-// pub struct EntityBuilder<'a> {
-//     pub world: &'a mut World,
-//     pub id: ID,
-//     pub tag: String,
-// }
-//
-// impl<'a> EntityBuilder<'a> {
-//     /// Returns the builder's ID.
-//     pub fn id(self) -> ID {
-//         self.id
-//     }
-//
-//     /// Adds an inventory component to the entity if it doesn't already have one.
-//     pub fn inventory(&mut self) -> &EntityBuilder<'a> {
-//         if self.world.inventories.get(&self.id).is_none() {
-//             self.world.inventories.insert(self.id, InventoryComponent::new());
-//         }
-//
-//         self
-//     }
-//
-//     pub fn flag_set(&mut self) -> &EntityBuilder<'a> {
-//         self
-//     }
-//
-//     /// Adds a flag to the entity, creating the flag set if needed.
-//     pub fn flag(&mut self, flag: Flag) -> &EntityBuilder<'a> {
-//         self.flag_set();
-//
-//         self.world.flag_sets.get_mut(&self.id).unwrap().set(flag);
-//         self
-//     }
-//
-//     /// Adds the essential trimmings for a player.
-//     pub fn player(&mut self, visual: &str) -> &EntityBuilder<'a> {
-//         assert!(
-//             !self.world.players.get(&self.id).is_some(),
-//             "Tried to add player component twice: [{}] {}",
-//             self.id,
-//             self.tag
-//         );
-//
-//         self.world.pid = self.id;
-//         self.world.players.insert(self.id, PlayerComponent::new());
-//         self.world.things.insert(self.id,
-//             ThingComponent::new("Yourself", "self", visual));
-//
-//         self.inventory();
-//         self.flag_set();
-//
-//         self
-//     }
-//
-//     /// Adds the essential trimmings for a room.
-//     pub fn room(&mut self, name: &str, visual: &str) -> &EntityBuilder<'a> {
-//         assert!(
-//             !self.world.rooms.get(&self.id).is_some(),
-//             "Tried to add room component twice: [{}] {}",
-//             self.id,
-//             self.tag
-//         );
-//
-//         self.world.rooms.insert(self.id, RoomComponent::new(name, visual));
-//         self.inventory();
-//         self.flag_set();
-//
-//         self
-//     }
-//
-//     /// Adds the essential trimmings for a thing.
-//     pub fn thing(&mut self, name: &str, noun: &str, visual: &str) -> &EntityBuilder<'a> {
-//         assert!(
-//             !self.world.things.get(&self.id).is_some(),
-//             "Tried to add thing component twice: [{}] {}",
-//             self.id,
-//             self.tag
-//         );
-//
-//         self.world.things.insert(self.id, ThingComponent::new(name, noun, visual));
-//         self.flag_set();
-//
-//         self
-//     }
-//
-//     /// Adds a book component to the entity.
-//     pub fn book(&mut self, text: &str) -> &EntityBuilder<'a> {
-//         assert!(
-//             self.world.things.get(&self.id).is_some(),
-//             "Tried to add book component to non-thing: [{}] {}",
-//             self.id,
-//             self.tag
-//         );
-//
-//         self.world.books.insert(self.id, BookComponent::new(text));
-//
-//         self
-//     }
-//
-//     /// Adds a predicate for a rule that will fire at most once.
-//     pub fn once(&mut self, predicate: RulePred) -> &EntityBuilder<'a> {
-//         assert!(
-//             !self.world.rules.get(&self.id).is_some(),
-//             "Tried to add rule component twice: [{}] {}",
-//             self.id,
-//             self.tag
-//         );
-//
-//         self.world.rules.insert(self.id, RuleComponent::once(predicate));
-//
-//         self
-//     }
-//
-//     /// Adds a rule that will fire every time the predicate is met.
-//     pub fn always(&mut self, predicate: RulePred) -> &EntityBuilder<'a> {
-//         assert!(
-//             !self.world.rules.get(&self.id).is_some(),
-//             "Tried to add rule component twice: [{}] {}",
-//             self.id,
-//             self.tag
-//         );
-//
-//         self.world.rules.insert(self.id, RuleComponent::always(predicate));
-//
-//         self
-//     }
-//
-//     /// Adds an action to a rule.
-//     pub fn action(&mut self, action: Action) -> &EntityBuilder<'a> {
-//         assert!(
-//             self.world.rules.get(&self.id).is_some(),
-//             "Tried to add action to non-rule: [{}] {}",
-//             self.id,
-//             self.tag
-//         );
-//
-//         let rule = self.world.rules.get_mut(&self.id).unwrap();
-//         rule.actions.push(action);
-//
-//         self
-//     }
-// }

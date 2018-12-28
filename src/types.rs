@@ -38,20 +38,26 @@ pub enum ProseType {
 #[allow(dead_code)]
 /// Game flags.  At present this is a mixture of engine flags and scenario flags.
 pub enum Flag {
+    /// This rule should only be fired once.
+    FireOnce,
+
+    /// This rule has fired at least once.
+    Fired,
+
     /// Has the entity been killed?
     Dead,
 
     /// Has this entity been seen by the player?  Used mostly for locations.
     Seen(ID),
 
+    /// Is the thing Scenery?
+    Scenery,
+
     /// Does the player have dirty hands?
     DirtyHands,
 
     /// Does the location have clean water?
     HasWater,
-
-    /// Is the thing Scenery?
-    Scenery,
 
     /// Is the thing dirty?
     Dirty,

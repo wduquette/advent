@@ -30,7 +30,6 @@ pub fn dump_entity(world: &World, id: ID) {
         println!("  Thing name: {}", thingc.name);
         println!("    Noun: {}", thingc.noun);
         println!("    Location: {}", thingc.location);
-        // println!("    Visual: {}", thingc.visual.as_string(world, id));
     }
 
     // NEXT, if it's a room display the room info.
@@ -39,15 +38,23 @@ pub fn dump_entity(world: &World, id: ID) {
         for (dir, id) in &roomc.links {
             println!("    Link: {:?} to {}", dir, id);
         }
-        // println!("    Visual: {}", roomc.visual);
     }
 
+    // NEXT, if it's a rule display its actions.
+    if let Some(rulec) = &world.rules.get(&id) {
+        for action in &rulec.actions {
+            println!("  Rule Action: {:?}", action);
+        }
+    }
+
+    // NEXT, display its flags, if any.
     if let Some(flagc) = &world.flag_sets.get(&id) {
         for flag in flagc.iter() {
             println!("  Flag: {:?}", flag);
         }
     }
 
+    // NEXT, display its inventory, if any.
     if let Some(invc) = world.inventories.get(&id) {
         for tid in invc.iter() {
             let thingv = world.as_thing(*tid);
@@ -55,9 +62,11 @@ pub fn dump_entity(world: &World, id: ID) {
         }
     }
 
-    if let Some(rulec) = &world.rules.get(&id) {
-        for action in &rulec.actions {
-            println!("  Rule Action: {:?}", action);
+    // NEXT, display any associated prose (given the entity's current state)
+    if let Some(prosec) = &world.proses.get(&id) {
+        for (prose_type, prose) in &prosec.types {
+            println!("  Prose [{:?}]: {}", prose_type, prose.as_string(world, id));
         }
     }
+
 }

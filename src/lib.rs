@@ -9,7 +9,7 @@ mod console;
 mod debug;
 mod entity;
 mod player_control;
-mod rule;
+mod rule_monitor;
 mod scenario;
 mod types;
 mod visual;
@@ -94,7 +94,7 @@ pub fn run() {
         player_control::system(&mut game, &cmd);
 
         // NEXT, handle rules
-        rule::system(&mut game.world);
+        rule_monitor::system(&mut game.world);
 
         // NEXT, Increment the clock
         // TODO: Probably don't want to do this here.  Some commands should
