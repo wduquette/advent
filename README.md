@@ -7,6 +7,7 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
+* Debug commands shouldn't advance the clock.
 * Move ProseType to types.rs.
 * Define Event guards and hooks
   * The dirty-note rule should be a Get hook.

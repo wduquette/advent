@@ -82,8 +82,20 @@ how narrow it is.
         .thing("note", "note")
         .prose_hook(Thing, &|world, id| note_thing_prose(world, id))
         .prose_hook(Book, &|world, id| note_book_prose(world, id))
+        .put_in(clearing)
         .id();
-    world.put_in(note, clearing);
+
+    // The sword
+    world
+        .add("sword")
+        .thing("sword", "sword")
+        .prose(Thing, "\
+The sword, if you want to call it that, is a three-foot length of dark hardwood
+with a sharkskin hilt on one end.  It's polished so that it gleams, and it has no
+sharp edges anywhere.  Carved along the length of it are the words
+\"Emotional Support Sword (TM)\".
+        ")
+        .put_in(trail);
 
     world
         .add("rule-dirty-note")

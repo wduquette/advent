@@ -106,8 +106,8 @@ impl World {
         };
 
         // NEXT, add LIMBO, the container for things which aren't anywhere else.
-        // TODO: At present LIMBO doesn't have an inventory; it should.
-        world.add("LIMBO"); // ID=0
+        let id = world.add("LIMBO").inventory().id();
+        assert!(id == 0);
 
         // NEXT, add the standard verbs and synonyms
         world.add_verb("go");
@@ -279,11 +279,16 @@ impl World {
             container
         );
 
+        // FIRST, take it out of wherever it is (if anywhere); this moves it to limbo.
+        self.take_out(thing);
+
+        // NEXT, move it from LIMBO to where it belongs.
         let lc = self.locations.get_mut(&thing).unwrap();
         let ic = self.inventories.get_mut(&container).unwrap();
 
         ic.things.insert(thing);
         lc.id = container;
+        self.inventories.get_mut(&LIMBO).unwrap().remove(thing);
     }
 
     /// Removes the thing from its container's inventory, and puts it in LIMBO.
@@ -302,6 +307,7 @@ impl World {
 
             let lc = self.locations.get_mut(&thing).unwrap();
             lc.id = LIMBO;
+            self.inventories.get_mut(&LIMBO).unwrap().add(thing);
         }
     }
 
@@ -413,12 +419,33 @@ pub struct EBuilder<'a> {
 
 impl<'a> EBuilder<'a> {
     /// Adds a location component to the entity if it doesn't already have one.
+    /// It will initially be put in LIMBO.
     pub fn location(self) -> EBuilder<'a> {
         if self.world.locations.get(&self.id).is_none() {
+            self.world.inventories.get_mut(&LIMBO).unwrap().add(self.id);
             self.world
                 .locations
                 .insert(self.id, LocationComponent::new());
         }
+
+        self
+    }
+
+    /// Puts the thing in the given location.
+    pub fn put_in(self, loc: ID) -> EBuilder<'a> {
+        assert!(self.world.has_location(self.id),
+            "Entity has no location component: [{}] {}",
+            self.id,
+            self.tag);
+        assert!(
+            self.world.has_inventory(loc),
+            "Tried to put in non-location {}: [{}] {}",
+            loc,
+            self.id,
+            self.tag
+        );
+
+        self.world.put_in(self.id, loc);
 
         self
     }

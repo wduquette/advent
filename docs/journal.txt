@@ -122,6 +122,15 @@ x   Things done:
         uses mutable views.
     x   Removed all views, doing the necessary cleanup.
         The code is now both shorter and clearer.  Woohoo!
+    x   Scrubbed world.rs.
+    x   LIMBO now has an inventory.
+        x   New things are put in LIMBO automatically.
+        x   New EBuilder method "put_in" moves the thing from LIMBO to
+            another container.
+        x   World::take_out and World::put_in manage LIMBO's inventory.
+        x   World::put_in does an implicit World::take_out.
+            x   It's now only necessary to call "take_out" if you're
+                going to leave something in LIMBO.
 
 2018-12-27 (Thursday)
 x   Three related issues:
