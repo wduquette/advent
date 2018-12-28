@@ -8,6 +8,7 @@ mod conmark;
 mod console;
 mod debug;
 mod entity;
+mod phys;
 mod player_control;
 mod rule_monitor;
 mod scenario;
