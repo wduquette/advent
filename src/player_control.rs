@@ -36,7 +36,7 @@ pub fn system(game: &mut Game, input: &str) {
     // FIRST, get the current game state, for later undo.
     let undo_info = game.world.clone();
 
-    // NEXT, get the player.  We'll save any changes at the end.
+    // NEXT, get the player.
     // TODO: Instead of getting the player, create a context struct:
     // the player's ID and location, and maybe some other things.
     let player = &mut game.world.player();
@@ -46,7 +46,6 @@ pub fn system(game: &mut Game, input: &str) {
     match result {
         Err(msg) => visual::error(&msg),
         Ok(Normal) => {
-            player.save(&mut game.world);
             game.save_for_undo(undo_info);
         }
         Ok(Restart) => game.restart(),
@@ -54,7 +53,7 @@ pub fn system(game: &mut Game, input: &str) {
     }
 }
 
-fn handle_input(game: &mut Game, player: &mut PlayerView, input: &str) -> CmdResult {
+fn handle_input(game: &mut Game, player: &PlayerView, input: &str) -> CmdResult {
     // FIRST, parse the input.
     let cmd = command::parse(&game.world, input)?;
 
@@ -65,7 +64,7 @@ fn handle_input(game: &mut Game, player: &mut PlayerView, input: &str) -> CmdRes
     }
 }
 
-fn handle_normal_command(game: &mut Game, player: &mut PlayerView, cmd: &Command) -> CmdResult {
+fn handle_normal_command(game: &mut Game, player: &PlayerView, cmd: &Command) -> CmdResult {
     let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
     let world = &mut game.world;
 
@@ -100,7 +99,7 @@ fn handle_normal_command(game: &mut Game, player: &mut PlayerView, cmd: &Command
     }
 }
 
-fn handle_debug_command(game: &mut Game, player: &mut PlayerView, cmd: &Command) -> CmdResult {
+fn handle_debug_command(game: &mut Game, player: &PlayerView, cmd: &Command) -> CmdResult {
     let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
     let world = &mut game.world;
 
@@ -220,7 +219,7 @@ fn cmd_wash_hands(world: &mut World, player: &PlayerView) -> CmdResult {
 }
 
 /// Gets a thing from the location's inventory.
-fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult {
+fn cmd_get(world: &mut World, player: &PlayerView, name: &str) -> CmdResult {
     let here = world.loc(world.pid);
     let roomv = &mut world.as_room(here);
 
@@ -229,20 +228,14 @@ fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult 
         return Err("You already have it.".into());
     }
 
-    if let Some(id) = find_in_inventory(world, &roomv.inventory, name) {
-        let thingv = &mut world.as_thing(id);
-        if thingv.flag_set.has(Scenery) {
+    if let Some(thing) = find_in_inventory(world, &roomv.inventory, name) {
+        if world.has_flag(thing, Scenery) {
             return Err("You can't take that!".into());
         }
 
         // Get the thing.
-        // TODO: get rid of views, use take_out, put_in
-        roomv.inventory.remove(thingv.id);
-        player.inventory.add(thingv.id);
-        world.set_room(thingv.id, player.id);
-
-        roomv.save(world);
-        thingv.save(world);
+        world.take_out(thing);
+        world.put_in(thing, player.id);
 
         visual::act("Taken.");
         Ok(Normal)
@@ -252,20 +245,14 @@ fn cmd_get(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult 
 }
 
 /// Drops a thing you're carrying
-fn cmd_drop(world: &mut World, player: &mut PlayerView, name: &str) -> CmdResult {
+fn cmd_drop(world: &mut World, player: &PlayerView, name: &str) -> CmdResult {
     let here = world.loc(world.pid);
     let roomv = &mut world.as_room(here);
 
-    if let Some(id) = find_in_inventory(world, &player.inventory, name) {
-        let thingv = &mut world.as_thing(id);
-
-        // TODO: use take_out and put_int
-        player.inventory.remove(thingv.id);
-        roomv.inventory.add(thingv.id);
-        world.set_room(thingv.id, here);
-
-        roomv.save(world);
-        thingv.save(world);
+    if let Some(thing) = find_in_inventory(world, &player.inventory, name) {
+        // Drop the thing
+        world.take_out(thing);
+        world.put_in(thing, here);
 
         visual::act("Dropped.");
         Ok(Normal)

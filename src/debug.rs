@@ -22,7 +22,8 @@ pub fn dump_entity(world: &World, id: ID) {
 
     // FIRST, display its location, if any.
     if world.has_location(id) {
-        println!("  Location: {}", world.loc(id));
+        let here = world.loc(id);
+        println!("  Location: [{}] {}", here, world.tag(here));
     }
 
     // FIRST, display the player info
@@ -60,9 +61,12 @@ pub fn dump_entity(world: &World, id: ID) {
 
     // NEXT, display its inventory, if any.
     if let Some(invc) = world.inventories.get(&id) {
-        for tid in invc.iter() {
-            let thingv = world.as_thing(*tid);
-            println!("  Contains: [{}] {}", thingv.id, thingv.thing.name);
+        if invc.things.is_empty() {
+            println!("  Contains: nothing");
+        } else {
+            for tid in &invc.things {
+                println!("  Contains: [{}] {}", tid, world.tag(*tid));
+            }
         }
     }
 
@@ -72,5 +76,4 @@ pub fn dump_entity(world: &World, id: ID) {
             println!("  Prose [{:?}]: {}", prose_type, prose.as_string(world, id));
         }
     }
-
 }

@@ -290,6 +290,11 @@ impl World {
         }
     }
 
+    /// Returns the tag of the thing with the given ID
+    pub fn tag(&self, id: ID) -> String {
+        self.tags[&id].tag.clone()
+    }
+
     /// Returns the location of the thing with the given ID
     pub fn loc(&self, id: ID) -> ID {
         assert!(self.has_location(id) "Entity has no location: {}", id);
