@@ -120,6 +120,8 @@ x   Things done:
         x   Only "get" and "drop" now depend on a mutable PlayerView.
     x   Cleaned up mutable PlayerView; player_control::system() no longer
         uses mutable views.
+    x   Removed all views, doing the necessary cleanup.
+        The code is now both shorter and clearer.  Woohoo!
 
 2018-12-27 (Thursday)
 x   Three related issues:
