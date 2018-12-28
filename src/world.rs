@@ -216,12 +216,6 @@ impl World {
         self.proses[&id].types.get(&prose_type).is_some()
     }
 
-    /// Retrieve a view of the entity as a collection of prose
-    /// TODO: See if this is really needed.
-    pub fn as_prose(&self, id: ID) -> ProseView {
-        ProseView::from(&self, id)
-    }
-
     /// Can this entity function as a player?
     pub fn is_player(&self, id: ID) -> bool {
         self.players.get(&id).is_some()

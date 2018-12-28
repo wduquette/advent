@@ -66,28 +66,3 @@ impl ProseComponent {
         }
     }
 }
-
-//------------------------------------------------------------------------------------------------
-// Prose View
-
-/// Prose view: A view of an entity as a read-only collection of prose
-pub struct ProseView {
-    pub id: ID,
-    pub tag: String,
-    pub prose: ProseComponent,
-}
-
-impl ProseView {
-    /// Creates a ProseView for the entity.
-    pub fn from(world: &World, id: ID) -> Self {
-        let tc = &world.tags[&id];
-
-        assert!(world.is_prose(id), "Not prose: [{}] {}", tc.id, tc.tag,);
-
-        Self {
-            id: tc.id,
-            tag: tc.tag.clone(),
-            prose: world.proses[&id].clone(),
-        }
-    }
-}
