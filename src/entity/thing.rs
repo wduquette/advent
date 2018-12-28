@@ -1,9 +1,5 @@
 //! Thing Data
 
-use crate::entity::flag::FlagSetComponent;
-use crate::entity::ID;
-use crate::world::World;
-
 /// Information specific to things.
 #[derive(Debug, Clone)]
 pub struct ThingComponent {

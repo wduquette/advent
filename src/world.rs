@@ -249,11 +249,6 @@ impl World {
             && self.is_flag_set(id)
     }
 
-    /// Retrieve a view of the entity as a Thing
-    fn as_thing(&self, id: ID) -> ThingView {
-        ThingView::from(&self, id)
-    }
-
     /// Is this entity a rule?
     pub fn is_rule(&self, id: ID) -> bool {
         self.rules.get(&id).is_some()
