@@ -6,7 +6,7 @@ use crate::command::Command;
 use crate::debug;
 use crate::entity::inventory::InventoryComponent;
 use crate::entity::player::PlayerView;
-use crate::entity::prose::ProseType;
+use crate::types::ProseType;
 use crate::entity::ID;
 use crate::types::Dir::*;
 use crate::types::Flag::*;

@@ -4,20 +4,8 @@ use std::collections::HashMap;
 use crate::entity::ID;
 use crate::world::World;
 use crate::types::EntityStringHook;
+use crate::types::ProseType;
 use std::fmt;
-
-/// The different kinds of prose supported by the entity.
-#[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
-pub enum ProseType {
-    /// Prose describing a room's interior
-    Room,
-
-    /// Prose describing a thing's visible appearance.
-    Thing,
-
-    /// The prose contents of a book, note, etc.
-    Book
-}
 
 /// A hook to convert an entity into prose.
 /// We define this struct because we can't add traits to EntityStringHook.

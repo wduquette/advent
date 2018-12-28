@@ -13,7 +13,7 @@ use crate::console::para;
 use crate::entity::inventory::InventoryComponent;
 use crate::entity::ID;
 use crate::types::Flag::*;
-use crate::entity::prose::ProseType;
+use crate::types::ProseType;
 use crate::world::World;
 
 //-----------------------------------------------------------------------------

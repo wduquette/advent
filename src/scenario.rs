@@ -1,6 +1,6 @@
 //! Scenario definition
 
-use crate::entity::prose::ProseType::*;
+use crate::types::ProseType::*;
 use crate::entity::ID;
 use crate::entity::rule::Action::*;
 use crate::types::Dir::*;

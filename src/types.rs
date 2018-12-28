@@ -20,13 +20,27 @@ pub enum Dir {
     Out,
 }
 
+/// The different kinds of prose supported by an entity.
+#[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
+pub enum ProseType {
+    /// Prose describing a room's interior
+    Room,
+
+    /// Prose describing a thing's visible appearance.
+    Thing,
+
+    /// The prose contents of a book, note, etc.
+    Book
+}
+
+
 #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
 #[allow(dead_code)]
 /// Game flags.  At present this is a mixture of engine flags and scenario flags.
 pub enum Flag {
     /// Has the entity been killed?
     Dead,
-    
+
     /// Has this entity been seen by the player?  Used mostly for locations.
     Seen(ID),
 
