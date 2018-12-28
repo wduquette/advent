@@ -1,5 +1,4 @@
 //! The game world
-use crate::types::EntityStringHook;
 use crate::entity::flag::*;
 use crate::entity::inventory::*;
 use crate::entity::location::*;
@@ -11,6 +10,7 @@ use crate::entity::rule::*;
 use crate::entity::tag::*;
 use crate::entity::thing::*;
 use crate::entity::ID;
+use crate::types::EntityStringHook;
 use crate::types::*;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -42,19 +42,18 @@ pub struct World {
     //--------------------------------------------------------------------------------------------
     // Entity Components
     /// Tag Components: Identifiers for the entities.  This is a BTreeMap so that we can
-    /// easily reference entities in creation order, and can easily determine the next available
-    /// ID.
+    /// easily reference entities in order of creation.
     pub tags: BTreeMap<ID, TagComponent>,
 
-    /// Flags, used for storing arbitrary data about the entity.  This is mostly for use by
-    /// scenarios; infrastructure data should be stored in the regular components.
+    /// FlagSets, used for storing arbitrary data about the entity.  Flags include "engine"
+    /// flags and custom flags defined by the scenario.
     pub flag_sets: HashMap<ID, FlagSetComponent>,
 
-    /// Inventory Components: This is broken out separately because many kinds of entity can
-    /// own or contain things.
+    /// Inventory Components: For entities that can contain other entities: rooms, boxes,
+    /// the player.
     pub inventories: HashMap<ID, InventoryComponent>,
 
-    /// Location Components: This where things are located.
+    /// Location Components: Where entities are located.
     pub locations: HashMap<ID, LocationComponent>,
 
     /// Prose Components: contains all the different kinds of prose an entity can have.
@@ -162,11 +161,9 @@ impl World {
 
     //--------------------------------------------------------------------------------------------
     // Entity types
-    //
-    // TODO: Use phrasing "has_X" instead of "is_X" for things like inventory, flag_set, etc.
-    // Reserve "is_X" for things, rooms, etc.
 
-    /// Add a new entity using the builder pattern.
+    /// Add a new entity using the builder pattern.  The entity will have the given tag.
+    /// See also EBuilder, below.
     pub fn add(&mut self, tag: &str) -> EBuilder {
         let id = self.next_id;
         self.next_id += 1;
@@ -182,15 +179,13 @@ impl World {
         }
     }
 
-    /// Can this entity function as a flag set?
-    // TODO: should be has_flag_set()
-    pub fn is_flag_set(&self, id: ID) -> bool {
+    /// Does this entity have a set of flag?
+    pub fn has_flags(&self, id: ID) -> bool {
         self.flag_sets.get(&id).is_some()
     }
 
-    /// Can this entity function as an inventory
-    // TODO: should be has_inventory()
-    pub fn is_inventory(&self, id: ID) -> bool {
+    /// Does this inventory own other things?
+    pub fn has_inventory(&self, id: ID) -> bool {
         self.inventories.get(&id).is_some()
     }
 
@@ -199,19 +194,17 @@ impl World {
         self.locations.get(&id).is_some()
     }
 
-    /// Can this entity function as an inventory
-    /// TODO: See if this is needed.
-    pub fn is_prose(&self, id: ID) -> bool {
+    /// Does this entity contain prose?
+    pub fn has_prose(&self, id: ID) -> bool {
         self.proses.get(&id).is_some()
     }
 
     /// Does this entity have prose of a given type?
-    pub fn has_prose(&self, id: ID, prose_type: ProseType) -> bool {
-        self.proses.get(&id).is_some() &&
-        self.proses[&id].types.get(&prose_type).is_some()
+    pub fn has_prose_type(&self, id: ID, prose_type: ProseType) -> bool {
+        self.proses.get(&id).is_some() && self.proses[&id].types.get(&prose_type).is_some()
     }
 
-    /// Can this entity function as a player?
+    /// Is this entity a (the) player?
     pub fn is_player(&self, id: ID) -> bool {
         self.players.get(&id).is_some()
             && self.locations.get(&id).is_some()
@@ -220,24 +213,19 @@ impl World {
             && self.things.get(&id).is_some()
     }
 
-    /// Can this entity function as a room?  I.e., a place the player can be?
+    /// Is this entity a room where the player can go?
     pub fn is_room(&self, id: ID) -> bool {
-        self.rooms.get(&id).is_some()
-            && self.is_inventory(id)
-            && self.is_flag_set(id)
+        self.rooms.get(&id).is_some() && self.has_inventory(id) && self.has_flags(id)
     }
 
-    /// Can this entity function as a thing?  I.e., as a noun?
+    /// Is this entity a thing the player can interact with?
     pub fn is_thing(&self, id: ID) -> bool {
-        self.things.get(&id).is_some()
-            && self.has_location(id)
-            && self.is_flag_set(id)
+        self.things.get(&id).is_some() && self.has_location(id) && self.has_flags(id)
     }
 
     /// Is this entity a rule?
     pub fn is_rule(&self, id: ID) -> bool {
-        self.rules.get(&id).is_some()
-            && self.is_flag_set(id)
+        self.rules.get(&id).is_some() && self.has_flags(id)
     }
 
     //--------------------------------------------------------------------------------------------
@@ -249,7 +237,7 @@ impl World {
     }
 
     /// Looks up an entity's ID in the tag map.
-    /// TODO: Make this just "lookup".  Might want two variants, one that returns
+    /// TODO: Might want two variants, one that returns
     /// Option and one that panics.
     pub fn lookup_id(&self, tag: &str) -> Option<ID> {
         if let Some(id) = self.tag_map.get(tag) {
@@ -261,22 +249,22 @@ impl World {
 
     /// Returns the location of the thing with the given ID
     pub fn loc(&self, id: ID) -> ID {
-        assert!(self.has_location(id) "Entity has no location: {}", id);
+        assert!(self.has_location(id), "Entity has no location: {}", id);
         self.locations.get(&id).as_ref().unwrap().id
     }
 
     /// Returns true if the loc owns the thing, and false otherwise.
     pub fn owns(&self, loc: ID, thing: ID) -> bool {
-        assert!(self.is_inventory(loc), "Not an inventory: {}", loc);
+        assert!(self.has_inventory(loc), "Entity has no inventory: {}", loc);
         self.inventories[&loc].has(thing)
     }
 
     /// Moves the player (or some other NPC, ultimately) to a location. Performs no
     /// game logic.
-    /// TODO: Should be handled by physical system.
+    /// TODO: Eventually, should be handled by physical system.
     pub fn set_room(&mut self, player: ID, loc: ID) {
-        assert!(self.has_location(player) "Not a locatable thing: [{}]", player);
-        assert!(self.is_inventory(loc) "Not an inventory: [{}]", loc);
+        assert!(self.is_player(player), "Not a player: [{}]", player);
+        assert!(self.is_room(loc), "Not a room: [{}]", loc);
 
         self.locations.get_mut(&player).unwrap().id = loc;
     }
@@ -284,8 +272,12 @@ impl World {
     /// Puts the thing in the container's inventory, and sets the thing's location.
     /// No op if the thing is already in the location.
     pub fn put_in(&mut self, thing: ID, container: ID) {
-        assert!(self.has_location(thing) "Not a thing: [{}]", id);
-        assert!(self.is_inventory(container) "Not an inventory: [{}]", container);
+        assert!(self.has_location(thing), "Has no location: [{}]", thing);
+        assert!(
+            self.has_inventory(container),
+            "Has no inventory: [{}]",
+            container
+        );
 
         let lc = self.locations.get_mut(&thing).unwrap();
         let ic = self.inventories.get_mut(&container).unwrap();
@@ -296,10 +288,15 @@ impl World {
 
     /// Removes the thing from its container's inventory, and puts it in LIMBO.
     pub fn take_out(&mut self, thing: ID) {
-        assert!(self.has_location(thing), "Not a thing: [{}]", thing);
+        assert!(self.has_location(thing), "Has no location: [{}]", thing);
         let container = self.loc(thing);
 
         if container != LIMBO {
+            assert!(
+                self.has_inventory(container),
+                "Has no inventory: [{}]",
+                container
+            );
             let ic = self.inventories.get_mut(&container).unwrap();
             ic.things.remove(&thing);
 
@@ -311,7 +308,7 @@ impl World {
     /// Tries to follow a link in the given direction; returns the linked
     /// location if any.
     pub fn follow(&self, loc: ID, dir: Dir) -> Option<ID> {
-        assert!(self.is_room(loc) "Not a room: [{}]", loc);
+        assert!(self.is_room(loc), "Not a room: [{}]", loc);
 
         let rc = &self.rooms[&loc];
 
@@ -322,8 +319,8 @@ impl World {
     /// Links are not bidirectional.  If you want links both ways, you
     /// have to add them.
     pub fn oneway(&mut self, from: ID, dir: Dir, to: ID) {
-        assert!(self.is_room(from) "Not a room: [{}]", from);
-        assert!(self.is_room(to) "Not a room: [{}]", to);
+        assert!(self.is_room(from), "Not a room: [{}]", from);
+        assert!(self.is_room(to), "Not a room: [{}]", to);
 
         let fromc = self.rooms.get_mut(&from).unwrap();
         fromc.links.insert(dir, to);
@@ -331,8 +328,8 @@ impl World {
 
     /// Links two rooms in the given directions.
     pub fn twoway(&mut self, a: ID, to_b: Dir, to_a: Dir, b: ID) {
-        assert!(self.is_room(a) "Not a room: [{}]", a);
-        assert!(self.is_room(b) "Not a room: [{}]", b);
+        assert!(self.is_room(a), "Not a room: [{}]", a);
+        assert!(self.is_room(b), "Not a room: [{}]", b);
 
         let fromc = self.rooms.get_mut(&a).unwrap();
         fromc.links.insert(to_b, b);
@@ -343,7 +340,7 @@ impl World {
 
     /// Get the specific type of prose from the entity
     pub fn prose(&self, id: ID, prose_type: ProseType) -> String {
-        assert!(self.is_prose(id) "Not prose: [{}]", id);
+        assert!(self.has_prose(id), "Not prose: [{}]", id);
 
         let prosec = &self.proses[&id];
 
@@ -374,9 +371,18 @@ impl World {
     //--------------------------------------------------------------------------------------------
     // Flags
 
+    /// Is the flag set on the entity?
+    #[allow(dead_code)]
+    pub fn has_flag(&self, id: ID, flag: Flag) -> bool {
+        assert!(self.has_flags(id) "Not a flag set: [{}]", id);
+        let fc = &self.flag_sets[&id];
+
+        fc.has(flag)
+    }
+
     /// Set the flag on the entity
     pub fn set_flag(&mut self, id: ID, flag: Flag) {
-        assert!(self.is_flag_set(id) "Not a flag set: [{}]", id);
+        assert!(self.has_flags(id) "Not a flag set: [{}]", id);
 
         let fc = self.flag_sets.get_mut(&id).unwrap();
 
@@ -385,29 +391,19 @@ impl World {
     }
 
     /// Clear the flag from the entity
-    #[allow(dead_code)]
     pub fn unset_flag(&mut self, id: ID, flag: Flag) {
-        assert!(self.is_flag_set(id) "Not a flag set: [{}]", id);
+        assert!(self.has_flags(id) "Not a flag set: [{}]", id);
 
         let fc = self.flag_sets.get_mut(&id).unwrap();
 
         // Consider adding as_flags() to Entity
         fc.unset(flag);
     }
-
-    /// Is the flag set on the entity?
-    #[allow(dead_code)]
-    pub fn has_flag(&self, id: ID, flag: Flag) -> bool {
-        assert!(self.is_flag_set(id) "Not a flag set: [{}]", id);
-        let fc = &self.flag_sets[&id];
-
-        fc.has(flag)
-    }
 }
 
 /// # EBuilder -- A tool for building entities
 ///
-/// Use World.ad() to create an entity and assign it a tag.  This returns an
+/// Use World.add() to create an entity and assign it a tag and ID.  This returns an
 /// EBuilder struct.  Use the EBuilder methods to add components to the entity.
 pub struct EBuilder<'a> {
     pub world: &'a mut World,
@@ -438,7 +434,7 @@ impl<'a> EBuilder<'a> {
         self
     }
 
-    /// Adds a flag component to the entity if it doesn't already have one.
+    /// Adds a flag set component to the entity if it doesn't already have one.
     pub fn flag_set(self) -> EBuilder<'a> {
         if self.world.flag_sets.get(&self.id).is_none() {
             self.world
@@ -457,16 +453,14 @@ impl<'a> EBuilder<'a> {
         self
     }
 
-    /// Adds a prose description of the given type to the entity.
+    /// Adds a prose description of the given type to the entity as a literal string,
+    /// creating the prose component if necessary.
     pub fn prose(self, prose_type: ProseType, text: &str) -> EBuilder<'a> {
         if self.world.proses.get(&self.id).is_none() {
-            self.world
-                .proses
-                .insert(self.id, ProseComponent::new());
+            self.world.proses.insert(self.id, ProseComponent::new());
         }
 
-        self
-            .world
+        self.world
             .proses
             .get_mut(&self.id)
             .unwrap()
@@ -476,16 +470,14 @@ impl<'a> EBuilder<'a> {
         self
     }
 
-    /// Adds a prose description of the given type to the entity.
+    /// Adds a prose description of the given type to the entity using a prose hook,
+    /// creating the prose component if necessary.
     pub fn prose_hook(self, prose_type: ProseType, hook: EntityStringHook) -> EBuilder<'a> {
         if self.world.proses.get(&self.id).is_none() {
-            self.world
-                .proses
-                .insert(self.id, ProseComponent::new());
+            self.world.proses.insert(self.id, ProseComponent::new());
         }
 
-        self
-            .world
+        self.world
             .proses
             .get_mut(&self.id)
             .unwrap()
@@ -495,7 +487,7 @@ impl<'a> EBuilder<'a> {
         self
     }
 
-    /// Adds the essential trimmings for a player.
+    /// Adds the essential trimmings for a player to the entity.
     pub fn player(mut self) -> EBuilder<'a> {
         assert!(
             !self.world.players.get(&self.id).is_some(),
@@ -526,9 +518,7 @@ impl<'a> EBuilder<'a> {
             self.tag
         );
 
-        self.world
-            .rooms
-            .insert(self.id, RoomComponent::new(name));
+        self.world.rooms.insert(self.id, RoomComponent::new(name));
         self = self.inventory();
         self = self.flag_set();
 
@@ -591,7 +581,8 @@ impl<'a> EBuilder<'a> {
     }
 
     /// Adds an action to a rule.
-    /// TODO: Probably want to add closure that returns ActionScript.
+    /// TODO: Probably want to use a closure that returns an ActionScript rather than
+    /// adding individual actions.
     pub fn action(self, action: Action) -> EBuilder<'a> {
         assert!(
             self.world.rules.get(&self.id).is_some(),
@@ -606,7 +597,7 @@ impl<'a> EBuilder<'a> {
         self
     }
 
-    /// Returns the entity's ID.
+    /// Returns the entity's ID, for use at the end of the chain.
     pub fn id(self) -> ID {
         self.id
     }

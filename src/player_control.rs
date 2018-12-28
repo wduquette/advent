@@ -4,10 +4,10 @@ use self::Status::*;
 use crate::command;
 use crate::command::Command;
 use crate::debug;
-use crate::types::ProseType;
 use crate::entity::ID;
 use crate::types::Dir::*;
 use crate::types::Flag::*;
+use crate::types::ProseType;
 use crate::types::*;
 use crate::visual;
 use crate::world::*;
@@ -43,7 +43,7 @@ pub fn system(game: &mut Game, input: &str) {
     // NEXT, get the player's context
     let player = Player {
         id: game.world.pid,
-        loc: game.world.loc(game.world.pid)
+        loc: game.world.loc(game.world.pid),
     };
 
     // NEXT, handle the input
@@ -178,7 +178,7 @@ fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
 fn cmd_read(world: &World, player: &Player, name: &str) -> CmdResult {
     if let Some(thing) = find_visible_thing(world, player.id, name) {
         // If it has no prose, it can't be read
-        if !world.has_prose(thing, ProseType::Book) {
+        if !world.has_prose_type(thing, ProseType::Book) {
             return Err("You can't read that.".into());
         }
 
@@ -359,7 +359,7 @@ fn cmd_debug_go(world: &mut World, player: &Player, id_arg: &str) -> CmdResult {
 
 /// Looks for a thing with the given name in the given inventory list.
 fn find_in_inventory(world: &World, inv: ID, noun: &str) -> Option<ID> {
-    assert!(world.is_inventory(inv), "Not an inventory: {}", inv);
+    assert!(world.has_inventory(inv), "Not an inventory: {}", inv);
     for id in world.inventories[&inv].iter() {
         let thingc = &world.things[id];
         if thingc.noun == noun {

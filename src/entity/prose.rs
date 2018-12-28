@@ -1,10 +1,10 @@
 //! The prose component.  It stores the entity's prose visuals.
 
-use std::collections::HashMap;
 use crate::entity::ID;
-use crate::world::World;
 use crate::types::EntityStringHook;
 use crate::types::ProseType;
+use crate::world::World;
+use std::collections::HashMap;
 use std::fmt;
 
 /// A hook to convert an entity into prose.
@@ -34,11 +34,11 @@ impl fmt::Debug for ProseHook {
 
 /// A Prose value: how to produce a visual string for an entity.
 #[allow(dead_code)]
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub enum Prose {
     Default,
     Prose(String),
-    Hook(ProseHook)
+    Hook(ProseHook),
 }
 
 impl Prose {
@@ -55,7 +55,7 @@ impl Prose {
 /// Information specific to entity prose
 #[derive(Debug, Clone, Default)]
 pub struct ProseComponent {
-    pub types: HashMap<ProseType,Prose>,
+    pub types: HashMap<ProseType, Prose>,
 }
 
 impl ProseComponent {

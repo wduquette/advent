@@ -1,7 +1,7 @@
 //! Type definitions for this app.
 
-use crate::world::World;
 use crate::entity::ID;
+use crate::world::World;
 
 //------------------------------------------------------------------------------------------------
 // Basic Types
@@ -30,9 +30,8 @@ pub enum ProseType {
     Thing,
 
     /// The prose contents of a book, note, etc.
-    Book
+    Book,
 }
-
 
 #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
 #[allow(dead_code)]

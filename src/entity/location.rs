@@ -15,8 +15,6 @@ pub struct LocationComponent {
 impl LocationComponent {
     /// Create a new component
     pub fn new() -> Self {
-        Self {
-            id: LIMBO,
-        }
+        Self { id: LIMBO }
     }
 }

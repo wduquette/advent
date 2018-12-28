@@ -1,12 +1,12 @@
 //! Scenario definition
 
-use crate::types::ProseType::*;
-use crate::entity::ID;
 use crate::entity::rule::Action::*;
+use crate::entity::ID;
 use crate::types::Dir::*;
 use crate::types::Flag::*;
-use crate::world::World;
+use crate::types::ProseType::*;
 use crate::visual::Buffer;
+use crate::world::World;
 
 // Important Constants
 const NOTE: &str = "note";
@@ -40,21 +40,28 @@ pub fn build() -> World {
     let trail = world
         .add("trail")
         .room("Trail")
-        .prose(Room, "A trail from hither to yon.  You can go east or west.")
+        .prose(
+            Room,
+            "A trail from hither to yon.  You can go east or west.",
+        )
         .id();
 
     // Room: Bridge
     let bridge = world
         .add("bridge")
         .room("Bridge")
-        .prose(Room, "The trail crosses a small stream here.  You can go east or west.")
+        .prose(
+            Room,
+            "The trail crosses a small stream here.  You can go east or west.",
+        )
         .flag(HasWater)
         .id();
 
     let stream = world
         .add("stream")
         .thing("stream", "stream")
-        .prose(Thing,
+        .prose(
+            Thing,
             "\
 The stream comes from the north, down a little waterfall, and runs
 away under the bridge.  It looks surprisingly deep, considering
@@ -99,7 +106,6 @@ and gosh, this doesn't look anything like the toy aisle.
             .into(),
         ));
 
-
     world
         .add("fairy-godmother-rule")
         .always(&|world| player_is_dead(world))
@@ -109,7 +115,8 @@ A fairy godmother hovers over your limp body.  She frowns;
 then, apparently against her better judgment, she waves
 her wand.  There's a flash, and she disappears.
 ||*** You are alive! ***
-            ".into()
+            "
+            .into(),
         ))
         .action(ClearFlag(pid, Dead));
 
@@ -160,11 +167,12 @@ fn note_book_prose(world: &World, id: ID) -> String {
     if world.has_flag(id, Dirty) {
         "You've gotten it too dirty to read.".into()
     } else {
-            "\
+        "\
 Welcome, dear friend.  Your mission, should you choose to
 accept it, is to figure out how to get to the end of
 the trail.  You've already taken the first big
 step!
-         ".into()
+         "
+        .into()
     }
 }
