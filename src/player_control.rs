@@ -4,7 +4,6 @@ use self::Status::*;
 use crate::command;
 use crate::command::Command;
 use crate::debug;
-use crate::entity::inventory::InventoryComponent;
 use crate::entity::player::PlayerView;
 use crate::types::ProseType;
 use crate::entity::ID;
@@ -162,7 +161,7 @@ fn cmd_inventory(world: &World) -> CmdResult {
 
 /// Describe a thing in the current location.
 fn cmd_examine(world: &World, player: &PlayerView, name: &str) -> CmdResult {
-    if let Some(id) = find_visible_thing(world, player, name) {
+    if let Some(id) = find_visible_thing(world, player.id, name) {
         visual::thing(world, id);
         Ok(Normal)
     } else {
@@ -172,7 +171,7 @@ fn cmd_examine(world: &World, player: &PlayerView, name: &str) -> CmdResult {
 
 /// Read a thing in the current location.
 fn cmd_read(world: &World, player: &PlayerView, name: &str) -> CmdResult {
-    if let Some(thing) = find_visible_thing(world, player, name) {
+    if let Some(thing) = find_visible_thing(world, player.id, name) {
         // If it has no prose, it can't be read
         if !world.has_prose(thing, ProseType::Book) {
             return Err("You can't read that.".into());
@@ -221,14 +220,13 @@ fn cmd_wash_hands(world: &mut World, player: &PlayerView) -> CmdResult {
 /// Gets a thing from the location's inventory.
 fn cmd_get(world: &mut World, player: &PlayerView, name: &str) -> CmdResult {
     let here = world.loc(world.pid);
-    let roomv = &mut world.as_room(here);
 
     // Does he already have it?
-    if find_in_inventory(world, &player.inventory, name).is_some() {
+    if find_in_inventory(world, player.id, name).is_some() {
         return Err("You already have it.".into());
     }
 
-    if let Some(thing) = find_in_inventory(world, &roomv.inventory, name) {
+    if let Some(thing) = find_in_inventory(world, here, name) {
         if world.has_flag(thing, Scenery) {
             return Err("You can't take that!".into());
         }
@@ -247,16 +245,15 @@ fn cmd_get(world: &mut World, player: &PlayerView, name: &str) -> CmdResult {
 /// Drops a thing you're carrying
 fn cmd_drop(world: &mut World, player: &PlayerView, name: &str) -> CmdResult {
     let here = world.loc(world.pid);
-    let roomv = &mut world.as_room(here);
 
-    if let Some(thing) = find_in_inventory(world, &player.inventory, name) {
+    if let Some(thing) = find_in_inventory(world, player.id, name) {
         // Drop the thing
         world.take_out(thing);
         world.put_in(thing, here);
 
         visual::act("Dropped.");
         Ok(Normal)
-    } else if find_in_inventory(world, &roomv.inventory, name).is_some() {
+    } else if find_in_inventory(world, here, name).is_some() {
         Err("You aren't carrying that.".into())
     } else {
         Err("You don't see any such thing.".into())
@@ -362,8 +359,9 @@ fn cmd_debug_go(world: &mut World, player: &PlayerView, id_arg: &str) -> CmdResu
 // Parsing Tools
 
 /// Looks for a thing with the given name in the given inventory list.
-fn find_in_inventory(world: &World, inventory: &InventoryComponent, noun: &str) -> Option<ID> {
-    for id in inventory.iter() {
+fn find_in_inventory(world: &World, inv: ID, noun: &str) -> Option<ID> {
+    assert!(world.is_inventory(inv), "Not an inventory: {}", inv);
+    for id in world.inventories[&inv].iter() {
         let thingc = &world.things[id];
         if thingc.noun == noun {
             return Some(*id);
@@ -374,17 +372,16 @@ fn find_in_inventory(world: &World, inventory: &InventoryComponent, noun: &str) 
 }
 
 /// Find a visible thing: something you're carrying, or that's here in this location.
-fn find_visible_thing(world: &World, player: &PlayerView, noun: &str) -> Option<ID> {
+fn find_visible_thing(world: &World, pid: ID, noun: &str) -> Option<ID> {
     // FIRST, does the player have it?
-    if let Some(id) = find_in_inventory(world, &player.inventory, noun) {
+    if let Some(id) = find_in_inventory(world, pid, noun) {
         return Some(id);
     }
 
     // NEXT, is it in this room?
-    let here = world.loc(player.id);
-    let roomv = &world.as_room(here);
+    let here = world.loc(pid);
 
-    if let Some(id) = find_in_inventory(world, &roomv.inventory, noun) {
+    if let Some(id) = find_in_inventory(world, here, noun) {
         return Some(id);
     }
 

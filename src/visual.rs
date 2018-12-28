@@ -74,18 +74,18 @@ pub fn room_brief(world: &World, id: ID) {
 /// * A brief description omits the visual; it's used for rooms that the player has visited
 ///   before.
 fn print_room(world: &World, id: ID, detail: Detail) {
-    let roomv = world.as_room(id);
+    let roomc = &world.rooms[&id];
 
     // FIRST, display the room's description
     if detail == Detail::Full {
-        para!("{}|{}", roomv.room.name, world.prose(id, ProseType::Room))
+        para!("{}|{}", roomc.name, world.prose(id, ProseType::Room))
     } else {
-        para(&roomv.room.name);
+        para(&roomc.name);
     }
 
     // NEXT, list any objects in the room's inventory.  (We don't list
     // scenary; presumably that's in the description.)
-    let list = invent_list(world, &roomv.inventory);
+    let list = invent_list(world, &world.inventories[&id]);
 
     if !list.is_empty() {
         para!("You see: {}.", list);

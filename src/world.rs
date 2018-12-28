@@ -232,11 +232,6 @@ impl World {
             && self.is_flag_set(id)
     }
 
-    /// Retrieve a view of the entity as a Room
-    pub fn as_room(&self, id: ID) -> RoomView {
-        RoomView::from(&self, id)
-    }
-
     /// Can this entity function as a thing?  I.e., as a noun?
     pub fn is_thing(&self, id: ID) -> bool {
         self.things.get(&id).is_some()
