@@ -1,11 +1,11 @@
 //! Rule Monitor System
 
-use crate::entity::rule_component::Action::*;
 use crate::entity::ID;
+use crate::phys;
+use crate::types::Action::*;
 use crate::types::Flag::*;
 use crate::visual;
 use crate::world::World;
-use crate::phys;
 
 /// The Rule System.  Processes all rules, executing those that should_fire.
 pub fn system(world: &mut World) {

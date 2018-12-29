@@ -64,3 +64,21 @@ pub enum Flag {
 
 /// A closure to produce a string from an entity
 pub type EntityStringHook = &'static Fn(&World, ID) -> String;
+
+/// Actions taken by rules (and maybe other things)
+/// TODO: Move this to types, and define ActionScript.
+#[allow(dead_code)]
+#[derive(Clone, Debug)]
+pub enum Action {
+    /// Print the entity's visual
+    Print(String),
+
+    /// Set the variable for the entity with the given ID
+    SetFlag(ID, Flag),
+
+    /// Clear the given variable
+    ClearFlag(ID, Flag),
+
+    /// Swap an item in the world for one in LIMBO
+    Swap(ID, ID),
+}

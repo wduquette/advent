@@ -1,12 +1,12 @@
 //! Scenario definition
 
-use crate::entity::rule_component::Action::*;
 use crate::entity::ID;
+use crate::phys;
+use crate::types::Action::*;
 use crate::types::Dir::*;
 use crate::types::Flag::*;
 use crate::types::ProseType::*;
 use crate::visual::Buffer;
-use crate::phys;
 use crate::world::World;
 
 // Important Constants

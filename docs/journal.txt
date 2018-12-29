@@ -1,5 +1,18 @@
 Bonaventure Journal
 
+2018-12-29 (Saturday)
+x   Completed the inventory refactor, and cleaned up a bunch of misplaced
+    or extraneous functions.
+x   Next step is event guards and hooks, now that I have an architecture that
+    supports them.
+    x   Model: "get <noun>"
+        x   player_control determines whether the operation is possible in
+            principle: the noun is visible and gettable.
+        x   player_control calls phys::get_thing(), which will either get
+            the thing for a player or return an error.
+        x   phys::get_thing() will call any "Get" event guards or hooks, and
+            carry them out, returning Err(msg) if a guard rejects the get.
+
 2018-12-28 (Friday)
 x   Note: The "player-dead" rule could/should be an event hook on the player
     entity with event "Dead".

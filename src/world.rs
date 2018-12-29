@@ -5,7 +5,6 @@ use crate::entity::location_component::*;
 use crate::entity::player_component::*;
 use crate::entity::prose_component::*;
 use crate::entity::room_component::*;
-use crate::entity::rule_component::Action;
 use crate::entity::rule_component::*;
 use crate::entity::tag_component::*;
 use crate::entity::thing_component::*;
