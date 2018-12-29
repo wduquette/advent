@@ -54,6 +54,21 @@ pub fn contents(world: &World, container: ID) -> BTreeSet<ID> {
     world.inventories[&container].things.clone()
 }
 
+pub fn scenery(world: &World, owner: ID) -> BTreeSet<ID> {
+    assert_has_inventory(world, owner);
+
+    let mut result: BTreeSet<ID> = BTreeSet::new();
+
+    // FIRST, get everything that's flagged as scenery.
+    for id in contents(world, owner) {
+        if world.has_flag(id, Scenery) {
+            result.insert(id);
+        }
+    }
+
+    result
+}
+
 /// Finds all things in the viewer's location that are visible to
 /// the viewer.  This includes things owned by the viewer, present
 /// in the viewer's location, or (ultimately) visible in open containers.

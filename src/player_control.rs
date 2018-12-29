@@ -1,5 +1,6 @@
 //! The Player Control System
 
+use std::collections::BTreeSet;
 use self::Status::*;
 use crate::command;
 use crate::command::Command;
@@ -86,7 +87,7 @@ fn handle_normal_command(game: &mut Game, player: &Player, cmd: &Command) -> Cmd
         ["west"] => cmd_go(world, player, West),
         ["help"] => cmd_help(),
         ["look"] => cmd_look(world, player),
-        ["inventory"] => cmd_inventory(world),
+        ["inventory"] => cmd_inventory(world, player),
         ["examine", name] => cmd_examine(world, player, name),
         ["read", name] => cmd_read(world, player, name),
         ["get", name] => cmd_get(world, player, name),
@@ -142,18 +143,18 @@ fn cmd_look(world: &World, player: &Player) -> CmdResult {
 }
 
 /// Display the player's inventory.
-fn cmd_inventory(world: &World) -> CmdResult {
-    visual::player_inventory(world);
+fn cmd_inventory(world: &World, player: &Player) -> CmdResult {
+    visual::player_inventory(world, player.id);
     Ok(Normal)
 }
 
 /// Describe a thing in the current location.
 fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
-    if let Some(id) = find_visible_thing(world, player.id, name) {
-        if id == player.id {
+    if let Some(thing) = find_noun(world, phys::visible(world, player.id), name) {
+        if thing == player.id {
             visual::player(world, player.id);
         } else {
-            visual::thing(world, id);
+            visual::thing(world, thing);
         }
         Ok(Normal)
     } else {
@@ -163,14 +164,16 @@ fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
 
 /// Read a thing in the current location.
 fn cmd_read(world: &World, player: &Player, name: &str) -> CmdResult {
-    if let Some(thing) = find_visible_thing(world, player.id, name) {
+    if let Some(thing) = find_noun(world, phys::visible(world, player.id), name) {
         // If it has no prose, it can't be read
+        // TODO: visual::can_read(world, thing)
         if !world.has_prose_type(thing, ProseType::Book) {
             return Err("You can't read that.".into());
         }
 
         // If he's holding it, or it's scenery, then he can read it.
-        if world.loc(thing) == player.id || world.has_flag(thing, Scenery) {
+        if phys::owns(world, player.id, thing) || world.has_flag(thing, Scenery) {
+            // TODO: visual::read(world, thing)
             visual::book(world, thing);
             Ok(Normal)
         } else {
@@ -201,36 +204,37 @@ fn cmd_wash_hands(world: &mut World, player: &Player) -> CmdResult {
 }
 
 /// Gets a thing from the location's inventory.
-fn cmd_get(world: &mut World, player: &Player, name: &str) -> CmdResult {
+fn cmd_get(world: &mut World, player: &Player, noun: &str) -> CmdResult {
     // Does he already have it?
-    if find_in_inventory(world, player.id, name).is_some() {
-        return Err("You already have it.".into());
+    if find_noun(world, phys::contents(world, player.id), noun).is_some() {
+        return Err("You already have that.".into());
     }
 
-    if let Some(thing) = find_in_inventory(world, player.loc, name) {
-        if world.has_flag(thing, Scenery) {
-            return Err("You can't take that!".into());
-        }
+    if find_noun(world, phys::scenery(world, player.loc), noun).is_some() {
+        return Err("You can't take that!".into());
+    }
 
+    if let Some(thing) = find_noun(world, phys::gettable(world, player.id), noun) {
         // Get the thing.
         phys::put_in(world, thing, player.id);
 
         visual::act("Taken.");
-        Ok(Normal)
-    } else {
-        Err("You don't see any such thing.".into())
+        return Ok(Normal);
     }
+
+    Err("You don't see any such thing.".into())
 }
 
 /// Drops a thing you're carrying
-fn cmd_drop(world: &mut World, player: &Player, name: &str) -> CmdResult {
-    if let Some(thing) = find_in_inventory(world, player.id, name) {
+fn cmd_drop(world: &mut World, player: &Player, noun: &str) -> CmdResult {
+    if let Some(thing) = find_noun(world, phys::droppable(world, player.id), noun) {
         // Drop the thing
         phys::put_in(world, thing, player.loc);
-
         visual::act("Dropped.");
         Ok(Normal)
-    } else if find_in_inventory(world, player.loc, name).is_some() {
+    } else if find_noun(world, phys::scenery(world, player.id), noun).is_some() {
+        Err("You can't drop that!".into())
+    } else if find_noun(world, phys::visible(world, player.id), noun).is_some() {
         Err("You aren't carrying that.".into())
     } else {
         Err("You don't see any such thing.".into())
@@ -352,31 +356,13 @@ fn cmd_debug_go(world: &mut World, player: &Player, id_arg: &str) -> CmdResult {
 //-------------------------------------------------------------------------
 // Parsing Tools
 
-/// Looks for a thing with the given name in the given inventory list.
-fn find_in_inventory(world: &World, inv: ID, noun: &str) -> Option<ID> {
-    assert!(world.has_inventory(inv), "Not an inventory: {}", inv);
-    for id in world.inventories[&inv].iter() {
-        let thingc = &world.things[id];
+/// Finds a noun in the list of things.
+fn find_noun(world: &World, ids: BTreeSet<ID>, noun: &str) -> Option<ID> {
+    for id in ids {
+        let thingc = &world.things[&id];
         if thingc.noun == noun {
-            return Some(*id);
+            return Some(id);
         }
-    }
-
-    None
-}
-
-/// Find a visible thing: something you're carrying, or that's here in this location.
-fn find_visible_thing(world: &World, pid: ID, noun: &str) -> Option<ID> {
-    // FIRST, does the player have it?
-    if let Some(id) = find_in_inventory(world, pid, noun) {
-        return Some(id);
-    }
-
-    // NEXT, is it in this room?
-    let here = world.loc(pid);
-
-    if let Some(id) = find_in_inventory(world, here, noun) {
-        return Some(id);
     }
 
     None

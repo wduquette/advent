@@ -9,12 +9,12 @@
 // appropriate moments in processing; thus, this module is called as needed, rather than
 // doing its work all at once.
 
+use std::collections::BTreeSet;
 use crate::console::para;
-use crate::entity::inventory_component::InventoryComponent;
 use crate::entity::ID;
-use crate::types::Flag::*;
 use crate::types::ProseType;
 use crate::world::World;
+use crate::phys;
 
 //-----------------------------------------------------------------------------
 // Types
@@ -83,9 +83,9 @@ fn print_room(world: &World, id: ID, detail: Detail) {
         para(&roomc.name);
     }
 
-    // NEXT, list any objects in the room's inventory.  (We don't list
+    // NEXT, list any "removable" objects in the room's inventory.  (We don't list
     // scenary; presumably that's in the description.)
-    let list = invent_list(world, &world.inventories[&id]);
+    let list = invent_list(world, &phys::removable(world, id));
 
     if !list.is_empty() {
         para!("You see: {}.", list);
@@ -120,30 +120,29 @@ pub fn player(world: &World, pid: ID) {
 }
 
 /// Outputs the player's inventory
-pub fn player_inventory(world: &World) {
-    let invc = &world.inventories[&world.pid];
+pub fn player_inventory(world: &World, pid: ID) {
+    // A player's inventory is precisely the things that they are carrying that
+    // are (in theory at least) droppable: the player's sword, but not the player's hands.
+    let ids = phys::droppable(world, pid);
 
-    if invc.is_empty() {
+    if ids.is_empty() {
         para("You aren't carrying anything.");
     } else {
-        para!("You have: {}.\n", invent_list(world, invc));
+        para!("You have: {}.\n", invent_list(world, &ids));
     }
 }
 
-/// List the names of the entities, separated by commas.  Omits scenery.
-fn invent_list(world: &World, inventory: &InventoryComponent) -> String {
+/// List the names of the entities, separated by commas.
+fn invent_list(world: &World, ids: &BTreeSet<ID>) -> String {
     let mut list = String::new();
 
-    for id in inventory.iter() {
-        let thingc = &world.things[id];
+    for id in ids {
+        let thingc = &world.things[&id];
 
-        // TODO: Use physical system to get relevant content
-        if !world.has_flag(*id, Scenery) {
-            if !list.is_empty() {
-                list.push_str(", ");
-            }
-            list.push_str(&thingc.name);
+        if !list.is_empty() {
+            list.push_str(", ");
         }
+        list.push_str(&thingc.name);
     }
 
     list
