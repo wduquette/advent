@@ -41,7 +41,7 @@ pub fn dump_entity(world: &World, id: ID) {
     if let Some(roomc) = &world.rooms.get(&id) {
         println!("  Room name: {}", roomc.name);
         for (dir, id) in &roomc.links {
-            println!("    Link: {:?} to {}", dir, id);
+            println!("    Link: {:?} to [{}] {}", dir, id, world.tag(*id));
         }
     }
 

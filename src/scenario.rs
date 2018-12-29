@@ -6,6 +6,7 @@ use crate::types::Dir::*;
 use crate::types::Flag::*;
 use crate::types::ProseType::*;
 use crate::visual::Buffer;
+use crate::phys;
 use crate::world::World;
 
 // Important Constants
@@ -57,7 +58,7 @@ pub fn build() -> World {
         .flag(HasWater)
         .id();
 
-    let stream = world
+    world
         .add("stream")
         .thing("stream", "stream")
         .prose(
@@ -69,8 +70,8 @@ how narrow it is.
         ",
         )
         .flag(Scenery)
+        .put_in(bridge)
         .id();
-    world.put_in(stream, bridge);
 
     // Links
     world.twoway(clearing, East, West, trail);
@@ -133,7 +134,7 @@ her wand.  There's a flash, and she disappears.
         .action(ClearFlag(pid, Dead));
 
     // NEXT, set the starting location.
-    world.set_room(world.pid, clearing);
+    phys::put_in(world, world.pid, clearing);
     world.set_flag(world.pid, Seen(clearing));
 
     // NEXT, return the world.

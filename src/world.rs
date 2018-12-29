@@ -260,16 +260,6 @@ impl World {
         self.inventories[&loc].has(thing)
     }
 
-    /// Moves the player (or some other NPC, ultimately) to a location. Performs no
-    /// game logic.
-    /// TODO: Eventually, should be handled by physical system.
-    pub fn set_room(&mut self, player: ID, loc: ID) {
-        assert!(self.is_player(player), "Not a player: [{}]", player);
-        assert!(self.is_room(loc), "Not a room: [{}]", loc);
-
-        self.locations.get_mut(&player).unwrap().id = loc;
-    }
-
     /// Puts the thing in the container's inventory, and sets the thing's location.
     /// No op if the thing is already in the location.
     pub fn put_in(&mut self, thing: ID, container: ID) {
@@ -514,7 +504,7 @@ impl<'a> EBuilder<'a> {
 
         self = self.location();
         self = self.inventory();
-        self = self.flag_set();
+        self = self.flag(Flag::Scenery);
 
         self.world.pid = self.id;
         self.world.players.insert(self.id, PlayerComponent::new());

@@ -113,8 +113,8 @@ pub fn book(world: &World, id: ID) {
 // Player Visuals
 
 /// Outputs a visual of the player.
-pub fn player(world: &World) {
-    para(&world.prose(world.pid, ProseType::Thing));
+pub fn player(world: &World, pid: ID) {
+    para(&world.prose(pid, ProseType::Thing));
 
     // TODO: Could add inventory.
 }

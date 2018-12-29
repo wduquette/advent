@@ -87,8 +87,6 @@ fn handle_normal_command(game: &mut Game, player: &Player, cmd: &Command) -> Cmd
         ["help"] => cmd_help(),
         ["look"] => cmd_look(world, player),
         ["inventory"] => cmd_inventory(world),
-        ["examine", "self"] => cmd_examine_self(world),
-        ["examine", "me"] => cmd_examine_self(world),
         ["examine", name] => cmd_examine(world, player, name),
         ["read", name] => cmd_read(world, player, name),
         ["get", name] => cmd_get(world, player, name),
@@ -126,7 +124,7 @@ fn handle_debug_command(game: &mut Game, player: &Player, cmd: &Command) -> CmdR
 /// Move the player in the given direction
 fn cmd_go(world: &mut World, player: &Player, dir: Dir) -> CmdResult {
     if let Some(dest) = world.follow(player.loc, dir) {
-        world.set_room(player.id, dest);
+        phys::put_in(world, player.id, dest);
 
         if !world.has_flag(player.id, Seen(dest)) {
             visual::room(world, dest);
@@ -168,7 +166,11 @@ fn cmd_inventory(world: &World) -> CmdResult {
 /// Describe a thing in the current location.
 fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
     if let Some(id) = find_visible_thing(world, player.id, name) {
-        visual::thing(world, id);
+        if id == player.id {
+            visual::player(world, player.id);
+        } else {
+            visual::thing(world, id);
+        }
         Ok(Normal)
     } else {
         Err("You don't see any such thing.".into())
@@ -194,13 +196,6 @@ fn cmd_read(world: &World, player: &Player, name: &str) -> CmdResult {
         // It isn't here.
         Err("You don't see any such thing.".into())
     }
-}
-
-/// Describe a thing in the current location.
-fn cmd_examine_self(world: &World) -> CmdResult {
-    visual::player(world);
-
-    Ok(Normal)
 }
 
 // TODO: As currently implemented, this should be a scenario command, not a
@@ -345,7 +340,7 @@ fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
 fn cmd_debug_go(world: &mut World, player: &Player, id_arg: &str) -> CmdResult {
     let loc = parse_id(world, id_arg)?;
     if world.is_room(loc) {
-        world.set_room(player.id, loc);
+        phys::put_in(world, player.id, loc);
         visual::room(world, loc);
         Ok(Normal)
     } else {
