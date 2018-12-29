@@ -2,6 +2,7 @@
 
 use crate::entity::ID;
 use crate::world::*;
+use crate::phys;
 
 /// List all entities in the world
 pub fn list_world(world: &World) {
@@ -22,7 +23,7 @@ pub fn dump_entity(world: &World, id: ID) {
 
     // FIRST, display its location, if any.
     if world.has_location(id) {
-        let here = world.loc(id);
+        let here = phys::loc(world, id);
         println!("  Location: [{}] {}", here, world.tag(here));
     }
 

@@ -50,7 +50,7 @@ impl Game {
     pub fn introduce(&self) {
         println!("Welcome to Bonaventure!\n");
 
-        visual::room(&self.world, self.world.loc(self.world.pid));
+        visual::room(&self.world, phys::loc(&self.world, self.world.pid));
     }
 
     /// Restart the game: recreate the initial scenario.

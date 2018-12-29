@@ -78,7 +78,7 @@ fn print_room(world: &World, id: ID, detail: Detail) {
 
     // FIRST, display the room's description
     if detail == Detail::Full {
-        para!("{}|{}", roomc.name, world.prose(id, ProseType::Room))
+        para!("{}|{}", roomc.name, get_prose(world, id, ProseType::Room))
     } else {
         para(&roomc.name);
     }
@@ -98,7 +98,7 @@ fn print_room(world: &World, id: ID, detail: Detail) {
 /// Outputs a description of a thing.
 pub fn thing(world: &World, id: ID) {
     // FIRST, display the thing's description
-    para(&world.prose(id, ProseType::Thing));
+    para(&get_prose(world, id, ProseType::Thing));
 
     // TODO: eventually we will want to describe its contents, if it has
     // contents, or other changeable state.
@@ -106,7 +106,7 @@ pub fn thing(world: &World, id: ID) {
 
 /// Outputs the content of a book.
 pub fn book(world: &World, id: ID) {
-    para(&world.prose(id, ProseType::Book));
+    para(&get_prose(world, id, ProseType::Book));
 }
 
 //-----------------------------------------------------------------------------
@@ -114,7 +114,7 @@ pub fn book(world: &World, id: ID) {
 
 /// Outputs a visual of the player.
 pub fn player(world: &World, pid: ID) {
-    para(&world.prose(pid, ProseType::Thing));
+    para(&get_prose(world, pid, ProseType::Thing));
 
     // TODO: Could add inventory.
 }
@@ -150,6 +150,19 @@ fn invent_list(world: &World, ids: &BTreeSet<ID>) -> String {
 
 //-----------------------------------------------------------------------------
 // Helpers
+
+/// Get the specific type of prose from the entity
+pub fn get_prose(world: &World, id: ID, prose_type: ProseType) -> String {
+    assert!(world.has_prose(id), "Not prose: [{}]", id);
+
+    let prosec = &world.proses[&id];
+
+    if let Some(prose) = &prosec.types.get(&prose_type) {
+        prose.as_string(world, id)
+    } else {
+        "You don't see anything special.".to_string()
+    }
+}
 
 /// A buffer for building up text strings for output.
 pub struct Buffer {

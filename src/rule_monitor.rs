@@ -46,7 +46,7 @@ fn fire_rule(world: &mut World, id: ID) {
 
             // Swap a, in a place, with b, in LIMBO
             Swap(a, b) => {
-                let loc = world.loc(a);
+                let loc = phys::loc(world, a);
                 phys::take_out(world, a);
                 phys::put_in(world, b, loc);
             }

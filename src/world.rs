@@ -248,18 +248,6 @@ impl World {
         }
     }
 
-    /// Returns the location of the thing with the given ID
-    pub fn loc(&self, id: ID) -> ID {
-        assert!(self.has_location(id), "Entity has no location: {}", id);
-        self.locations.get(&id).as_ref().unwrap().id
-    }
-
-    /// Returns true if the loc owns the thing, and false otherwise.
-    pub fn owns(&self, loc: ID, thing: ID) -> bool {
-        assert!(self.has_inventory(loc), "Entity has no inventory: {}", loc);
-        self.inventories[&loc].has(thing)
-    }
-
     /// Links one room to another in the given direction.
     /// Links are not bidirectional.  If you want links both ways, you
     /// have to add them.
@@ -281,19 +269,6 @@ impl World {
 
         let toc = self.rooms.get_mut(&b).unwrap();
         toc.links.insert(to_a, a);
-    }
-
-    /// Get the specific type of prose from the entity
-    pub fn prose(&self, id: ID, prose_type: ProseType) -> String {
-        assert!(self.has_prose(id), "Not prose: [{}]", id);
-
-        let prosec = &self.proses[&id];
-
-        if let Some(prose) = &prosec.types.get(&prose_type) {
-            prose.as_string(self, id)
-        } else {
-            "You don't see anything special.".to_string()
-        }
     }
 
     //--------------------------------------------------------------------------------------------

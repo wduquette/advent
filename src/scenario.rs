@@ -159,7 +159,7 @@ fn player_visual(world: &World, pid: ID) -> String {
 fn player_gets_note_dirty(world: &World) -> bool {
     let note = world.lookup_id(NOTE).unwrap();
 
-    world.owns(world.pid, note)
+    phys::owns(world, world.pid, note)
         && world.has_flag(world.pid, DirtyHands)
         && !world.has_flag(note, Dirty)
 }
