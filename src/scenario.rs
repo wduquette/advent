@@ -4,6 +4,7 @@ use crate::entity::ID;
 use crate::phys;
 use crate::types::Action::*;
 use crate::types::Dir::*;
+use crate::types::Event::*;
 use crate::types::Flag::*;
 use crate::types::ProseType::*;
 use crate::visual::Buffer;
@@ -100,7 +101,7 @@ sharp edges anywhere.  Carved along the length of it are the words
 
     world
         .add("rule-dirty-note")
-        .always(&|world| player_gets_note_dirty(world))
+        .always(Turn, &|world| player_gets_note_dirty(world))
         .action(Print(
             "The dirt from your hands got all over the note.".into(),
         ))
@@ -109,7 +110,7 @@ sharp edges anywhere.  Carved along the length of it are the words
     // Stories: Rules that supply backstory to the player.
     world
         .add("rule-story-1")
-        .once(&|world| world.clock == 2)
+        .once(Turn, &|world| world.clock == 2)
         .action(Print(
             "\
 You don't know where you are.  You don't even know where you want to
@@ -121,7 +122,7 @@ and gosh, this doesn't look anything like the toy aisle.
 
     world
         .add("fairy-godmother-rule")
-        .always(&|world| player_is_dead(world))
+        .always(Turn, &|world| player_is_dead(world))
         .action(Print(
             "\
 A fairy godmother hovers over your limp body.  She frowns;

@@ -19,6 +19,7 @@ mod visual;
 mod world;
 
 use crate::world::*;
+use crate::types::Event;
 
 /// The main game object.  The Game contains the world, and any other data that
 /// change when the world changes.
@@ -95,7 +96,7 @@ pub fn run() {
         player_control::system(&mut game, &cmd);
 
         // NEXT, handle rules
-        rule_monitor::system(&mut game.world);
+        rule_monitor::system(&mut game.world, &Event::Turn);
 
         // NEXT, Increment the clock
         // TODO: Probably don't want to do this here.  Some commands should

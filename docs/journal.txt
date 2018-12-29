@@ -12,6 +12,16 @@ x   Next step is event guards and hooks, now that I have an architecture that
             the thing for a player or return an error.
         x   phys::get_thing() will call any "Get" event guards or hooks, and
             carry them out, returning Err(msg) if a guard rejects the get.
+x   Notion: All guards and hooks are different kinds of rules.
+    x   Current rules are for Turn events.
+    x   A normal rule:
+        x   Triggered by an event, e.g., Turn, Get(player,thing).
+        x   Has predicate; only fires if the predicate is met.
+        x   Has a script that executes.
+    x   At appropriate times, the rule system is called with the relevant
+        event.
+    x   A guard is also triggered by an event, but before the event occurs.
+        x   Has a Closure that returns (Allow/Deny, Script).
 
 2018-12-28 (Friday)
 x   Note: The "player-dead" rule could/should be an event hook on the player

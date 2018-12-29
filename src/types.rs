@@ -12,6 +12,8 @@ pub type WorldPredicate = &'static Fn(&World) -> bool;
 /// A closure to produce a string from an entity
 pub type EntityStringHook = &'static Fn(&World, ID) -> String;
 
+/// The time, in game turns
+pub type Time = usize;
 
 /// Directions
 #[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
@@ -85,4 +87,14 @@ pub enum Action {
 
     /// Swap an item in the world for one in LIMBO
     Swap(ID, ID),
+}
+
+/// Things that can happen in the game, to which rules, guards, and hooks can be attached
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub enum Event {
+    /// A game turn has elapsed
+    Turn,
+
+    /// Get(player, thing): A player has gotten (or wants to get) a thing
+    Get(ID,ID),
 }

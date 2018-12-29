@@ -37,7 +37,7 @@ pub struct World {
     pub pid: ID,
 
     // The game clock
-    pub clock: usize,
+    pub clock: Time,
 
     //--------------------------------------------------------------------------------------------
     // Entity Components
@@ -68,8 +68,9 @@ pub struct World {
     /// Thing Components: Information about things that the player can interact with.
     pub things: HashMap<ID, ThingComponent>,
 
-    /// Rule Components: Rules that can fire.
-    pub rules: HashMap<ID, RuleComponent>,
+    /// Rule Components: Rules that can fire.  We use BTreeMap to ensure that rules fire
+    /// in order of definition.
+    pub rules: BTreeMap<ID, RuleComponent>,
 
     //--------------------------------------------------------------------------------------------
     // Resources
@@ -100,7 +101,7 @@ impl World {
             players: HashMap::new(),
             rooms: HashMap::new(),
             things: HashMap::new(),
-            rules: HashMap::new(),
+            rules: BTreeMap::new(),
             verbs: HashSet::new(),
             synonyms: HashMap::new(),
         };
@@ -473,7 +474,7 @@ impl<'a> EBuilder<'a> {
     }
 
     /// Adds a predicate for a rule that will fire at most once.
-    pub fn always(mut self, predicate: WorldPredicate) -> EBuilder<'a> {
+    pub fn always(mut self, event: Event, predicate: WorldPredicate) -> EBuilder<'a> {
         assert!(
             !self.world.rules.get(&self.id).is_some(),
             "Tried to add rule component twice: [{}] {}",
@@ -485,13 +486,13 @@ impl<'a> EBuilder<'a> {
 
         self.world
             .rules
-            .insert(self.id, RuleComponent::new(predicate));
+            .insert(self.id, RuleComponent::new(event, predicate));
 
         self
     }
 
     /// Adds a predicate for a rule that will fire at most once.
-    pub fn once(mut self, predicate: WorldPredicate) -> EBuilder<'a> {
+    pub fn once(mut self, event: Event, predicate: WorldPredicate) -> EBuilder<'a> {
         assert!(
             !self.world.rules.get(&self.id).is_some(),
             "Tried to add rule component twice: [{}] {}",
@@ -503,7 +504,7 @@ impl<'a> EBuilder<'a> {
 
         self.world
             .rules
-            .insert(self.id, RuleComponent::new(predicate));
+            .insert(self.id, RuleComponent::new(event, predicate));
 
         self
     }
