@@ -11,6 +11,8 @@ use crate::entity::ID;
 use crate::world::World;
 use crate::world::LIMBO;
 
+type PhysResult = Result<(), String>;
+
 //--------------------------------------------------------------------------------
 // Queries
 
@@ -134,7 +136,10 @@ pub fn gettable(world: &World, viewer: ID) -> BTreeSet<ID> {
 }
 
 //--------------------------------------------------------------------------------
-// Low-level operations, for use only in this module
+// Low-level operations
+//
+// These operations move things about and do the bookkeeping; but they contain no
+// game logic.
 
 /// Removes the thing from its current location and puts it in LIMBO.
 pub fn take_out(world: &mut World, thing: ID) {
@@ -156,6 +161,16 @@ pub fn put_in(world: &mut World, thing: ID, container: ID) {
     // NEXT, put it where it goes.
     world.locations.get_mut(&thing).unwrap().id = container;
     world.inventories.get_mut(&container).unwrap().add(thing);
+}
+
+//---------------------------------------------------------------------------------
+// High-level operations
+
+/// The player gets the thing.
+pub fn get_thing(world: &mut World, pid: ID, thing: ID) -> PhysResult {
+    put_in(world, thing, pid);
+
+    Ok(())
 }
 
 
