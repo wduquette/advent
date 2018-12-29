@@ -7,25 +7,17 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Complete the physical system, phys::, and use it through out.
-  * And then remove the relevant methods out of World.
-* Move rule_component::Action to types::
 * Consider: scenario builds links using tags, which are added to a temporary
   data structure and resolved after the scenario is completely built.
   Then links could be part of initial entity creation.
   * .put_in() could work the same way.  Give the tag, and then it's resolved
     at the end.
 * Debug commands shouldn't advance the clock.
-* Define Event guards and hooks
-  * The dirty-note rule should be a Get hook.
-  * The note Book prose hook could be a Read guard.
+* Define Event guards
+  * The note's "Book" prose hook could be implemented as normal prose
+    plus a Read guard that says it's too dirty to read.
 * The Game
-  * Add emotional comfort sword.
-    * Kills you if you draw it when your hands are dirty.
-      * But the fairy godmother will revive you.
   * Main loop should halt if you're dead at the end of it.
-  * Rules map should be BTreeMap, so that the order of
-    rule execution is predictable.
   * Add puzzle to make water flow in the stream.
   * Extend the world.
   * Add some more things and more puzzles.
@@ -35,11 +27,6 @@ Also, see docs/journal.txt.
       RPG?
   * Add winning condition.
 * Add save/restore
-* Add `stuff` system
-  * For finding and listing things in the local environment.
-  * Can support queries of various kinds.
-  * Goal is to simplify the command handlers.
-  * Don't try to do too much too quickly.
 * Improve vocabulary and grammar management
   * Consider design where verbs (operations) depend on
     species, i.e., each thing knows what verbs can be
@@ -112,13 +99,15 @@ The entities themselves have very little logic attached to them.
 * The World struct (which contains the entities) provides convenience
   methods for querying and mutating the game world at a very low level.
 
-* The World struct allows for acquiring "view" objects focussed on a
-  particular role, e.g., `as_room()` and `as_thing()`.  Views can be
-  mutated and the result saved back into the World.  
-
-* The bulk of the logic is in the game's "systems", which define how
-  the entities appear to the player (the `visual` system), how the
-  player's commands are processed (the `player_control` system), etc.
+* The bulk of the logic is in the game's "systems":
+  * The `visual` system, which controls how entities appear to the
+    player, along with other visual output.
+  * The `phys` (physical) system, which is responsible for managing how
+    entities are related to each other (i.e., where they are located
+    and moved)
+  * The `rule` system, which allows the scenario to define special
+    rules that are triggered by various events.
+  * The `player_control` system which processes the player's commands.
 
 ## Ideas for the Future
 
@@ -187,6 +176,8 @@ enum Dest {
 Here, `Go` means just link there; `DeadEnd` means you can't go that way,
 but there's a special message; `Guarded` means you can only go there if
 a predicate condition is met, and you'll get a `DeadEnd` message otherwise.
+
+The Guarded destination is probably better handled by an event guard.
 
 ### Dictionary Content
 

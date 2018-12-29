@@ -15,13 +15,20 @@ x   Next step is event guards and hooks, now that I have an architecture that
 x   Notion: All guards and hooks are different kinds of rules.
     x   Current rules are for Turn events.
     x   A normal rule:
-        x   Triggered by an event, e.g., Turn, Get(player,thing).
+        x   Triggered by an event, e.g., Turn, GetThing(player,thing).
         x   Has predicate; only fires if the predicate is met.
         x   Has a script that executes.
     x   At appropriate times, the rule system is called with the relevant
         event.
     x   A guard is also triggered by an event, but before the event occurs.
         x   Has a Closure that returns (Allow/Deny, Script).
+x   Implemented the Turn event, which was straightforward.
+x   Implemented the GetThing event, which was absurdly easy.
+x   Added Drop, Kill, and Revive Actions.
+x   rule-dirty-note is now a GetThing rule.
+x   Added rule-sword-get, which kills the player if they try to pick up
+    the sword with dirty hands.
+    x   And then the fairy-godmother rule revives them.
 
 2018-12-28 (Friday)
 x   Note: The "player-dead" rule could/should be an event hook on the player
