@@ -1,6 +1,6 @@
 //! Rule Data
 
-use crate::types::Action;
+use crate::script::Script;
 use crate::world::World;
 
 /// A rule predicate
@@ -10,14 +10,14 @@ pub type RulePred = &'static Fn(&World) -> bool;
 #[derive(Clone)]
 pub struct RuleComponent {
     pub predicate: RulePred,
-    pub actions: Vec<Action>,
+    pub script: Script,
 }
 
 impl RuleComponent {
     pub fn new(predicate: RulePred) -> RuleComponent {
         RuleComponent {
             predicate: predicate,
-            actions: Vec::new(),
+            script: Script::new(),
         }
     }
 }

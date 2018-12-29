@@ -48,7 +48,7 @@ pub fn dump_entity(world: &World, id: ID) {
 
     // NEXT, if it's a rule display its actions.
     if let Some(rulec) = &world.rules.get(&id) {
-        for action in &rulec.actions {
+        for action in &rulec.script.actions {
             println!("  Rule Action: {:?}", action);
         }
     }

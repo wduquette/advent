@@ -13,10 +13,17 @@ pub struct Script {
 }
 
 impl Script {
+    /// Creates a new, empty script.
+    pub fn new() -> Self {
+        Self { actions: Vec::new() }
+    }
+
+    /// Adds an action to a script.
     pub fn add(&mut self, action: Action) {
         self.actions.push(action);
     }
 
+    /// Executes a script on the world.
     pub fn execute(&self, world: &mut World) {
         for action in &self.actions {
             match action {

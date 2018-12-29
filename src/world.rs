@@ -520,7 +520,7 @@ impl<'a> EBuilder<'a> {
         );
 
         let rule = &mut self.world.rules.get_mut(&self.id).unwrap();
-        rule.actions.push(action);
+        rule.script.add(action);
 
         self
     }

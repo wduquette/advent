@@ -1,10 +1,7 @@
 //! Rule Monitor System
 
 use crate::entity::ID;
-use crate::phys;
-use crate::types::Action::*;
 use crate::types::Flag::*;
-use crate::visual;
 use crate::world::World;
 
 /// The Rule System.  Processes all rules, executing those that should_fire.
@@ -26,30 +23,6 @@ pub fn system(world: &mut World) {
 
 /// Execute the given rule
 fn fire_rule(world: &mut World, id: ID) {
-    let script = world.rules[&id].actions.clone();
-    for action in script {
-        match action {
-            // Print the rule's visual
-            Print(visual) => {
-                visual::info(&visual);
-            }
-
-            // Set the flag on the entity's flag set
-            SetFlag(id, flag) => {
-                world.set_flag(id, flag);
-            }
-
-            // Clear the flag on the entity's flag set
-            ClearFlag(id, flag) => {
-                world.unset_flag(id, flag);
-            }
-
-            // Swap a, in a place, with b, in LIMBO
-            Swap(a, b) => {
-                let loc = phys::loc(world, a);
-                phys::take_out(world, a);
-                phys::put_in(world, b, loc);
-            }
-        }
-    }
+    let script = world.rules[&id].script.clone();
+    script.execute(world);
 }
