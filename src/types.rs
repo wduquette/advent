@@ -79,14 +79,23 @@ pub enum Action {
     /// Print the entity's visual
     Print(String),
 
-    /// Set the variable for the entity with the given ID
+    /// Set the flag for the entity with the given ID
     SetFlag(ID, Flag),
 
-    /// Clear the given variable
-    ClearFlag(ID, Flag),
+    /// Unset the flag on the entity with the given ID.
+    UnsetFlag(ID, Flag),
 
     /// Swap an item in the world for one in LIMBO
     Swap(ID, ID),
+
+    /// Drop(player,thing): Drop a held item into the current location.
+    Drop(ID, ID),
+
+    /// Kill the player/NPC with the given ID
+    Kill(ID),
+
+    /// Revie the player/NPC with the given ID
+    Revive(ID),
 }
 
 /// Things that can happen in the game, to which rules, guards, and hooks can be attached
@@ -96,5 +105,5 @@ pub enum Event {
     Turn,
 
     /// Get(player, thing): A player has gotten (or wants to get) a thing
-    Get(ID,ID),
+    GetThing(ID, ID),
 }

@@ -1,13 +1,14 @@
 //! Scripts that mutate the world
 
 use crate::phys;
-use crate::visual;
 use crate::types::Action;
 use crate::types::Action::*;
+use crate::types::Flag;
+use crate::visual;
 use crate::world::World;
 
 /// A script of actions to be executed at a later time.
-#[derive(Clone,Debug,Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Script {
     pub actions: Vec<Action>,
 }
@@ -15,7 +16,9 @@ pub struct Script {
 impl Script {
     /// Creates a new, empty script.
     pub fn new() -> Self {
-        Self { actions: Vec::new() }
+        Self {
+            actions: Vec::new(),
+        }
     }
 
     /// Adds an action to a script.
@@ -38,8 +41,14 @@ impl Script {
                 }
 
                 // Clear the flag on the entity's flag set
-                ClearFlag(id, flag) => {
+                UnsetFlag(id, flag) => {
                     world.unset_flag(*id, *flag);
+                }
+
+                // Player/NPC drops thing into its current location.
+                Drop(pid, thing) => {
+                    let loc = phys::loc(world, *pid);
+                    phys::put_in(world, *thing, loc);
                 }
 
                 // Swap a, in a place, with b, in LIMBO
@@ -47,6 +56,18 @@ impl Script {
                     let loc = phys::loc(world, *a);
                     phys::take_out(world, *a);
                     phys::put_in(world, *b, loc);
+                }
+
+                // Kill the player/NPC
+                Kill(pid) => {
+                    world.set_flag(*pid, Flag::Dead);
+                    visual::act("*** You have died. ***");
+                }
+
+                // Revive the player/NPC
+                Revive(pid) => {
+                    world.unset_flag(*pid, Flag::Dead);
+                    visual::act("*** You are alive! ***");
                 }
             }
         }

@@ -1,8 +1,8 @@
 //! Rule Monitor System
 
 use crate::entity::ID;
-use crate::types::Flag::*;
 use crate::types::Event;
+use crate::types::Flag::*;
 use crate::world::World;
 
 /// The Rule System.  Processes all rules, executing those that should_fire.

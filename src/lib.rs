@@ -18,8 +18,8 @@ mod types;
 mod visual;
 mod world;
 
-use crate::world::*;
 use crate::types::Event;
+use crate::world::*;
 
 /// The main game object.  The Game contains the world, and any other data that
 /// change when the world changes.

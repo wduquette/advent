@@ -9,12 +9,12 @@
 // appropriate moments in processing; thus, this module is called as needed, rather than
 // doing its work all at once.
 
-use std::collections::BTreeSet;
 use crate::console::para;
 use crate::entity::ID;
+use crate::phys;
 use crate::types::ProseType;
 use crate::world::World;
-use crate::phys;
+use std::collections::BTreeSet;
 
 //-----------------------------------------------------------------------------
 // Types

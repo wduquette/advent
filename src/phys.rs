@@ -4,15 +4,15 @@
 //! where they are, and making them available.  As such, it is concerned with the
 //! location and inventory components.
 
-use crate::types::Dir;
-use crate::types::Flag::Scenery;
-use std::collections::BTreeSet;
 use crate::entity::ID;
+use crate::rule;
+use crate::types::Dir;
+use crate::types::Event::*;
+use crate::types::Flag::Scenery;
+use crate::visual;
 use crate::world::World;
 use crate::world::LIMBO;
-use crate::rule;
-use crate::visual;
-use crate::types::Event::*;
+use std::collections::BTreeSet;
 
 type PhysResult = Result<(), String>;
 
@@ -37,7 +37,6 @@ pub fn follow_link(world: &World, loc: ID, dir: Dir) -> Option<ID> {
 
     roomc.links.get(&dir).cloned()
 }
-
 
 /// Determines whether the thing is in the container.
 ///
@@ -92,7 +91,6 @@ pub fn visible(world: &World, viewer: ID) -> BTreeSet<ID> {
 
     result
 }
-
 
 /// Finds all things in the location's inventory that can be removed,
 /// i.e., that isn't flagged as Scenery.
@@ -173,11 +171,10 @@ pub fn put_in(world: &mut World, thing: ID, container: ID) {
 pub fn get_thing(world: &mut World, pid: ID, thing: ID) -> PhysResult {
     put_in(world, thing, pid);
     visual::act("Taken.");
-    rule::system(world, &Get(pid, thing));
+    rule::system(world, &GetThing(pid, thing));
 
     Ok(())
 }
-
 
 //--------------------------------------------------------------------------------
 // Standard Assertions
@@ -191,11 +188,17 @@ fn assert_is_room(world: &World, loc: ID) {
 }
 
 fn assert_has_inventory(world: &World, container: ID) {
-    assert!(world.inventories.get(&container).is_some(),
-        "Has no inventory component: {}", idtag(world, container));
+    assert!(
+        world.inventories.get(&container).is_some(),
+        "Has no inventory component: {}",
+        idtag(world, container)
+    );
 }
 
 fn assert_has_location(world: &World, thing: ID) {
-    assert!(world.locations.get(&thing).is_some(),
-        "Has no location component: {}", idtag(world, thing));
+    assert!(
+        world.locations.get(&thing).is_some(),
+        "Has no location component: {}",
+        idtag(world, thing)
+    );
 }

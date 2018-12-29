@@ -87,25 +87,45 @@ how narrow it is.
         .put_in(clearing)
         .id();
 
-    // The sword
-    world
-        .add("sword")
-        .thing("sword", "sword")
-        .prose(Thing, "\
-The sword, if you want to call it that, is a three-foot length of dark hardwood
-with a sharkskin hilt on one end.  It's polished so that it gleams, and it has no
-sharp edges anywhere.  Carved along the length of it are the words
-\"Emotional Support Sword (TM)\".
-        ")
-        .put_in(trail);
-
     world
         .add("rule-dirty-note")
-        .always(Get(pid, note), &|world| player_gets_note_dirty(world))
+        .always(GetThing(pid, note), &|world| player_gets_note_dirty(world))
         .action(Print(
             "The dirt from your hands got all over the note.".into(),
         ))
         .action(SetFlag(note, Dirty));
+
+    // The sword
+    let sword = world
+        .add("sword")
+        .thing("sword", "sword")
+        .prose(
+            Thing,
+            "\
+The sword, if you want to call it that, is a three-foot length of dark hardwood
+with a sharkskin hilt on one end.  It's polished so that it gleams, and it has no
+sharp edges anywhere.  Carved along the length of it are the words
+\"Emotional Support Sword (TM)\".
+        ",
+        )
+        .put_in(trail)
+        .id();
+
+    // TODO: This should really be a guard, so that you don't end up with the sword.
+    world
+        .add("rule-sword-get")
+        .always(GetThing(pid, sword), &|world| {
+            world.has_flag(world.pid, DirtyHands)
+        })
+        .action(Print(
+            "\
+Oh, you so didn't want to touch the sword with dirty hands.
+Only the pure may touch this sword.
+            "
+            .into(),
+        ))
+        .action(Drop(pid, sword))
+        .action(Kill(pid));
 
     // Stories: Rules that supply backstory to the player.
     world
@@ -122,17 +142,16 @@ and gosh, this doesn't look anything like the toy aisle.
 
     world
         .add("fairy-godmother-rule")
-        .always(Turn, &|world| player_is_dead(world))
+        .always(Turn, &|world| world.has_flag(world.pid, Dead))
         .action(Print(
             "\
 A fairy godmother hovers over your limp body.  She frowns;
 then, apparently against her better judgment, she waves
 her wand.  There's a flash, and she disappears.
-||*** You are alive! ***
             "
             .into(),
         ))
-        .action(ClearFlag(pid, Dead));
+        .action(Revive(pid));
 
     // NEXT, set the starting location.
     phys::put_in(world, world.pid, clearing);
@@ -157,16 +176,11 @@ fn player_visual(world: &World, pid: ID) -> String {
         .get()
 }
 
+/// Predicate for rule-note-dirty
 fn player_gets_note_dirty(world: &World) -> bool {
     let note = world.lookup_id(NOTE).unwrap();
 
-    phys::owns(world, world.pid, note)
-        && world.has_flag(world.pid, DirtyHands)
-        && !world.has_flag(note, Dirty)
-}
-
-fn player_is_dead(world: &World) -> bool {
-    world.has_flag(world.pid, Dead)
+    world.has_flag(world.pid, DirtyHands) && !world.has_flag(note, Dirty)
 }
 
 fn note_thing_prose(world: &World, id: ID) -> String {

@@ -1,6 +1,5 @@
 //! The Player Control System
 
-use std::collections::BTreeSet;
 use self::Status::*;
 use crate::command;
 use crate::command::Command;
@@ -14,6 +13,7 @@ use crate::types::*;
 use crate::visual;
 use crate::world::*;
 use crate::Game;
+use std::collections::BTreeSet;
 
 /// A status result.  Indicates the general category of the change.
 #[derive(Copy, Clone, Debug)]
@@ -280,7 +280,6 @@ fn handle_debug_command(game: &mut Game, player: &Player, cmd: &Command) -> CmdR
         _ => Err("I don't understand.".into()),
     }
 }
-
 
 /// List all of the available entities.
 fn cmd_debug_list(world: &World) -> CmdResult {

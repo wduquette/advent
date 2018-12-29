@@ -1,7 +1,7 @@
 //! Rule Data
 
-use crate::types::Event;
 use crate::script::Script;
+use crate::types::Event;
 use crate::types::WorldPredicate;
 
 /// Game rules: actions taken when a predicate is met

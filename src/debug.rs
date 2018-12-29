@@ -1,8 +1,8 @@
 //! Debugging tools module
 
 use crate::entity::ID;
-use crate::world::*;
 use crate::phys;
+use crate::world::*;
 
 /// List all entities in the world
 pub fn list_world(world: &World) {
