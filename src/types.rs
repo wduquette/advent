@@ -6,6 +6,13 @@ use crate::world::World;
 //------------------------------------------------------------------------------------------------
 // Basic Types
 
+/// A closure that's a predicate on the World
+pub type WorldPredicate = &'static Fn(&World) -> bool;
+
+/// A closure to produce a string from an entity
+pub type EntityStringHook = &'static Fn(&World, ID) -> String;
+
+
 /// Directions
 #[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
 #[allow(dead_code)]
@@ -61,9 +68,6 @@ pub enum Flag {
     /// Is the thing dirty?
     Dirty,
 }
-
-/// A closure to produce a string from an entity
-pub type EntityStringHook = &'static Fn(&World, ID) -> String;
 
 /// Actions taken by rules (and maybe other things)
 /// TODO: Move this to types, and define ActionScript.
