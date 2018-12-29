@@ -217,7 +217,6 @@ fn cmd_get(world: &mut World, player: &Player, noun: &str) -> CmdResult {
     if let Some(thing) = find_noun(world, phys::gettable(world, player.id), noun) {
         // Get the thing.
         phys::get_thing(world, player.id, thing)?;
-        visual::act("Taken.");
         return Ok(Normal);
     }
 

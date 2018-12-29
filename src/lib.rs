@@ -11,7 +11,7 @@ mod entity;
 #[allow(dead_code)] // Temporary
 mod phys;
 mod player_control;
-mod rule_monitor;
+mod rule;
 mod scenario;
 mod script;
 mod types;
@@ -96,7 +96,7 @@ pub fn run() {
         player_control::system(&mut game, &cmd);
 
         // NEXT, handle rules
-        rule_monitor::system(&mut game.world, &Event::Turn);
+        rule::system(&mut game.world, &Event::Turn);
 
         // NEXT, Increment the clock
         // TODO: Probably don't want to do this here.  Some commands should

@@ -10,6 +10,9 @@ use std::collections::BTreeSet;
 use crate::entity::ID;
 use crate::world::World;
 use crate::world::LIMBO;
+use crate::rule;
+use crate::visual;
+use crate::types::Event::*;
 
 type PhysResult = Result<(), String>;
 
@@ -169,6 +172,8 @@ pub fn put_in(world: &mut World, thing: ID, container: ID) {
 /// The player gets the thing.
 pub fn get_thing(world: &mut World, pid: ID, thing: ID) -> PhysResult {
     put_in(world, thing, pid);
+    visual::act("Taken.");
+    rule::system(world, &Get(pid, thing));
 
     Ok(())
 }

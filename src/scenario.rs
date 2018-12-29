@@ -101,7 +101,7 @@ sharp edges anywhere.  Carved along the length of it are the words
 
     world
         .add("rule-dirty-note")
-        .always(Turn, &|world| player_gets_note_dirty(world))
+        .always(Get(pid, note), &|world| player_gets_note_dirty(world))
         .action(Print(
             "The dirt from your hands got all over the note.".into(),
         ))
