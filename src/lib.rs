@@ -13,6 +13,7 @@ mod phys;
 mod player_control;
 mod rule_monitor;
 mod scenario;
+mod script;
 mod types;
 mod visual;
 mod world;
