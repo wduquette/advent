@@ -283,28 +283,6 @@ fn handle_debug_command(game: &mut Game, player: &Player, cmd: &Command) -> CmdR
     }
 }
 
-/// Parse a token as an entity tag or ID, return an ID on success and
-/// an error result on failure.
-fn parse_id(world: &World, token: &str) -> Result<ID, String> {
-    // FIRST, is the token a tag?
-    if let Some(id) = world.lookup_id(token) {
-        return Ok(id);
-    }
-
-    // NEXT, is it an explicit ID?
-    let id = match token.parse() {
-        Ok(id) => id,
-        Err(_) => {
-            return Err(format!("Not an ID: {}", token));
-        }
-    };
-
-    if !world.tags.contains_key(&id) {
-        return Err(format!("Not an ID: {}", token));
-    }
-
-    Ok(id)
-}
 
 /// List all of the available entities.
 fn cmd_debug_list(world: &World) -> CmdResult {
@@ -351,6 +329,29 @@ fn cmd_debug_go(world: &mut World, player: &Player, id_arg: &str) -> CmdResult {
     } else {
         Err(format!("Entity {} is not a room.", loc))
     }
+}
+
+/// Parse a token as an entity tag or ID, return an ID on success and
+/// an error result on failure.
+fn parse_id(world: &World, token: &str) -> Result<ID, String> {
+    // FIRST, is the token a tag?
+    if let Some(id) = world.lookup_id(token) {
+        return Ok(id);
+    }
+
+    // NEXT, is it an explicit ID?
+    let id = match token.parse() {
+        Ok(id) => id,
+        Err(_) => {
+            return Err(format!("Not an ID: {}", token));
+        }
+    };
+
+    if !world.tags.contains_key(&id) {
+        return Err(format!("Not an ID: {}", token));
+    }
+
+    Ok(id)
 }
 
 //-------------------------------------------------------------------------
