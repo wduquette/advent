@@ -4,6 +4,7 @@
 //! where they are, and making them available.  As such, it is concerned with the
 //! location and inventory components.
 
+use crate::types::Dir;
 use crate::types::Flag::Scenery;
 use std::collections::BTreeSet;
 use crate::entity::ID;
@@ -21,6 +22,17 @@ pub fn loc(world: &World, thing: ID) -> ID {
 
     world.locations[&thing].id
 }
+
+/// Tries to follow a link in the given direction; returns the linked
+/// location if any.
+pub fn follow_link(world: &World, loc: ID, dir: Dir) -> Option<ID> {
+    assert_is_room(world, loc);
+
+    let roomc = &world.rooms[&loc];
+
+    roomc.links.get(&dir).cloned()
+}
+
 
 /// Determines whether the thing is in the container.
 ///
@@ -135,12 +147,20 @@ pub fn put_in(world: &mut World, thing: ID, container: ID) {
 //--------------------------------------------------------------------------------
 // Standard Assertions
 
+fn idtag(world: &World, id: ID) -> String {
+    format!("[{}] {}", id, world.tag(id))
+}
+
+fn assert_is_room(world: &World, loc: ID) {
+    assert!(world.is_room(loc), "Not a room: {}", idtag(world, loc));
+}
+
 fn assert_has_inventory(world: &World, container: ID) {
     assert!(world.inventories.get(&container).is_some(),
-        "Has no inventory component: [{}]", container);
+        "Has no inventory component: {}", idtag(world, container));
 }
 
 fn assert_has_location(world: &World, thing: ID) {
     assert!(world.locations.get(&thing).is_some(),
-        "Has no location component: [{}]", thing);
+        "Has no location component: {}", idtag(world, thing));
 }

@@ -103,27 +103,11 @@ fn handle_normal_command(game: &mut Game, player: &Player, cmd: &Command) -> Cmd
     }
 }
 
-fn handle_debug_command(game: &mut Game, player: &Player, cmd: &Command) -> CmdResult {
-    let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
-    let world = &mut game.world;
-
-    match words.as_slice() {
-        ["list"] => cmd_debug_list(world),
-        ["dump", id_arg] => cmd_debug_dump(world, id_arg),
-        ["look", id_arg] => cmd_debug_look(world, id_arg),
-        ["examine", id_arg] => cmd_debug_examine(world, id_arg),
-        ["go", id_arg] => cmd_debug_go(world, player, id_arg),
-
-        // Error
-        _ => Err("I don't understand.".into()),
-    }
-}
-
 // User Commands
 
 /// Move the player in the given direction
 fn cmd_go(world: &mut World, player: &Player, dir: Dir) -> CmdResult {
-    if let Some(dest) = world.follow(player.loc, dir) {
+    if let Some(dest) = phys::follow_link(world, player.loc, dir) {
         phys::put_in(world, player.id, dest);
 
         if !world.has_flag(player.id, Seen(dest)) {
@@ -277,6 +261,23 @@ fn cmd_quit() -> CmdResult {
 
 //------------------------------------------------------------------------------
 // Debugging commands
+
+/// Handle debugging commands.
+fn handle_debug_command(game: &mut Game, player: &Player, cmd: &Command) -> CmdResult {
+    let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
+    let world = &mut game.world;
+
+    match words.as_slice() {
+        ["list"] => cmd_debug_list(world),
+        ["dump", id_arg] => cmd_debug_dump(world, id_arg),
+        ["look", id_arg] => cmd_debug_look(world, id_arg),
+        ["examine", id_arg] => cmd_debug_examine(world, id_arg),
+        ["go", id_arg] => cmd_debug_go(world, player, id_arg),
+
+        // Error
+        _ => Err("I don't understand.".into()),
+    }
+}
 
 /// Parse a token as an entity tag or ID, return an ID on success and
 /// an error result on failure.

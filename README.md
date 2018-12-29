@@ -10,6 +10,11 @@ Also, see docs/journal.txt.
 * Complete the physical system, phys::, and use it through out.
   * And then remove the relevant methods out of World.
 * Move rule_component::Action to types::
+* Consider: scenario builds links using tags, which are added to a temporary
+  data structure and resolved after the scenario is completely built.
+  Then links could be part of initial entity creation.
+  * .put_in() could work the same way.  Give the tag, and then it's resolved
+    at the end.
 * Debug commands shouldn't advance the clock.
 * Define Event guards and hooks
   * The dirty-note rule should be a Get hook.

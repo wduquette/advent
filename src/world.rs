@@ -260,16 +260,6 @@ impl World {
         self.inventories[&loc].has(thing)
     }
 
-    /// Tries to follow a link in the given direction; returns the linked
-    /// location if any.
-    pub fn follow(&self, loc: ID, dir: Dir) -> Option<ID> {
-        assert!(self.is_room(loc), "Not a room: [{}]", loc);
-
-        let rc = &self.rooms[&loc];
-
-        rc.links.get(&dir).cloned()
-    }
-
     /// Links one room to another in the given direction.
     /// Links are not bidirectional.  If you want links both ways, you
     /// have to add them.
