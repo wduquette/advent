@@ -260,48 +260,6 @@ impl World {
         self.inventories[&loc].has(thing)
     }
 
-    /// Puts the thing in the container's inventory, and sets the thing's location.
-    /// No op if the thing is already in the location.
-    pub fn put_in(&mut self, thing: ID, container: ID) {
-        assert!(self.has_location(thing), "Has no location: [{}]", thing);
-        assert!(
-            self.has_inventory(container),
-            "Has no inventory: [{}]",
-            container
-        );
-
-        // FIRST, take it out of wherever it is (if anywhere); this moves it to limbo.
-        self.take_out(thing);
-
-        // NEXT, move it from LIMBO to where it belongs.
-        let lc = self.locations.get_mut(&thing).unwrap();
-        let ic = self.inventories.get_mut(&container).unwrap();
-
-        ic.things.insert(thing);
-        lc.id = container;
-        self.inventories.get_mut(&LIMBO).unwrap().remove(thing);
-    }
-
-    /// Removes the thing from its container's inventory, and puts it in LIMBO.
-    pub fn take_out(&mut self, thing: ID) {
-        assert!(self.has_location(thing), "Has no location: [{}]", thing);
-        let container = self.loc(thing);
-
-        if container != LIMBO {
-            assert!(
-                self.has_inventory(container),
-                "Has no inventory: [{}]",
-                container
-            );
-            let ic = self.inventories.get_mut(&container).unwrap();
-            ic.things.remove(&thing);
-
-            let lc = self.locations.get_mut(&thing).unwrap();
-            lc.id = LIMBO;
-            self.inventories.get_mut(&LIMBO).unwrap().add(thing);
-        }
-    }
-
     /// Tries to follow a link in the given direction; returns the linked
     /// location if any.
     pub fn follow(&self, loc: ID, dir: Dir) -> Option<ID> {

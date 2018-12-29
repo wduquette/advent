@@ -229,7 +229,7 @@ fn cmd_get(world: &mut World, player: &Player, name: &str) -> CmdResult {
         }
 
         // Get the thing.
-        world.put_in(thing, player.id);
+        phys::put_in(world, thing, player.id);
 
         visual::act("Taken.");
         Ok(Normal)
@@ -242,7 +242,7 @@ fn cmd_get(world: &mut World, player: &Player, name: &str) -> CmdResult {
 fn cmd_drop(world: &mut World, player: &Player, name: &str) -> CmdResult {
     if let Some(thing) = find_in_inventory(world, player.id, name) {
         // Drop the thing
-        world.put_in(thing, player.loc);
+        phys::put_in(world, thing, player.loc);
 
         visual::act("Dropped.");
         Ok(Normal)

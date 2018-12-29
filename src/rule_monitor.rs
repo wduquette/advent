@@ -5,6 +5,7 @@ use crate::entity::ID;
 use crate::types::Flag::*;
 use crate::visual;
 use crate::world::World;
+use crate::phys;
 
 /// The Rule System.  Processes all rules, executing those that should_fire.
 pub fn system(world: &mut World) {
@@ -46,8 +47,8 @@ fn fire_rule(world: &mut World, id: ID) {
             // Swap a, in a place, with b, in LIMBO
             Swap(a, b) => {
                 let loc = world.loc(a);
-                world.take_out(a);
-                world.put_in(b, loc);
+                phys::take_out(world, a);
+                phys::put_in(world, b, loc);
             }
         }
     }
