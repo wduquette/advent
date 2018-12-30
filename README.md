@@ -7,6 +7,8 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
+* Rules executing at clock=0 should execute before the player's first
+  command.
 * Consider: scenario builds links using tags, which are added to a temporary
   data structure and resolved after the scenario is completely built.
   Then links could be part of initial entity creation.

@@ -1,5 +1,43 @@
 Bonaventure Journal
 
+2018-12-30 (Sunday)
+x   Rule changes:
+    x   I'll want Enter(pid, room) rules and guards, and probably also
+        EnterFrom(pid, from, to) rules and guards.
+        x   Because the invariant is that rules are executed in the order of
+            definition, the rule::system() call should take a set of events,
+            rather than a single event.
+        x   Any rule whose event matches the set gets executed.
+    x   It would be nice if rule predicates had access to the event,
+        so that they could parse the entity IDs out of the event enum.
+x   Guards are different than rules.
+    x   It makes sense to allow multiple rules for a single event,
+        provided that the order is controlled.
+    x   It doesn't make sense to have multiple guards for a single event,
+        since precisely what a guard does is determine whether the event
+        occurs or not.
+    x   Is it really necessary for a guard to be able to take action,
+        beyond printing something?
+    x   Seems to me that on Allow, you can define an Enter rule that takes
+        action; so Allow actions aren't needed.
+    x   But Deny actions are needed, because at least you need to print
+        the deny message.
+    x   So:
+        x   Define GuardComponent.
+        x   A Guard has a GuardFunction and a Script.
+        x   The GuardFunction returns GuardResult: Allow/Deny
+        x   On Deny, the actions are executed.
+        x   On Allow, the event proceeds.
+        x   If I let Allow=true and Deny=false, I can use the same
+            predicate.  But rule::guard() needs to return the flag.
+x   Today:
+    x   Revise rules
+        x   Rule predicate takes event argument
+        x   rule::fire() replaces rule::system() and takes set of events.
+    x   Add GuardComponent and rule::allow(), which takes the event and
+        returns true/false
+
+
 2018-12-29 (Saturday)
 x   Completed the inventory refactor, and cleaned up a bunch of misplaced
     or extraneous functions.

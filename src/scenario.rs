@@ -130,7 +130,7 @@ Only the pure may touch this sword.
     // Stories: Rules that supply backstory to the player.
     world
         .add("rule-story-1")
-        .once(Turn, &|world| world.clock == 2)
+        .once(Turn, &|world| world.clock == 0)
         .action(Print(
             "\
 You don't know where you are.  You don't even know where you want to

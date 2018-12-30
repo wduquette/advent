@@ -96,7 +96,7 @@ pub fn run() {
         player_control::system(&mut game, &cmd);
 
         // NEXT, handle rules
-        rule::system(&mut game.world, &Event::Turn);
+        rule::fire_event(&mut game.world, &Event::Turn);
 
         // NEXT, Increment the clock
         // TODO: Probably don't want to do this here.  Some commands should
