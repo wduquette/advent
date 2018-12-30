@@ -1,5 +1,6 @@
 //! Scenario definition
 
+use crate::types::Event;
 use crate::entity::ID;
 use crate::phys;
 use crate::types::Action::*;
@@ -89,7 +90,7 @@ how narrow it is.
 
     world
         .add("rule-dirty-note")
-        .always(GetThing(pid, note), &|world| player_gets_note_dirty(world))
+        .always(GetThing(pid, note), &|w, e| predicate_rule_dirty_note(w, e))
         .action(Print(
             "The dirt from your hands got all over the note.".into(),
         ))
@@ -114,8 +115,8 @@ sharp edges anywhere.  Carved along the length of it are the words
     // TODO: This should really be a guard, so that you don't end up with the sword.
     world
         .add("rule-sword-get")
-        .always(GetThing(pid, sword), &|world| {
-            world.has_flag(world.pid, DirtyHands)
+        .always(GetThing(pid, sword), &|w,_| {
+            w.has_flag(w.pid, DirtyHands)
         })
         .action(Print(
             "\
@@ -130,7 +131,7 @@ Only the pure may touch this sword.
     // Stories: Rules that supply backstory to the player.
     world
         .add("rule-story-1")
-        .once(Turn, &|world| world.clock == 0)
+        .once(Turn, &|w,_| w.clock == 0)
         .action(Print(
             "\
 You don't know where you are.  You don't even know where you want to
@@ -142,7 +143,7 @@ and gosh, this doesn't look anything like the toy aisle.
 
     world
         .add("fairy-godmother-rule")
-        .always(Turn, &|world| world.has_flag(world.pid, Dead))
+        .always(Turn, &|w, _| w.has_flag(w.pid, Dead))
         .action(Print(
             "\
 A fairy godmother hovers over your limp body.  She frowns;
@@ -177,10 +178,13 @@ fn player_visual(world: &World, pid: ID) -> String {
 }
 
 /// Predicate for rule-note-dirty
-fn player_gets_note_dirty(world: &World) -> bool {
-    let note = world.lookup_id(NOTE).unwrap();
-
-    world.has_flag(world.pid, DirtyHands) && !world.has_flag(note, Dirty)
+fn predicate_rule_dirty_note(world: &World, event: &Event) -> bool {
+    match event {
+        GetThing(pid,note) => {
+            world.has_flag(*pid, DirtyHands) && !world.has_flag(*note, Dirty)
+        }
+        _ => false,
+    }
 }
 
 fn note_thing_prose(world: &World, id: ID) -> String {

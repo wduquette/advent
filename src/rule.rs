@@ -22,7 +22,7 @@ pub fn fire_events(world: &mut World, events: &[&Event]) {
 
     for id in rules {
         let rulec = &world.rules[&id];
-        if events.contains(&&rulec.event) && (rulec.predicate)(world) {
+        if events.contains(&&rulec.event) && (rulec.predicate)(world, &rulec.event) {
             fire_rule(world, id);
         }
     }

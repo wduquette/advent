@@ -2,18 +2,18 @@
 
 use crate::script::Script;
 use crate::types::Event;
-use crate::types::WorldPredicate;
+use crate::types::EventPredicate;
 
 /// Game rules: actions taken when a predicate is met
 #[derive(Clone)]
 pub struct RuleComponent {
     pub event: Event,
-    pub predicate: WorldPredicate,
+    pub predicate: EventPredicate,
     pub script: Script,
 }
 
 impl RuleComponent {
-    pub fn new(event: Event, predicate: WorldPredicate) -> RuleComponent {
+    pub fn new(event: Event, predicate: EventPredicate) -> RuleComponent {
         RuleComponent {
             event,
             predicate,

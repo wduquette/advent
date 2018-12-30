@@ -6,8 +6,8 @@ use crate::world::World;
 //------------------------------------------------------------------------------------------------
 // Basic Types
 
-/// A closure that's a predicate on the World
-pub type WorldPredicate = &'static Fn(&World) -> bool;
+/// A closure that's a predicate on the World and an Event.
+pub type EventPredicate = &'static Fn(&World, &Event) -> bool;
 
 /// A closure to produce a string from an entity
 pub type EntityStringHook = &'static Fn(&World, ID) -> String;

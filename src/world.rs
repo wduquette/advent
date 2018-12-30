@@ -474,7 +474,7 @@ impl<'a> EBuilder<'a> {
     }
 
     /// Adds a predicate for a rule that will fire at most once.
-    pub fn always(mut self, event: Event, predicate: WorldPredicate) -> EBuilder<'a> {
+    pub fn always(mut self, event: Event, predicate: EventPredicate) -> EBuilder<'a> {
         assert!(
             !self.world.rules.get(&self.id).is_some(),
             "Tried to add rule component twice: [{}] {}",
@@ -492,7 +492,7 @@ impl<'a> EBuilder<'a> {
     }
 
     /// Adds a predicate for a rule that will fire at most once.
-    pub fn once(mut self, event: Event, predicate: WorldPredicate) -> EBuilder<'a> {
+    pub fn once(mut self, event: Event, predicate: EventPredicate) -> EBuilder<'a> {
         assert!(
             !self.world.rules.get(&self.id).is_some(),
             "Tried to add rule component twice: [{}] {}",
