@@ -1,6 +1,5 @@
 //! Rule Monitor System
 
-use std::collections::HashSet;
 use crate::entity::ID;
 use crate::types::Event;
 use crate::types::Flag::*;
@@ -8,14 +7,12 @@ use crate::world::World;
 
 /// Fire all rules for the given event, and execute those whose predicates are met.
 pub fn fire_event(world: &mut World, event: &Event) {
-    let mut events = HashSet::new();
-    events.insert(event);
-    fire_events(world, &events);
+    fire_events(world, &[event]);
 }
 
 /// Fire all rules whose events are in the events set, and execute those whose
 /// predicates are met.
-pub fn fire_events(world: &mut World, events: &HashSet<&Event>) {
+pub fn fire_events(world: &mut World, events: &[&Event]) {
     let rules: Vec<ID> = world
         .rules
         .keys()
@@ -25,7 +22,7 @@ pub fn fire_events(world: &mut World, events: &HashSet<&Event>) {
 
     for id in rules {
         let rulec = &world.rules[&id];
-        if events.contains(&rulec.event) && (rulec.predicate)(world) {
+        if events.contains(&&rulec.event) && (rulec.predicate)(world) {
             fire_rule(world, id);
         }
     }
