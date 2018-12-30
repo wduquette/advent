@@ -5,6 +5,29 @@ use crate::types::Event;
 use crate::types::Flag::*;
 use crate::world::World;
 
+/// Executes the guard that applies to the given event (if any), and returns
+/// whether or not the event is allowed.  If the event is denied, the guard's
+/// script is executed.
+pub fn allows(world: &mut World, event: &Event) -> bool {
+    for id in world.rules.keys().cloned() {
+        let rulec = &world.rules[&id];
+        if rulec.is_guard && event == &rulec.event {
+            if (rulec.predicate)(world, &rulec.event) {
+                // The action is allowed.
+                return true;
+            } else {
+                // The action is not allowed; execute the script.
+                let script = rulec.script.clone();
+                script.execute(world);
+                return false;
+            }
+        }
+    }
+
+    // NEXT, no guard matches; carry on normally.
+    true
+}
+
 /// Fire all rules for the given event, and execute those whose predicates are met.
 pub fn fire_event(world: &mut World, event: &Event) {
     fire_events(world, &[event]);
@@ -22,11 +45,15 @@ pub fn fire_events(world: &mut World, events: &[&Event]) {
 
     for id in rules {
         let rulec = &world.rules[&id];
-        if events.contains(&&rulec.event) && (rulec.predicate)(world, &rulec.event) {
+        if !rulec.is_guard
+            && events.contains(&&rulec.event)
+            && (rulec.predicate)(world, &rulec.event)
+        {
             fire_rule(world, id);
         }
     }
 }
+
 
 /// Execute the given rule
 fn fire_rule(world: &mut World, id: ID) {

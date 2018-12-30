@@ -473,6 +473,30 @@ impl<'a> EBuilder<'a> {
         self
     }
 
+    /// Adds an event guard.  If the predicate is true, the event will be allowed to
+    /// occur; if it is false, the guard's actions will execute.
+    pub fn guard(mut self, event: Event, predicate: EventPredicate) -> EBuilder<'a> {
+        assert!(
+            !self.world.rules.get(&self.id).is_some(),
+            "Tried to add rule component twice: [{}] {}",
+            self.id,
+            self.tag
+        );
+
+        let others: Vec<&RuleComponent> = self.world.rules.values()
+            .filter(|rc| rc.event == event && rc.is_guard)
+            .collect();
+        assert!(others.is_empty(), "Tried to add two guards for event: {:?}", event);
+
+        self = self.flag_set();
+
+        self.world
+            .rules
+            .insert(self.id, RuleComponent::guard(event, predicate));
+
+        self
+    }
+
     /// Adds a predicate for a rule that will fire at most once.
     pub fn always(mut self, event: Event, predicate: EventPredicate) -> EBuilder<'a> {
         assert!(

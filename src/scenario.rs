@@ -112,11 +112,10 @@ sharp edges anywhere.  Carved along the length of it are the words
         .put_in(trail)
         .id();
 
-    // TODO: This should really be a guard, so that you don't end up with the sword.
     world
         .add("rule-sword-get")
-        .always(GetThing(pid, sword), &|w,_| {
-            w.has_flag(w.pid, DirtyHands)
+        .guard(GetThing(pid, sword), &|w,_| {
+            !w.has_flag(w.pid, DirtyHands)
         })
         .action(Print(
             "\
@@ -125,7 +124,6 @@ Only the pure may touch this sword.
             "
             .into(),
         ))
-        .action(Drop(pid, sword))
         .action(Kill(pid));
 
     // Stories: Rules that supply backstory to the player.

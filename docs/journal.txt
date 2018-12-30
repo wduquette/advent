@@ -36,7 +36,16 @@ x   Today:
         x   rule::fire() replaces rule::system() and takes set of events.
     x   Add GuardComponent and rule::allow(), which takes the event and
         returns true/false
-
+x   Done
+    x   Revised rule:: more or less as described.
+        x   rule::fire_event() still takes a single event.
+        x   rule::fire_events() takes a slice of events.
+    x   Guards aren't a special kind of component; instead, they are rules
+        whose "is_guard" flag is set.
+    x   Added EBuilder::guard() to define a guard.  It makes sure that there's
+        only one guard for the given event.
+    x   Added rule::allows() to determine whether the event is allowed or
+        not.
 
 2018-12-29 (Saturday)
 x   Completed the inventory refactor, and cleaned up a bunch of misplaced

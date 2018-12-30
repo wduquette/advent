@@ -15,9 +15,8 @@ Also, see docs/journal.txt.
   * .put_in() could work the same way.  Give the tag, and then it's resolved
     at the end.
 * Debug commands shouldn't advance the clock.
-* Define Event guards
-  * The note's "Book" prose hook could be implemented as normal prose
-    plus a Read guard that says it's too dirty to read.
+* The note's "Book" prose hook could be implemented as normal prose
+  plus a Read guard that says it's too dirty to read.
 * The Game
   * Main loop should halt if you're dead at the end of it.
   * Add puzzle to make water flow in the stream.

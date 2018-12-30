@@ -8,14 +8,27 @@ use crate::types::EventPredicate;
 #[derive(Clone)]
 pub struct RuleComponent {
     pub event: Event,
+    pub is_guard: bool,
     pub predicate: EventPredicate,
     pub script: Script,
 }
 
 impl RuleComponent {
+    /// Creates a new standard rule, to which actions can be added.
     pub fn new(event: Event, predicate: EventPredicate) -> RuleComponent {
         RuleComponent {
             event,
+            is_guard: false,
+            predicate,
+            script: Script::new(),
+        }
+    }
+
+    /// Creates a new guard rule, to which actions can be added.
+    pub fn guard(event: Event, predicate: EventPredicate) -> RuleComponent {
+        RuleComponent {
+            event,
+            is_guard: true,
             predicate,
             script: Script::new(),
         }

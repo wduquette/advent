@@ -169,9 +169,11 @@ pub fn put_in(world: &mut World, thing: ID, container: ID) {
 
 /// The player gets the thing.
 pub fn get_thing(world: &mut World, pid: ID, thing: ID) -> PhysResult {
-    put_in(world, thing, pid);
-    visual::act("Taken.");
-    rule::fire_event(world, &GetThing(pid, thing));
+    if rule::allows(world, &GetThing(pid, thing)) {
+        put_in(world, thing, pid);
+        visual::act("Taken.");
+        rule::fire_event(world, &GetThing(pid, thing));
+    }
 
     Ok(())
 }
