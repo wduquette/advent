@@ -114,6 +114,19 @@ scenario.  But the scenario still refers to the phys:: system (at least),
 and the World includes methods for use at both build and run time, and
 also methods for use by the framework itself.
 
+### Ambient Sound
+
+It would be cool to manage sources of sound (conveyed, as always, by prose).
+Sounds could be Quiet, Medium, or Loud.  Quiet sounds you can only hear if
+you "listen"; others appear as part of the normal room description.  
+Volume decreases with distance; Loud sounds can be heard in
+adjoining rooms without explicitly listening, and Medium sounds can be heard
+if you "listen".
+
+To do this properly we would need a notion of the distance between two rooms;
+just because they are adjacent in the link map doesn't mean they are close
+to each other.  A link could be a long road, for example.
+
 ### Fancy Undo
 
 At present Bonaventure supports undoing the very last command.  This is
@@ -124,6 +137,9 @@ fire or an NPC move during that time.
 
 Consequently, we may want a multi-level undo; and if so, we certainly need to
 tell the user what was undone.
+
+Alternatively, we can design the game so that undo isn't needed.  And for
+some games, undo is undesirable (i.e., if combat is a real thing)
 
 ### NPCs and Monsters
 
