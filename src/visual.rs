@@ -104,9 +104,14 @@ pub fn thing(world: &World, id: ID) {
     // contents, or other changeable state.
 }
 
+/// Can this be read as a book?
+pub fn can_read(world: &World, thing: ID) -> bool {
+    world.has_prose_type(thing, ProseType::Book)
+}
+
 /// Outputs the content of a book.
-pub fn book(world: &World, id: ID) {
-    para(&get_prose(world, id, ProseType::Book));
+pub fn read(world: &World, book: ID) {
+    para(&get_prose(world, book, ProseType::Book));
 }
 
 //-----------------------------------------------------------------------------

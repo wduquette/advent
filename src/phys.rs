@@ -178,6 +178,16 @@ pub fn get_thing(world: &mut World, pid: ID, thing: ID) -> PhysResult {
     Ok(())
 }
 
+/// The player reads the thing's Book prose.
+pub fn read_thing(world: &mut World, pid: ID, thing: ID) -> PhysResult {
+    if rule::allows(world, &ReadThing(pid, thing)) {
+        visual::read(world, thing);
+        rule::fire_event(world, &ReadThing(pid, thing));
+    }
+
+    Ok(())
+}
+
 //--------------------------------------------------------------------------------
 // Standard Assertions
 

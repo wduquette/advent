@@ -101,6 +101,10 @@ pub enum Event {
     /// A game turn has elapsed
     Turn,
 
-    /// Get(player, thing): A player has gotten (or wants to get) a thing
+    /// GetThing(player, thing): A player has gotten (or wants to get) a thing
     GetThing(ID, ID),
+
+    /// ReadThing(player, thing): A player has read (or wants to read) a thing's
+    /// Book prose.
+    ReadThing(ID, ID),
 }

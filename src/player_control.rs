@@ -10,7 +10,6 @@ use crate::entity::ID;
 use crate::phys;
 use crate::types::Dir::*;
 use crate::types::Flag::*;
-use crate::types::ProseType;
 use crate::types::*;
 use crate::visual;
 use crate::world::*;
@@ -165,18 +164,16 @@ fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
 }
 
 /// Read a thing in the current location.
-fn cmd_read(world: &World, player: &Player, name: &str) -> CmdResult {
+fn cmd_read(world: &mut World, player: &Player, name: &str) -> CmdResult {
     if let Some(thing) = find_noun(world, phys::visible(world, player.id), name) {
         // If it has no prose, it can't be read
-        // TODO: visual::can_read(world, thing)
-        if !world.has_prose_type(thing, ProseType::Book) {
+        if !visual::can_read(world, thing) {
             return Err("You can't read that.".into());
         }
 
         // If he's holding it, or it's scenery, then he can read it.
         if phys::owns(world, player.id, thing) || world.has_flag(thing, Scenery) {
-            // TODO: visual::read(world, thing)
-            visual::book(world, thing);
+            phys::read_thing(world, player.id, thing)?;
             Ok(Normal)
         } else {
             Err("You don't have it.".into())
