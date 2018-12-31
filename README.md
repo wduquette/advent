@@ -7,17 +7,24 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Debug commands shouldn't advance the clock.
 * The Game
-  * Main loop should halt if you're dead at the end of it.
-  * Add puzzle to make water flow in the stream.
-  * Extend the world.
-  * Add some more things and more puzzles.
+  * Add "wayback" room.  
+    * You can't really go there.  It's the way you remember coming, but
+      it won't let you back.
+    * Could be done as an "EnterRoom" guard.
+    * Could be done as a "DeadEnd" destination.  (That would be nice.)
+  * Add stone for sword to be in.
+    * The stone should obscure the sword.  All you can see is the hilt.
+    * The stone should have the words, "Only the pure".
+    * When you get the sword successfully, the stone should evaporate.
+    * You can't enter the cave without the sword.  It makes you feel better.
   * Add more story.
+  * Main loop should halt if you're dead at the end of it.
   * Add NPCs, monsters.
     * Maybe less of a standard text adventure, more of a text-based
       RPG?
   * Add winning condition.
+* Debug commands shouldn't advance the clock.
 * Add save/restore
 * Improve vocabulary and grammar management
   * Consider design where verbs (operations) depend on

@@ -28,7 +28,20 @@ pub fn build() -> World {
     let mut the_world = World::new();
     let world = &mut the_world;
 
-    // // NEXT, Make the player
+    // Story 1
+    world
+        .add("rule-story-1")
+        .once(Turn, &|w,_| w.clock == 0)
+        .action(Print(
+            "\
+You don't know where you are.  You don't even know where you want to
+be.  All you know is that your feet are wet, your hands are dirty,
+and gosh, this doesn't look anything like the toy aisle.
+        "
+            .into(),
+        ));
+
+    // The player
     world.pid = world
         .add("self")
         .player()
@@ -38,54 +51,15 @@ pub fn build() -> World {
 
     let pid = world.pid;
 
-    // NEXT, make the rooms.
-
     // Room: Clearing
     let clearing = world
         .add("clearing")
         .room("Clearing")
-        .prose(Room, "A wide spot in the woods.  You can go east.")
+        .prose(Room, "\
+A wide spot in the woods.  The trees are dense, but there seem to be paths
+heading to the north, south, and east.
+        ")
         .id();
-
-    // Room: Trail
-    let trail = world
-        .add("trail")
-        .room("Trail")
-        .prose(
-            Room,
-            "A trail from hither to yon.  You can go east or west.",
-        )
-        .id();
-
-    // Room: Bridge
-    let bridge = world
-        .add("bridge")
-        .room("Bridge")
-        .prose(
-            Room,
-            "The trail crosses a small stream here.  You can go east or west.",
-        )
-        .flag(HAS_WATER)
-        .id();
-
-    world
-        .add("stream")
-        .thing("stream", "stream")
-        .prose(
-            Thing,
-            "\
-The stream comes from the north, down a little waterfall, and runs
-away under the bridge.  It looks surprisingly deep, considering
-how narrow it is.
-        ",
-        )
-        .flag(Scenery)
-        .put_in(bridge)
-        .id();
-
-    // Links
-    world.twoway(clearing, East, West, trail);
-    world.twoway(trail, East, West, bridge);
 
     // The note
     let note = world
@@ -115,6 +89,44 @@ step!
         ))
         .action(SetFlag(note, DIRTY));
 
+    // Room: Grotto
+    let grotto = world
+        .add("grotto")
+        .room("Grotto")
+        .prose(Room, "\
+Nestled in a grotto among the trees you find a pool of water.
+A path leads west.
+        ")
+        .flag(HAS_WATER)
+        .id();
+
+        world
+            .add("pool")
+            .thing("pool", "pool")
+            .prose(
+                Thing,
+                "\
+Moss grows on the stones around the edge, but the water is clear and
+deep and cold.
+            ",
+            )
+            .flag(Scenery)
+            .put_in(grotto)
+            .id();
+
+    // Room: Hilltop
+    let hilltop = world
+        .add("hilltop")
+        .room("Hilltop")
+        .prose(
+            Room,
+            "\
+The path has led you to the top of a hill, where there is a broad open
+space.  Trails lead to the north and south.
+            ",
+        )
+        .id();
+
     // The sword
     let sword = world
         .add("sword")
@@ -128,7 +140,7 @@ sharp edges anywhere.  Carved along the length of it are the words
 \"Emotional Support Sword (TM)\".
         ",
         )
-        .put_in(trail)
+        .put_in(hilltop)
         .id();
 
     world
@@ -144,20 +156,55 @@ Only the pure may touch this sword.
             .into(),
         ))
         .action(Kill(pid));
-
-    // Stories: Rules that supply backstory to the player.
-    world
-        .add("rule-story-1")
-        .once(Turn, &|w,_| w.clock == 0)
-        .action(Print(
+    // Room: Mouth of Cave
+    let cave_mouth = world
+        .add("cave-mouth")
+        .room("Mouth of Cave")
+        .prose(
+            Room,
             "\
-You don't know where you are.  You don't even know where you want to
-be.  All you know is that your feet are wet, your hands are dirty,
-and gosh, this doesn't look anything like the toy aisle.
-        "
-            .into(),
-        ));
+The trail ends at the mouth of a dark and forbidding cave.  You just
+know that if you go any closer, a stream of bats will fly out and
+scare you silly.  If you choose, you can enter the cave to the east, or
+go back up the trail to the west.
+            ",
+        )
+        .id();
 
+    // UNUSED! Room: Bridge
+    let bridge = world
+        .add("bridge")
+        .room("Bridge")
+        .prose(
+            Room,
+            "The trail crosses a small stream here.  You can go east or west.",
+        )
+        .flag(HAS_WATER)
+        .id();
+
+    world
+        .add("stream")
+        .thing("stream", "stream")
+        .prose(
+            Thing,
+            "\
+The stream comes from the north, down a little waterfall, and runs
+away under the bridge.  It looks surprisingly deep, considering
+how narrow it is.
+        ",
+        )
+        .flag(Scenery)
+        .put_in(bridge)
+        .id();
+
+    // Links
+    world.twoway(clearing, East, West, grotto);
+    world.twoway(clearing, South, North, hilltop);
+    world.twoway(hilltop, South, West, cave_mouth);
+
+    // Other Rules
+
+    // The fairy-godmother revives you if you die.
     world
         .add("fairy-godmother-rule")
         .always(Turn, &|w, _| w.has(w.pid, Dead))
