@@ -93,9 +93,19 @@ how narrow it is.
         .add(NOTE)
         .thing("note", "note")
         .prose_hook(Thing, &|world, id| note_thing_prose(world, id))
-        .prose_hook(Book, &|world, id| note_book_prose(world, id))
+        .prose(Book, "\
+Welcome, dear friend.  Your mission, should you choose to
+accept it, is to figure out how to get to the end of
+the trail.  You've already taken the first big
+step!
+         ")
         .put_in(clearing)
         .id();
+
+    world
+        .add("guard-dirty-note")
+        .guard(ReadThing(pid, note), &|w, e| predicate_note_is_clean(w, e))
+        .action(Print("You've gotten it too dirty to read.".into()));
 
     world
         .add("rule-dirty-note")
@@ -184,6 +194,15 @@ fn player_visual(world: &World, pid: ID) -> String {
         .get()
 }
 
+/// Predicate for guard-note-dirty
+fn predicate_note_is_clean(world: &World, event: &Event) -> bool {
+    match event {
+        ReadThing(_,note) => {
+           !world.has_flag(*note, DIRTY)
+        }
+        _ => false,
+    }
+}
 /// Predicate for rule-note-dirty
 fn predicate_rule_dirty_note(world: &World, event: &Event) -> bool {
     match event {
@@ -199,19 +218,5 @@ fn note_thing_prose(world: &World, id: ID) -> String {
         "A note, on plain paper.  It looks pretty grubby; someone's been mishandling it.".into()
     } else {
         "A note, on plain paper".into()
-    }
-}
-
-fn note_book_prose(world: &World, id: ID) -> String {
-    if world.has_flag(id, DIRTY) {
-        "You've gotten it too dirty to read.".into()
-    } else {
-        "\
-Welcome, dear friend.  Your mission, should you choose to
-accept it, is to figure out how to get to the end of
-the trail.  You've already taken the first big
-step!
-         "
-        .into()
     }
 }
