@@ -106,6 +106,10 @@ x   Event predicates with better signatures?
         x   It would use matching to build the relevant event handler struct.
         x   Does mean a lot more coding for each event handler type.
         x   But actually, we only need a type for each flavor.
+        x   Did a little exploratory coding; see "better-event-handlers".
+            x   But it seems overly complicated.
+            x   Gonna sit on this until I figure out how to handle
+                custom commands.
 
 
 2018-12-30 (Sunday)

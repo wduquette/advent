@@ -21,10 +21,9 @@ mod world;
 use crate::types::Event;
 use crate::world::*;
 
-/// The main game object.  The Game contains the world, and any other data that
-/// change when the world changes.
-/// TODO: Ultimately, this will live somewhere else; and it will contain data that persists
-/// from scene to scene.
+/// The main game object.  It owns the world as it currently is, and supports restart
+/// and undo, etc.
+/// TODO: Possibly, this should live elsewhere.
 pub struct Game {
     // THe current world
     world: World,
@@ -49,10 +48,27 @@ impl Game {
     }
 
     /// Introduce the game: print a welcome message, and visualize the initial location
-    pub fn introduce(&self) {
+    pub fn introduce(&mut self) {
         println!("Welcome to Bonaventure!\n");
 
-        visual::room(&self.world, phys::loc(&self.world, self.world.pid));
+        // The first turn is always an implicit "look at the current setting".
+        // This will also give everything else a chance to move.
+        self.turn("look");
+    }
+
+    /// Execute one game turn.
+    pub fn turn(&mut self, cmd: &str) {
+        // FIRST, let the player do what he does.
+        player_control::system(self, &cmd);
+
+        // NEXT, handle rules
+        rule::fire_event(&mut self.world, &Event::Turn);
+
+        // NEXT, Increment the clock
+        // TODO: Probably don't want to do this here.  Some commands should
+        // take time, and some shouldn't.  This should probably be in the
+        // player_control system.
+        self.world.clock += 1;
     }
 
     /// Restart the game: recreate the initial scenario.
@@ -89,19 +105,6 @@ pub fn run() {
     let mut con = console::Console::new();
 
     loop {
-        // FIRST, get the user's input
-        let cmd = con.readline("> ");
-
-        // NEXT, let the player do what he does.
-        player_control::system(&mut game, &cmd);
-
-        // NEXT, handle rules
-        rule::fire_event(&mut game.world, &Event::Turn);
-
-        // NEXT, Increment the clock
-        // TODO: Probably don't want to do this here.  Some commands should
-        // take time, and some shouldn't.  This should probably be in the
-        // player_control system.
-        game.world.clock += 1;
+        game.turn(&con.readline("> "));
     }
 }

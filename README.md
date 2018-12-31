@@ -7,15 +7,6 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Need better handling of the introduction text; the first story event
-  should just be prose displayed before the first room.
-* A rule that fires for turn 0 should fire before the player's first command.
-  * Effectively, the player's first command should be "look".
-* Consider: scenario builds links using tags, which are added to a temporary
-  data structure and resolved after the scenario is completely built.
-  Then links could be part of initial entity creation.
-  * .put_in() could work the same way.  Give the tag, and then it's resolved
-    at the end.
 * Debug commands shouldn't advance the clock.
 * The Game
   * Main loop should halt if you're dead at the end of it.
