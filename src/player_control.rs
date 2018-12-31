@@ -1,5 +1,7 @@
 //! The Player Control System
 
+use crate::scenario::DIRTY_HANDS;
+use crate::scenario::HAS_WATER;
 use self::Status::*;
 use crate::command;
 use crate::command::Command;
@@ -188,17 +190,17 @@ fn cmd_read(world: &World, player: &Player, name: &str) -> CmdResult {
 // TODO: As currently implemented, this should be a scenario command, not a
 // built-in command.
 fn cmd_wash_hands(world: &mut World, player: &Player) -> CmdResult {
-    if !world.has_flag(player.loc, HasWater) {
-        return Err("That'd be a neat trick.".into());
+    if !world.has_flag(player.loc, HAS_WATER) {
+        return Err("That'd be a neat trick, since there's no water here.".into());
     }
 
     visual::prose("You wash your hands in the water.")
         .when(
-            world.has_flag(player.id, DirtyHands),
+            world.has_flag(player.id, DIRTY_HANDS),
             "They look much cleaner now.",
         )
         .para();
-    world.unset_flag(player.id, DirtyHands);
+    world.unset_flag(player.id, DIRTY_HANDS);
 
     Ok(Normal)
 }

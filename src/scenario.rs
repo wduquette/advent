@@ -6,13 +6,22 @@ use crate::phys;
 use crate::types::Action::*;
 use crate::types::Dir::*;
 use crate::types::Event::*;
+use crate::types::Flag;
 use crate::types::Flag::*;
 use crate::types::ProseType::*;
 use crate::visual::Buffer;
 use crate::world::World;
 
-// Important Constants
+// Constant entity tags, for lookup
 const NOTE: &str = "note";
+
+// User-defined flags
+// TODO: These constants should only be used in the scenario itself; but at present they
+// are still used by the "wash hands" command code in player_control.rs.  Once that's
+// implemented clearly, they should no longer be "pub".
+const DIRTY: Flag = User("DIRTY");
+pub const DIRTY_HANDS: Flag = User("DIRTY_HANDS");
+pub const HAS_WATER: Flag = User("HAS_WATER");
 
 /// Build the initial state of the game world.
 pub fn build() -> World {
@@ -25,7 +34,7 @@ pub fn build() -> World {
         .add("self")
         .player()
         .prose_hook(Thing, &|world, id| player_visual(world, id))
-        .flag(DirtyHands)
+        .flag(DIRTY_HANDS)
         .id();
 
     let pid = world.pid;
@@ -57,7 +66,7 @@ pub fn build() -> World {
             Room,
             "The trail crosses a small stream here.  You can go east or west.",
         )
-        .flag(HasWater)
+        .flag(HAS_WATER)
         .id();
 
     world
@@ -94,7 +103,7 @@ how narrow it is.
         .action(Print(
             "The dirt from your hands got all over the note.".into(),
         ))
-        .action(SetFlag(note, Dirty));
+        .action(SetFlag(note, DIRTY));
 
     // The sword
     let sword = world
@@ -115,7 +124,7 @@ sharp edges anywhere.  Carved along the length of it are the words
     world
         .add("rule-sword-get")
         .guard(GetThing(pid, sword), &|w,_| {
-            !w.has_flag(w.pid, DirtyHands)
+            !w.has_flag(w.pid, DIRTY_HANDS)
         })
         .action(Print(
             "\
@@ -165,11 +174,11 @@ fn player_visual(world: &World, pid: ID) -> String {
     Buffer::new()
         .add("You've got all the usual bits.")
         .when(
-            world.has_flag(pid, DirtyHands),
+            world.has_flag(pid, DIRTY_HANDS),
             "Your hands are kind of dirty, though.",
         )
         .when(
-            !world.has_flag(pid, DirtyHands),
+            !world.has_flag(pid, DIRTY_HANDS),
             "Plus, they're clean bits!",
         )
         .get()
@@ -179,14 +188,14 @@ fn player_visual(world: &World, pid: ID) -> String {
 fn predicate_rule_dirty_note(world: &World, event: &Event) -> bool {
     match event {
         GetThing(pid,note) => {
-            world.has_flag(*pid, DirtyHands) && !world.has_flag(*note, Dirty)
+            world.has_flag(*pid, DIRTY_HANDS) && !world.has_flag(*note, DIRTY)
         }
         _ => false,
     }
 }
 
 fn note_thing_prose(world: &World, id: ID) -> String {
-    if world.has_flag(id, Dirty) {
+    if world.has_flag(id, DIRTY) {
         "A note, on plain paper.  It looks pretty grubby; someone's been mishandling it.".into()
     } else {
         "A note, on plain paper".into()
@@ -194,7 +203,7 @@ fn note_thing_prose(world: &World, id: ID) -> String {
 }
 
 fn note_book_prose(world: &World, id: ID) -> String {
-    if world.has_flag(id, Dirty) {
+    if world.has_flag(id, DIRTY) {
         "You've gotten it too dirty to read.".into()
     } else {
         "\

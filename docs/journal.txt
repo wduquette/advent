@@ -1,5 +1,44 @@
 Bonaventure Journal
 
+2018-12-31 (Monday)
+x   Custom Flags
+    x   Tried adding flag Global(&'static str) -- not great
+        x   Rationale:
+            x   const MY_FLAG: &str = "MyFlag";
+            x   world.set_flag(id, Global(MY_FLAG));
+        x   Works, but the syntax is clunky.
+        x   The &str is good for debugging, but bad for data-drive scenarios
+            x   Since it isn't String.
+    x   Could use Global(String), but this is worse
+        x   Can't define const MY_FLAG: String = "MyFlag".
+        x   The Flag type is no longer Copy.
+        x   Have to write code like this:
+            x   const MY_FLAG: &str = "MyFlag";
+            x   world.set_flag(id, &Global(MY_FLAG.into()));
+            x   Need to revise all code to pass references to flags instead
+                of passing constant flags.
+    x   I'd like a syntax where custom flags don't look much different than
+        the built-in flags.
+    x   Option A: (Will this work?)
+        x   Add Flag::User(&'static str)
+        x   Define constant: const MY_FLAG: Flag = Flag::User("MY_FLAG");
+            x   Not a function call, so it should work
+            x   Then the user can use MY_FLAG wherever a normal flag would
+                go.
+    x   Option B: Use usize.
+        x   Add Flag::User(usize)
+        x   Define constant: const MY_FLAG: usize = 1;
+        x   Flag is User(MY_FLAG).
+            x   Worse for debugging, but would work for data-driven scenarios.
+        x   NOTE: Don't need to use same solution for data-driven scenarios and
+            Rust-code scenarios.
+    x   Option C: Traits
+        x   In theory I could define a "Flag" trait, or, indeed, a Flag
+            struct, and use that as the public interface.  But then things
+            get even messier.
+    x   Conclusion: Try Option A; and extend with Option B if I ever need that.
+    x   This works pretty well.
+    
 2018-12-30 (Sunday)
 x   Rule changes:
     x   I'll want Enter(pid, room) rules and guards, and probably also

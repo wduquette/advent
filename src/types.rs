@@ -61,14 +61,11 @@ pub enum Flag {
     /// Is the thing Scenery?
     Scenery,
 
-    /// Does the player have dirty hands?
-    DirtyHands,
+    /// A generic flag type for use by users
+    User(&'static str),
 
-    /// Does the location have clean water?
-    HasWater,
-
-    /// Is the thing dirty?
-    Dirty,
+    /// A (flag + ID) flag type for use by users
+    UserId(&'static str, ID)
 }
 
 /// Actions taken by rules (and maybe other things)
