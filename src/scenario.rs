@@ -13,6 +13,7 @@ use crate::world::World;
 
 // Constant entity tags, for lookup
 const NOTE: &str = "note";
+const SWORD: &str = "sword";
 
 // User-defined flags
 // TODO: These constants should only be used in the scenario itself; but at present they
@@ -59,6 +60,12 @@ and gosh, this doesn't look anything like the toy aisle.
 A wide spot in the woods.  The trees are dense, but there seem to be paths
 heading to the north, south, and east.
         ")
+        .dead_end(North, "\
+You feel a chill as you approach the edge of the clearing, and after a few more steps are
+overcome with a vague but horrifying sense of deja vu.  You don't remember
+what's back under the trees to the north, but you're pretty sure you didn't like it
+and that you don't want to go find it again.
+        ")
         .id();
 
     // The note
@@ -67,17 +74,17 @@ heading to the north, south, and east.
         .thing("note", "note")
         .prose_hook(Thing, &|world, id| note_thing_prose(world, id))
         .prose(Book, "\
-Welcome, dear friend.  Your mission, should you choose to
-accept it, is to figure out how to get to the end of
-the trail.  You've already taken the first big
-step!
+If you ever wish to see your toy aisle alive again, put $10,000 dollars
+under the statue in the castle courtyard before nine o'clock tomorrow morning.
+||   -- Your host.
+||Well.  That's a bit alarming.  Where are you going to find $10,000 at this time of day?
          ")
         .put_in(clearing)
         .id();
 
     world
         .add("guard-dirty-note")
-        .guard(ReadThing(pid, note), &|w, _| !w.tag_has(NOTE, DIRTY))
+        .before(ReadThing(pid, note), &|w, _| !w.tag_has(NOTE, DIRTY))
         .action(Print("You've gotten it too dirty to read.".into()));
 
     world
@@ -129,7 +136,7 @@ space.  Trails lead to the north and south.
 
     // The sword
     let sword = world
-        .add("sword")
+        .add(SWORD)
         .thing("sword", "sword")
         .prose(
             Thing,
@@ -145,7 +152,7 @@ sharp edges anywhere.  Carved along the length of it are the words
 
     world
         .add("rule-sword-get")
-        .guard(GetThing(pid, sword), &|w,_| {
+        .before(GetThing(pid, sword), &|w,_| {
             !w.has(w.pid, DIRTY_HANDS)
         })
         .action(Print(
@@ -156,6 +163,7 @@ Only the pure may touch this sword.
             .into(),
         ))
         .action(Kill(pid));
+
     // Room: Mouth of Cave
     let cave_mouth = world
         .add("cave-mouth")
@@ -170,6 +178,37 @@ go back up the trail to the west.
             ",
         )
         .id();
+
+    let cave_1 = world
+        .add("cave-1")
+        .room("In Cave")
+        .prose(
+            Room,
+            "\
+You're in a damp, muddy cave, dimly lit by patches of the glowing fungus
+that indicates that game designer didn't want to be bothered with providing
+you a light source. The entrance is to the west, and a narrow passage continues
+to the east.
+        ")
+        .dead_end(East, "\
+At least, it would if the developer had implemented it yet.
+        ")
+        .id();
+
+    world
+        .add("before-cave-1")
+        .before(EnterRoom(pid, cave_1), &|w,_| w.tag_owns(w.pid, SWORD))
+        .action(Print("\
+Oh, hell, no, you're not going in there empty handed.  You'd better go back
+and get that sword.
+        ".into()));
+
+    world
+        .add("rule-enter-cave-1")
+        .once(EnterRoom(pid, cave_1), &|_,_| true)
+        .action(Print("\
+It's an unpleasant place but your sword gives you confidence and warm fuzzies.
+        ".into()));
 
     // UNUSED! Room: Bridge
     let bridge = world
@@ -201,6 +240,7 @@ how narrow it is.
     world.twoway(clearing, East, West, grotto);
     world.twoway(clearing, South, North, hilltop);
     world.twoway(hilltop, South, West, cave_mouth);
+    world.twoway(cave_mouth, East, West, cave_1);
 
     // Other Rules
 

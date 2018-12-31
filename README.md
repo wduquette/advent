@@ -8,11 +8,6 @@ using something like the ECS architecture.
 Also, see docs/journal.txt.
 
 * The Game
-  * Add "wayback" room.  
-    * You can't really go there.  It's the way you remember coming, but
-      it won't let you back.
-    * Could be done as an "EnterRoom" guard.
-    * Could be done as a "DeadEnd" destination.  (That would be nice.)
   * Add stone for sword to be in.
     * The stone should obscure the sword.  All you can see is the hilt.
     * The stone should have the words, "Only the pure".

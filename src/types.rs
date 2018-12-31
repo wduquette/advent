@@ -101,10 +101,24 @@ pub enum Event {
     /// A game turn has elapsed
     Turn,
 
+    /// EnterRoom(player, room): A player has entered (or wants to enter) a room
+    EnterRoom(ID, ID),
+
     /// GetThing(player, thing): A player has gotten (or wants to get) a thing
     GetThing(ID, ID),
 
     /// ReadThing(player, thing): A player has read (or wants to read) a thing's
     /// Book prose.
     ReadThing(ID, ID),
+}
+
+/// The destination of a link.
+#[derive(Clone, Debug)]
+pub enum LinkDest {
+    /// The link goes to another room.
+    Room(ID),
+
+    /// The link is a dead end.  The string is the prose to display to
+    /// the user.
+    DeadEnd(String)
 }

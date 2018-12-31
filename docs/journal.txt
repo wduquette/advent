@@ -110,7 +110,15 @@ x   Event predicates with better signatures?
             x   But it seems overly complicated.
             x   Gonna sit on this until I figure out how to handle
                 custom commands.
-
+x   Made the game begin with an implicit "look" command.  Rules (and
+    anything else) that's supposed to happen at time 0 now does.
+x   Wrote down some ideas about ambient sound.
+x   Extended and modified the map.
+x   Extended and modified it some more
+    x   Added LinkDest, with variants Room and DeadEnd.
+    x   Added the way back, as a DeadEnd.
+    x   Added the first room of the cave; you can't enter without
+        the sword.
 
 2018-12-30 (Sunday)
 x   Rule changes:
