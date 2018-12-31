@@ -77,6 +77,36 @@ x   Issue:
         x   Let's do this:
             x   has_flag, set_flag, and unset_flag become has, set, and unset.
             x   Add tag_has.
+            x   Done, and cleaned up the scenario.
+x   Event predicates with better signatures?
+    x   The problem with event predicates is that you'd really like to have
+        the event arguments available.  You can use match on the event enum,
+        but that leads to much wordier code.  What you'd really like are
+        predicates that have exactly the right signature, e.g.,
+        (World,player,thing) for a GetThing predicate.
+    x   But different events would have different signatures, e.g.,
+        x   Turn: (World)
+        x   GetThing: (World, player, thing)
+        x   GiveThing: (World, player, thing, to_npc)
+    x   The EBuilder::rule() method would need to take an event struct instead
+        of an Event and Predicate; and the event struct would need to accept
+        the predicate:
+        x   .rule(TurnEventHandler::new(|w| true))
+        x   .rule(GetThingEventHandler::new(|w,pid,tid| true))
+    x   Or, we could have an EBuilder method for each kind of supported event.
+        x   .on_get_thing(|w,pid,tid| ...)
+        x   .before_get_thing(|w,pid,tid| ...)
+        x   .on_po(|w,pid,oid| ...)
+        x   .before_po(|w,pid,oid| ...)
+    x   Or, we could have a builder method for each general category:
+        x   .on(Turn, |w| ...)
+        x   .on_po(GetThing(pid,note), |w,pid,note| ...)
+        x   .on_poi(GiveThing(pid,note,ogre), |w,pid,note,ogre| ...)
+    x   I kind of like the latter one.
+        x   It would use matching to build the relevant event handler struct.
+        x   Does mean a lot more coding for each event handler type.
+        x   But actually, we only need a type for each flavor.
+
 
 2018-12-30 (Sunday)
 x   Rule changes:
