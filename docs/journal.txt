@@ -38,7 +38,46 @@ x   Custom Flags
             get even messier.
     x   Conclusion: Try Option A; and extend with Option B if I ever need that.
     x   This works pretty well.
-    
+x   The scenario now uses a ReadThing guard to make the note illegible.
+x   Issue:
+    x   Writing predicates that involve entity IDs is a pain; for anything
+        but the PID you pretty much have to write a function, and that means
+        that the entity's logic is divided.
+        x   Option A: Add has_flag methods that uses string IDs
+            x   The "world" is the scenario's primary API.  It should be easier
+                for the scenario to reference entities by their tags.
+                x   Would need an alternate set of methods that use tags rather
+                    than IDs.
+                x   How to name them so that they are clear and concise both?
+            x   But for this purpose, all that's really needed is a tag-based
+                has_flag.
+        x   Option B: pre-assigned constant IDs
+            x   Alternatively, suppose I could pre-assign constant IDs, and then
+                use the ID constant.
+                x   All I need to do is make the ID assigner skip existing IDs.
+                x   I think that's cleaner.
+                x   Wait.  But then that affects the order in which you define
+                    the entities, which is a burden on the scenario author.
+                    x   Could make ID an isize instead of a usize, and use
+                        negative numbers for predefined items.  But that's
+                        obscure.
+                    x   Could recommend that scenario authors start predefined
+                        IDs at high numbers, e.g., 1000.
+                    x   Could add a reserve_id() method, or reserve_ids(), which
+                        reserves a range.
+                x   But really, all of these are making the scenario author work
+                    too hard.  This should just work, and be simple.
+        x   Option C: Special predicate facade
+            x   Instead of passing World to predicates, could pass a special
+                facade that provides just what's needed.
+            x   Could always use tags instead of IDs
+                x   But then you need to define tag constants for every entity,
+                    which is a nuisance, or use bare string literals, which
+                    is error prone.
+        x   Let's do this:
+            x   has_flag, set_flag, and unset_flag become has, set, and unset.
+            x   Add tag_has.
+
 2018-12-30 (Sunday)
 x   Rule changes:
     x   I'll want Enter(pid, room) rules and guards, and probably also

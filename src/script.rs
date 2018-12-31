@@ -37,12 +37,12 @@ impl Script {
 
                 // Set the flag on the entity's flag set
                 SetFlag(id, flag) => {
-                    world.set_flag(*id, *flag);
+                    world.set(*id, *flag);
                 }
 
                 // Clear the flag on the entity's flag set
                 UnsetFlag(id, flag) => {
-                    world.unset_flag(*id, *flag);
+                    world.unset(*id, *flag);
                 }
 
                 // Player/NPC drops thing into its current location.
@@ -60,13 +60,13 @@ impl Script {
 
                 // Kill the player/NPC
                 Kill(pid) => {
-                    world.set_flag(*pid, Flag::Dead);
+                    world.set(*pid, Flag::Dead);
                     visual::act("*** You have died. ***");
                 }
 
                 // Revive the player/NPC
                 Revive(pid) => {
-                    world.unset_flag(*pid, Flag::Dead);
+                    world.unset(*pid, Flag::Dead);
                     visual::act("*** You are alive! ***");
                 }
             }

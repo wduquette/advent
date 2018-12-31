@@ -166,8 +166,10 @@ impl World {
     /// Add a new entity using the builder pattern.  The entity will have the given tag.
     /// See also EBuilder, below.
     pub fn add(&mut self, tag: &str) -> EBuilder {
+        while self.tags.get(&self.next_id).is_some() {
+            self.next_id += 1;
+        }
         let id = self.next_id;
-        self.next_id += 1;
 
         let tc = TagComponent::new(id, tag);
         self.tags.insert(id, tc);
@@ -238,14 +240,18 @@ impl World {
     }
 
     /// Looks up an entity's ID in the tag map.
-    /// TODO: Might want two variants, one that returns
-    /// Option and one that panics.
     pub fn lookup_id(&self, tag: &str) -> Option<ID> {
         if let Some(id) = self.tag_map.get(tag) {
             Some(*id)
         } else {
             None
         }
+    }
+
+    /// Looks up an entity's ID in the tag map.  Panics if there is none.
+    pub fn lookup(&self, tag: &str) -> ID {
+        *self.tag_map.get(tag)
+            .unwrap_or_else(|| panic!("No entity with tag: {}", tag))
     }
 
     /// Links one room to another in the given direction.
@@ -292,8 +298,16 @@ impl World {
     // Flags
 
     /// Is the flag set on the entity?
-    #[allow(dead_code)]
-    pub fn has_flag(&self, id: ID, flag: Flag) -> bool {
+    pub fn has(&self, id: ID, flag: Flag) -> bool {
+        assert!(self.has_flags(id) "Not a flag set: [{}]", id);
+        let fc = &self.flag_sets[&id];
+
+        fc.has(flag)
+    }
+
+    /// Is the flag set on the entity?
+    pub fn tag_has(&self, tag: &str, flag: Flag) -> bool {
+        let id = self.lookup(tag);
         assert!(self.has_flags(id) "Not a flag set: [{}]", id);
         let fc = &self.flag_sets[&id];
 
@@ -301,7 +315,7 @@ impl World {
     }
 
     /// Set the flag on the entity
-    pub fn set_flag(&mut self, id: ID, flag: Flag) {
+    pub fn set(&mut self, id: ID, flag: Flag) {
         assert!(self.has_flags(id) "Not a flag set: [{}]", id);
 
         let fc = self.flag_sets.get_mut(&id).unwrap();
@@ -311,7 +325,7 @@ impl World {
     }
 
     /// Clear the flag from the entity
-    pub fn unset_flag(&mut self, id: ID, flag: Flag) {
+    pub fn unset(&mut self, id: ID, flag: Flag) {
         assert!(self.has_flags(id) "Not a flag set: [{}]", id);
 
         let fc = self.flag_sets.get_mut(&id).unwrap();

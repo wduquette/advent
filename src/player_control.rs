@@ -112,13 +112,13 @@ fn cmd_go(world: &mut World, player: &Player, dir: Dir) -> CmdResult {
     if let Some(dest) = phys::follow_link(world, player.loc, dir) {
         phys::put_in(world, player.id, dest);
 
-        if !world.has_flag(player.id, Seen(dest)) {
+        if !world.has(player.id, Seen(dest)) {
             visual::room(world, dest);
         } else {
             visual::room_brief(world, dest);
         }
 
-        world.set_flag(player.id, Seen(dest));
+        world.set(player.id, Seen(dest));
         Ok(Normal)
     } else {
         Err("You can't go that way.".into())
@@ -172,7 +172,7 @@ fn cmd_read(world: &mut World, player: &Player, name: &str) -> CmdResult {
         }
 
         // If he's holding it, or it's scenery, then he can read it.
-        if phys::owns(world, player.id, thing) || world.has_flag(thing, Scenery) {
+        if phys::owns(world, player.id, thing) || world.has(thing, Scenery) {
             phys::read_thing(world, player.id, thing)?;
             Ok(Normal)
         } else {
@@ -187,17 +187,17 @@ fn cmd_read(world: &mut World, player: &Player, name: &str) -> CmdResult {
 // TODO: As currently implemented, this should be a scenario command, not a
 // built-in command.
 fn cmd_wash_hands(world: &mut World, player: &Player) -> CmdResult {
-    if !world.has_flag(player.loc, HAS_WATER) {
+    if !world.has(player.loc, HAS_WATER) {
         return Err("That'd be a neat trick, since there's no water here.".into());
     }
 
     visual::prose("You wash your hands in the water.")
         .when(
-            world.has_flag(player.id, DIRTY_HANDS),
+            world.has(player.id, DIRTY_HANDS),
             "They look much cleaner now.",
         )
         .para();
-    world.unset_flag(player.id, DIRTY_HANDS);
+    world.unset(player.id, DIRTY_HANDS);
 
     Ok(Normal)
 }

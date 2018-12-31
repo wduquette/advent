@@ -7,8 +7,6 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* The note's "Book" prose hook could be implemented as normal prose
-  plus a Read guard that says it's too dirty to read.
 * Need better handling of the introduction text; the first story event
   should just be prose displayed before the first room.
 * A rule that fires for turn 0 should fire before the player's first command.
@@ -113,6 +111,17 @@ The entities themselves have very little logic attached to them.
   * The `player_control` system which processes the player's commands.
 
 ## Ideas for the Future
+
+### Clean Scenario API
+
+The framework should be implemented as a library crate with a clean public API
+for defining games.  The game API should have two parts: one for building
+the scenario, and one for use by hooks, etc., while the game is running.
+
+**Current Status**: The World struct is _de facto_ the public API for the
+scenario.  But the scenario still refers to the phys:: system (at least),
+and the World includes methods for use at both build and run time, and
+also methods for use by the framework itself.
 
 ### Fancy Undo
 

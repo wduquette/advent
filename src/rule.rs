@@ -40,7 +40,7 @@ pub fn fire_events(world: &mut World, events: &[&Event]) {
         .rules
         .keys()
         .cloned()
-        .filter(|id| !world.has_flag(*id, FireOnce) || !world.has_flag(*id, Fired))
+        .filter(|id| !world.has(*id, FireOnce) || !world.has(*id, Fired))
         .collect();
 
     for id in rules {
@@ -59,5 +59,5 @@ pub fn fire_events(world: &mut World, events: &[&Event]) {
 fn fire_rule(world: &mut World, id: ID) {
     let script = world.rules[&id].script.clone();
     script.execute(world);
-    world.set_flag(id, Fired);
+    world.set(id, Fired);
 }

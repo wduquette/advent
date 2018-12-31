@@ -65,7 +65,7 @@ pub fn scenery(world: &World, owner: ID) -> BTreeSet<ID> {
 
     // FIRST, get everything that's flagged as scenery.
     for id in contents(world, owner) {
-        if world.has_flag(id, Scenery) {
+        if world.has(id, Scenery) {
             result.insert(id);
         }
     }
@@ -102,7 +102,7 @@ pub fn removable(world: &World, loc: ID) -> BTreeSet<ID> {
     // FIRST, get everything owned by the viewer that isn't flagged
     // as scenario.
     for id in contents(world, loc) {
-        if !world.has_flag(id, Scenery) {
+        if !world.has(id, Scenery) {
             result.insert(id);
         }
     }
@@ -128,7 +128,7 @@ pub fn gettable(world: &World, viewer: ID) -> BTreeSet<ID> {
     // FIRST, get everything in the current location that isn't
     // flagged as "scenery".
     for id in contents(world, loc(world, viewer)) {
-        if !world.has_flag(id, Scenery) {
+        if !world.has(id, Scenery) {
             result.insert(id);
         }
     }

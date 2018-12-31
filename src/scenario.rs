@@ -1,6 +1,5 @@
 //! Scenario definition
 
-use crate::types::Event;
 use crate::entity::ID;
 use crate::phys;
 use crate::types::Action::*;
@@ -104,12 +103,13 @@ step!
 
     world
         .add("guard-dirty-note")
-        .guard(ReadThing(pid, note), &|w, e| predicate_note_is_clean(w, e))
+        .guard(ReadThing(pid, note), &|w, _| !w.tag_has(NOTE, DIRTY))
         .action(Print("You've gotten it too dirty to read.".into()));
 
     world
         .add("rule-dirty-note")
-        .always(GetThing(pid, note), &|w, e| predicate_rule_dirty_note(w, e))
+        .always(GetThing(pid, note),
+            &|w, _| w.has(w.pid, DIRTY_HANDS) && !w.tag_has(NOTE, DIRTY))
         .action(Print(
             "The dirt from your hands got all over the note.".into(),
         ))
@@ -134,7 +134,7 @@ sharp edges anywhere.  Carved along the length of it are the words
     world
         .add("rule-sword-get")
         .guard(GetThing(pid, sword), &|w,_| {
-            !w.has_flag(w.pid, DIRTY_HANDS)
+            !w.has(w.pid, DIRTY_HANDS)
         })
         .action(Print(
             "\
@@ -160,7 +160,7 @@ and gosh, this doesn't look anything like the toy aisle.
 
     world
         .add("fairy-godmother-rule")
-        .always(Turn, &|w, _| w.has_flag(w.pid, Dead))
+        .always(Turn, &|w, _| w.has(w.pid, Dead))
         .action(Print(
             "\
 A fairy godmother hovers over your limp body.  She frowns;
@@ -173,7 +173,7 @@ her wand.  There's a flash, and she disappears.
 
     // NEXT, set the starting location.
     phys::put_in(world, world.pid, clearing);
-    world.set_flag(world.pid, Seen(clearing));
+    world.set(world.pid, Seen(clearing));
 
     // NEXT, return the world.
     the_world
@@ -184,37 +184,18 @@ fn player_visual(world: &World, pid: ID) -> String {
     Buffer::new()
         .add("You've got all the usual bits.")
         .when(
-            world.has_flag(pid, DIRTY_HANDS),
+            world.has(pid, DIRTY_HANDS),
             "Your hands are kind of dirty, though.",
         )
         .when(
-            !world.has_flag(pid, DIRTY_HANDS),
+            !world.has(pid, DIRTY_HANDS),
             "Plus, they're clean bits!",
         )
         .get()
 }
 
-/// Predicate for guard-note-dirty
-fn predicate_note_is_clean(world: &World, event: &Event) -> bool {
-    match event {
-        ReadThing(_,note) => {
-           !world.has_flag(*note, DIRTY)
-        }
-        _ => false,
-    }
-}
-/// Predicate for rule-note-dirty
-fn predicate_rule_dirty_note(world: &World, event: &Event) -> bool {
-    match event {
-        GetThing(pid,note) => {
-            world.has_flag(*pid, DIRTY_HANDS) && !world.has_flag(*note, DIRTY)
-        }
-        _ => false,
-    }
-}
-
 fn note_thing_prose(world: &World, id: ID) -> String {
-    if world.has_flag(id, DIRTY) {
+    if world.has(id, DIRTY) {
         "A note, on plain paper.  It looks pretty grubby; someone's been mishandling it.".into()
     } else {
         "A note, on plain paper".into()

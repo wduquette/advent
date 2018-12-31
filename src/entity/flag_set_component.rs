@@ -40,23 +40,6 @@ impl FlagSetComponent {
         self.set.remove(&flag);
     }
 
-    /// Replaces all other occurrences of the same flag variant
-    /// with this flag.
-    #[allow(dead_code)]
-    pub fn replace(&mut self, flag: Flag) {
-        // FIRST, remove all other occurrences of the same variant, e.g., Seen(_).
-        let disc = std::mem::discriminant(&flag);
-        self.set = self
-            .set
-            .iter()
-            .cloned()
-            .filter(|f| std::mem::discriminant(f) != disc)
-            .collect();
-
-        // NEXT, add the new one.
-        self.set(flag);
-    }
-
     pub fn iter(&self) -> std::collections::hash_set::Iter<'_, Flag> {
         self.set.iter()
     }
@@ -99,20 +82,6 @@ mod tests {
         assert_eq!(set.len(), 1);
         assert!(!set.has(Seen(1)));
         assert!(set.has(Seen(2)));
-    }
-
-    #[test]
-    fn replace() {
-        let mut set = FlagSetComponent::new();
-        set.set(Seen(1));
-        set.set(Seen(2));
-
-        set.replace(Seen(3));
-
-        assert_eq!(set.len(), 1);
-        assert!(!set.has(Seen(1)));
-        assert!(!set.has(Seen(2)));
-        assert!(set.has(Seen(3)));
     }
 
     #[test]
