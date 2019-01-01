@@ -8,11 +8,6 @@ using something like the ECS architecture.
 Also, see docs/journal.txt.
 
 * The Game
-  * Add stone for sword to be in.
-    * The stone should obscure the sword.  All you can see is the hilt.
-    * The stone should have the words, "Only the pure".
-    * When you get the sword successfully, the stone should evaporate.
-    * You can't enter the cave without the sword.  It makes you feel better.
   * Add more story.
   * Main loop should halt if you're dead at the end of it.
   * Add NPCs, monsters.
