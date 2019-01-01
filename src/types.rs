@@ -82,6 +82,9 @@ pub enum Action {
     /// Unset the flag on the entity with the given ID.
     UnsetFlag(ID, Flag),
 
+    /// PutIn(thing, inv)
+    PutIn(ID, ID),
+
     /// Swap an item in the world for one in LIMBO
     Swap(ID, ID),
 

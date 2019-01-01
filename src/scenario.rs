@@ -10,10 +10,12 @@ use crate::types::Flag::*;
 use crate::types::ProseType::*;
 use crate::visual::Buffer;
 use crate::world::World;
+use crate::world::LIMBO;
 
 // Constant entity tags, for lookup
 const NOTE: &str = "note";
 const SWORD: &str = "sword";
+const STONE: &str = "stone";
 
 // User-defined flags
 // TODO: These constants should only be used in the scenario itself; but at present they
@@ -22,6 +24,7 @@ const SWORD: &str = "sword";
 const DIRTY: Flag = User("DIRTY");
 pub const DIRTY_HANDS: Flag = User("DIRTY_HANDS");
 pub const HAS_WATER: Flag = User("HAS_WATER");
+pub const TAKEN: Flag = User("TAKEN");
 
 /// Build the initial state of the game world.
 pub fn build() -> World {
@@ -134,35 +137,58 @@ space.  Trails lead to the north and south.
         )
         .id();
 
+    // The stone
+    let stone = world
+        .add(STONE)
+        .thing("stone", "stone")
+        .prose(
+            Thing,
+            "\
+It's a massive block of marble, four feet wide and three feet high.  The top is flat, and the
+four sides slope inward.  There's a sword sticking out of the top.  These words are chiseled
+into one side:
+||   * Only The Pure *
+            "
+        )
+        .flag(Scenery)
+        .put_in(hilltop)
+        .id();
+
     // The sword
     let sword = world
         .add(SWORD)
         .thing("sword", "sword")
-        .prose(
-            Thing,
-            "\
-The sword, if you want to call it that, is a three-foot length of dark hardwood
-with a sharkskin hilt on one end.  It's polished so that it gleams, and it has no
-sharp edges anywhere.  Carved along the length of it are the words
-\"Emotional Support Sword (TM)\".
-        ",
-        )
+        .prose_hook(Thing, &|w, id| sword_thing_prose(w, id))
         .put_in(hilltop)
         .id();
 
     world
-        .add("rule-sword-get")
+        .add("before-sword-get")
         .before(GetThing(pid, sword), &|w,_| {
             !w.has(w.pid, DIRTY_HANDS)
         })
         .action(Print(
             "\
 Oh, you so didn't want to touch the sword with dirty hands.
-Only the pure may touch this sword.
+Weren't you paying attention? Only the pure may touch this sword.
             "
             .into(),
         ))
         .action(Kill(pid));
+
+    world
+        .add("rule-sword-get")
+        .once(GetThing(pid, sword), &|w,_| !w.tag_has(SWORD, TAKEN))
+        .action(Print(
+            "\
+The sword almost seems to leap into your hands.  As you marvel at it
+(and, really, there's something odd about it), the marble block dissolves
+into white mist and blows away.
+            "
+            .into(),
+        ))
+        .action(PutIn(stone, LIMBO))
+        .action(SetFlag(sword, TAKEN));
 
     // Room: Mouth of Cave
     let cave_mouth = world
@@ -286,5 +312,18 @@ fn note_thing_prose(world: &World, id: ID) -> String {
         "A note, on plain paper.  It looks pretty grubby; someone's been mishandling it.".into()
     } else {
         "A note, on plain paper".into()
+    }
+}
+
+fn sword_thing_prose(world: &World, id: ID) -> String {
+    if world.has(id, TAKEN) {
+        "\
+The sword, if you want to call it that, is a three-foot length of dark hardwood
+with a sharkskin hilt on one end.  It's polished so that it gleams, and it has no
+sharp edges anywhere.  Carved along the length of it are the words
+\"Emotional Support Sword (TM)\".
+        ".into()
+    } else {
+        "All you can really see is the hilt; the rest is embedded in the stone.".into()
     }
 }
