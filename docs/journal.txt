@@ -1,6 +1,49 @@
 Bonaventure Journal
 
-2018-12-31 (Monday)
+2018-12-31 (Monday) Part II
+x   Problems with Scenario Definitions
+    x   Problems:
+        x   Can't define room links in-line, as part of the room, since
+            at least some of the other rooms won't be defined yet.
+        x   Writing rule predicates is tricky, because the event parameters
+            aren't easily available in the predicate.
+            x   In Java, the closure would simply keep the values, but Rust
+                is too strict to make that easy.  Or, at least, I don't know
+                how to do it.
+            x   So either you need to use global constants (i.e., tag names)
+                or parse the arguments out of the event enum.
+            x   It really ought to be easy to write these predicates.
+        x   A single thing or room can have multiple rules associated with it.
+            x   It would be nice if they could be merged together in some
+                way that makes sense.
+        x   The syntax for entering prose is overly verbose.
+        x   The syntax for entering rule actions is overly verbose.
+            x   In general, the scenario author shouldn't need to deal with
+                the action enum; we should have a method interface for it,
+                that compiles into the Script object.
+        x   The entity rules all take the player as an argument; but really,
+            they only apply to the player, and there's never going to be
+            multiple players. NPCs/monsters will have their own logic.
+    x   Some ideas
+        x   Define a WorldBuilder struct.  It creates a World internally,
+            and then lets you update it in EBuilder style.  It can provide
+            different builders for rules vs normal entities, and it can
+            mostly use tags instead of numeric IDs.  IDs get used internally.
+            x   Thus, the scenario developer doesn't work directly with the
+                entities or the World API
+            x   Point is, even with the current World building code there's
+                no real reason why you need to build an entity all at once.
+                An extend(id) method could return an EntityBuilder just
+                find.  And a link(Dir,Tag) method could easily create a
+                stub room that would later be fleshed out.
+            x   I'd want to save some details for checking when the world
+                is complete, like, "X" is supposed to be a room; is it?
+        x   Define a WorldView struct (or some better name).  This is passed
+            to predicates instead of the entire World, and includes only the
+            queries needed by the predicates
+            x   Or, go ahead and use a scripting language for the predicates.
+
+2018-12-31 (Monday) Part I
 x   Custom Flags
     x   Tried adding flag Global(&'static str) -- not great
         x   Rationale:

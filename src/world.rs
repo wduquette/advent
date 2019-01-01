@@ -17,6 +17,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 pub const LIMBO: ID = 0;
+pub const PLAYER: ID = 1;
 
 /// The game state.  Uses a variant of the Entity-Component-System architecture.
 /// This struct provides many methods for querying and mutating entities.  These methods
