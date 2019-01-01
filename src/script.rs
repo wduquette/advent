@@ -45,6 +45,11 @@ impl Script {
                     world.unset(*id, *flag);
                 }
 
+                // Moves a thing to a given place.
+                PutIn(thing, inv) => {
+                    phys::put_in(world, *thing, *inv);
+                }
+                
                 // Player/NPC drops thing into its current location.
                 Drop(pid, thing) => {
                     let loc = phys::loc(world, *pid);

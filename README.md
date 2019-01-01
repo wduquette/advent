@@ -7,26 +7,14 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Need better handling of the introduction text; the first story event
-  should just be prose displayed before the first room.
-* A rule that fires for turn 0 should fire before the player's first command.
-  * Effectively, the player's first command should be "look".
-* Consider: scenario builds links using tags, which are added to a temporary
-  data structure and resolved after the scenario is completely built.
-  Then links could be part of initial entity creation.
-  * .put_in() could work the same way.  Give the tag, and then it's resolved
-    at the end.
-* Debug commands shouldn't advance the clock.
 * The Game
-  * Main loop should halt if you're dead at the end of it.
-  * Add puzzle to make water flow in the stream.
-  * Extend the world.
-  * Add some more things and more puzzles.
   * Add more story.
+  * Main loop should halt if you're dead at the end of it.
   * Add NPCs, monsters.
     * Maybe less of a standard text adventure, more of a text-based
       RPG?
   * Add winning condition.
+* Debug commands shouldn't advance the clock.
 * Add save/restore
 * Improve vocabulary and grammar management
   * Consider design where verbs (operations) depend on
@@ -123,6 +111,19 @@ scenario.  But the scenario still refers to the phys:: system (at least),
 and the World includes methods for use at both build and run time, and
 also methods for use by the framework itself.
 
+### Ambient Sound
+
+It would be cool to manage sources of sound (conveyed, as always, by prose).
+Sounds could be Quiet, Medium, or Loud.  Quiet sounds you can only hear if
+you "listen"; others appear as part of the normal room description.  
+Volume decreases with distance; Loud sounds can be heard in
+adjoining rooms without explicitly listening, and Medium sounds can be heard
+if you "listen".
+
+To do this properly we would need a notion of the distance between two rooms;
+just because they are adjacent in the link map doesn't mean they are close
+to each other.  A link could be a long road, for example.
+
 ### Fancy Undo
 
 At present Bonaventure supports undoing the very last command.  This is
@@ -133,6 +134,9 @@ fire or an NPC move during that time.
 
 Consequently, we may want a multi-level undo; and if so, we certainly need to
 tell the user what was undone.
+
+Alternatively, we can design the game so that undo isn't needed.  And for
+some games, undo is undesirable (i.e., if combat is a real thing)
 
 ### NPCs and Monsters
 

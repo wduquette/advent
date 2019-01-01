@@ -107,24 +107,6 @@ fn handle_normal_command(game: &mut Game, player: &Player, cmd: &Command) -> Cmd
 
 // User Commands
 
-/// Move the player in the given direction
-fn cmd_go(world: &mut World, player: &Player, dir: Dir) -> CmdResult {
-    if let Some(dest) = phys::follow_link(world, player.loc, dir) {
-        phys::put_in(world, player.id, dest);
-
-        if !world.has(player.id, Seen(dest)) {
-            visual::room(world, dest);
-        } else {
-            visual::room_brief(world, dest);
-        }
-
-        world.set(player.id, Seen(dest));
-        Ok(Normal)
-    } else {
-        Err("You can't go that way.".into())
-    }
-}
-
 /// Display basic help, i.e., what commands are available.
 fn cmd_help() -> CmdResult {
     visual::info(
@@ -135,6 +117,23 @@ You know.  Like that.
     );
 
     Ok(Normal)
+}
+
+/// Move the player in the given direction
+fn cmd_go(world: &mut World, player: &Player, dir: Dir) -> CmdResult {
+    match phys::follow_link(world, player.loc, dir) {
+        Some(LinkDest::Room(dest)) => {
+            phys::enter_room(world, player.id, dest)?;
+            Ok(Normal)
+        },
+        Some(LinkDest::DeadEnd(prose)) => {
+            visual::info(&prose);
+            Ok(Normal)
+        }
+        None => {
+            Err("You can't go that way.".into())
+        }
+    }
 }
 
 /// Re-describe the current location.

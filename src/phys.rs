@@ -8,7 +8,8 @@ use crate::entity::ID;
 use crate::rule;
 use crate::types::Dir;
 use crate::types::Event::*;
-use crate::types::Flag::Scenery;
+use crate::types::LinkDest;
+use crate::types::Flag::*;
 use crate::visual;
 use crate::world::World;
 use crate::world::LIMBO;
@@ -30,7 +31,7 @@ pub fn loc(world: &World, thing: ID) -> ID {
 
 /// Tries to follow a link in the given direction; returns the linked
 /// location if any.
-pub fn follow_link(world: &World, loc: ID, dir: Dir) -> Option<ID> {
+pub fn follow_link(world: &World, loc: ID, dir: Dir) -> Option<LinkDest> {
     assert_is_room(world, loc);
 
     let roomc = &world.rooms[&loc];
@@ -142,6 +143,7 @@ pub fn gettable(world: &World, viewer: ID) -> BTreeSet<ID> {
 // These operations move things about and do the bookkeeping; but they contain no
 // game logic.
 
+
 /// Removes the thing from its current location and puts it in LIMBO.
 pub fn take_out(world: &mut World, thing: ID) {
     let container = loc(world, thing);
@@ -166,6 +168,25 @@ pub fn put_in(world: &mut World, thing: ID, container: ID) {
 
 //---------------------------------------------------------------------------------
 // High-level operations
+
+/// The player tries to enter the room.
+pub fn enter_room(world: &mut World, pid: ID, room: ID) -> PhysResult {
+    if rule::allows(world, &EnterRoom(pid, room)) {
+        put_in(world, pid, room);
+
+        if !world.has(pid, Seen(room)) {
+            visual::room(world, room);
+        } else {
+            visual::room_brief(world, room);
+        }
+
+        world.set(pid, Seen(room));
+
+        rule::fire_event(world, &EnterRoom(pid, room));
+    }
+
+    Ok(())
+}
 
 /// The player gets the thing.
 pub fn get_thing(world: &mut World, pid: ID, thing: ID) -> PhysResult {

@@ -263,7 +263,7 @@ impl World {
         assert!(self.is_room(to), "Not a room: [{}]", to);
 
         let fromc = self.rooms.get_mut(&from).unwrap();
-        fromc.links.insert(dir, to);
+        fromc.links.insert(dir, LinkDest::Room(to));
     }
 
     /// Links two rooms in the given directions.
@@ -272,10 +272,19 @@ impl World {
         assert!(self.is_room(b), "Not a room: [{}]", b);
 
         let fromc = self.rooms.get_mut(&a).unwrap();
-        fromc.links.insert(to_b, b);
+        fromc.links.insert(to_b, LinkDest::Room(b));
 
         let toc = self.rooms.get_mut(&b).unwrap();
-        toc.links.insert(to_a, a);
+        toc.links.insert(to_a, LinkDest::Room(a));
+    }
+
+    pub fn tag_owns(&self, owner: ID, thing: &str) -> bool {
+        let tid = self.lookup(thing);
+        if let Some(inv) = self.inventories.get(&owner) {
+            inv.has(tid)
+        } else {
+            false
+        }
     }
 
     //--------------------------------------------------------------------------------------------
@@ -488,9 +497,23 @@ impl<'a> EBuilder<'a> {
         self
     }
 
+    pub fn dead_end(self, dir: Dir, prose: &str) -> EBuilder<'a> {
+        assert!(
+            self.world.rooms.get(&self.id).is_some(),
+            "Tried to a dead end to a non-Room entity: [{}] {}",
+            self.id,
+            self.tag
+        );
+
+        self
+            .world.rooms.get_mut(&self.id).unwrap().links.insert(dir, LinkDest::DeadEnd(prose.into()));
+
+        self
+    }
+
     /// Adds an event guard.  If the predicate is true, the event will be allowed to
     /// occur; if it is false, the guard's actions will execute.
-    pub fn guard(mut self, event: Event, predicate: EventPredicate) -> EBuilder<'a> {
+    pub fn before(mut self, event: Event, predicate: EventPredicate) -> EBuilder<'a> {
         assert!(
             !self.world.rules.get(&self.id).is_some(),
             "Tried to add rule component twice: [{}] {}",

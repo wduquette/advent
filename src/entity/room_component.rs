@@ -1,6 +1,6 @@
 //! The Room Component
 
-use crate::entity::ID;
+use crate::types::LinkDest;
 use crate::types::Dir;
 use std::collections::HashMap;
 
@@ -11,7 +11,7 @@ pub struct RoomComponent {
     pub name: String,
 
     /// Links from this room to other rooms.
-    pub links: HashMap<Dir, ID>,
+    pub links: HashMap<Dir, LinkDest>,
 }
 
 impl RoomComponent {

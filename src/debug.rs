@@ -3,6 +3,7 @@
 use crate::entity::ID;
 use crate::phys;
 use crate::world::*;
+use crate::types::LinkDest::*;
 
 /// List all entities in the world
 pub fn list_world(world: &World) {
@@ -41,8 +42,15 @@ pub fn dump_entity(world: &World, id: ID) {
     // NEXT, if it's a room display the room info.
     if let Some(roomc) = &world.rooms.get(&id) {
         println!("  Room name: {}", roomc.name);
-        for (dir, id) in &roomc.links {
-            println!("    Link: {:?} to [{}] {}", dir, id, world.tag(*id));
+        for (dir, dest) in &roomc.links {
+            match dest {
+                Room(id) => {
+                    println!("    Link: {:?} to [{}] {}", dir, id, world.tag(*id));
+                },
+                DeadEnd(prose) => {
+                    println!("    Link: {:?} to DeadEnd: {}", dir, prose);
+                }
+            }
         }
     }
 

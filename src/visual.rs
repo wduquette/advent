@@ -111,7 +111,12 @@ pub fn can_read(world: &World, thing: ID) -> bool {
 
 /// Outputs the content of a book.
 pub fn read(world: &World, book: ID) {
-    para(&get_prose(world, book, ProseType::Book));
+    Buffer::new()
+        .add("The")
+        .add(&world.things[&book].noun)
+        .add("reads:")
+        .add(&get_prose(world, book, ProseType::Book))
+        .para();
 }
 
 //-----------------------------------------------------------------------------
