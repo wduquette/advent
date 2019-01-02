@@ -18,12 +18,31 @@ use crate::entity::thing_component::*;
 use crate::phys;
 use crate::types::*;
 use crate::world::World;
+use crate::world;
 
 //-----------------------------------------------------------------------------------------------
 // Constants
 
-const LIMBO: &str = "LIMBO";
-const PLAYER: &str = "PLAYER";
+/// The tag of the LIMBO entity, where currently unused entities live.
+pub const LIMBO: &str = "LIMBO";
+
+/// The tag of the PLAYER entity.
+pub const PLAYER: &str = "PLAYER";
+
+/// Events for which rules can be written.
+pub enum WBEvent<'a> {
+    /// The player gets (or tries to get) the tagged entity
+    GetThing(&'a str),
+
+    /// The player reads (or tries to read) the tagged entity
+    ReadThing(&'a str),
+
+    /// The player enters (or tries to enter) the tagged entity
+    EnterRoom(&'a str),
+}
+
+//-----------------------------------------------------------------------------------------------
+// The World Builder
 
 /// # WorldBuilder
 ///
@@ -112,7 +131,7 @@ impl WorldBuilder {
         }
     }
 
-    /// Creates and configures a rule.
+    /// Creates and configures a rule that will be triggered every turn.
     pub fn rule(&mut self, tag: &str) -> RuleBuilder {
         let id = self.world.alloc(tag);
 
@@ -122,6 +141,44 @@ impl WorldBuilder {
         RuleBuilder {
             wb: self,
             tag: tag.to_string(),
+            id,
+        }
+    }
+
+    /// Creates and configures a rule that will be triggered on a specific
+    /// event.
+    pub fn on(&mut self, evt: &WBEvent) -> RuleBuilder {
+        // FIRST, compute the internal event.
+        let mut rulec = RuleComponent::new();
+
+        let tag = match evt {
+            WBEvent::GetThing(thing_tag) => {
+                let tid = self.world.alloc(thing_tag);
+                rulec.event = Event::GetThing(self.world.pid, tid);
+                // TODO: Add thing expectation for tid.
+                format!("on-get-{}", thing_tag)
+            }
+            WBEvent::ReadThing(thing_tag) => {
+                let tid = self.world.alloc(thing_tag);
+                rulec.event = Event::ReadThing(self.world.pid, tid);
+                // TODO: Add thing:book expectation for tid.
+                format!("on-read-{}", thing_tag)
+            }
+            WBEvent::EnterRoom(room_tag) => {
+                let rid = self.world.alloc(room_tag);
+                rulec.event = Event::EnterRoom(self.world.pid, rid);
+                // TODO: Add room expectation for rid.
+                format!("on-enter-{}", room_tag)
+            }
+        };
+
+        let id = self.world.alloc(&tag);
+        self.world.rules.insert(id, rulec);
+        self.add_flag_set(id);
+
+        RuleBuilder {
+            wb: self,
+            tag: tag,
             id,
         }
     }
@@ -355,7 +412,7 @@ impl<'a> RuleBuilder<'a> {
 
     /// Specifies the predicate.  If omitted, the rule fires every time it
     /// is triggered.
-    pub fn when(self, predicate: EventPredicate) -> RuleBuilder<'a> {
+    pub fn when(self, predicate: RulePredicate) -> RuleBuilder<'a> {
         self.wb.world.rules.get_mut(&self.id).unwrap().predicate = predicate;
         self
     }
@@ -365,10 +422,56 @@ impl<'a> RuleBuilder<'a> {
         self.wb.add_flag(self.id, Flag::FireOnce);
         self
     }
+
     /// Specifies text to print when the rule fires.
     pub fn print(self, text: &str) -> RuleBuilder<'a> {
         let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
         rulec.script.add(Action::Print(text.into()));
+        self
+    }
+
+    /// Sets a flag on the entity.
+    pub fn set_flag(self, tag: &str, flag: Flag) -> RuleBuilder<'a> {
+        // FIRST, get the entity on which we'll be adding the flag, and
+        // make sure it's the kind of thing we can set a flag on.
+        let id = self.wb.world.alloc(tag);
+        self.wb.add_flag_set(id);
+
+        // NEXT, add the action.
+        let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
+        rulec.script.add(Action::SetFlag(id, flag));
+        self
+    }
+
+    /// Moves a thing to LIMBO
+    pub fn forget(self, thing_tag: &str) -> RuleBuilder<'a> {
+        // FIRST, get the entity which we'll be forgetting.
+        let id = self.wb.world.alloc(thing_tag);
+        // TODO: add thing expectation
+
+        // NEXT, add the action.
+        let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
+        rulec.script.add(Action::PutIn(id, world::LIMBO));
+        self
+    }
+
+    /// Kills the tagged entity, i.e., sets the Dead flag.
+    /// TODO: At present, really presumes that the entity is the player.
+    /// TODO: Add expectation that the entity is something that can be killed.
+    pub fn kill(self, tag: &str) -> RuleBuilder<'a> {
+        let id = self.wb.world.lookup(tag);
+        let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
+        rulec.script.add(Action::Kill(id));
+        self
+    }
+
+    /// Revives the tagged entity, i.e., clears the Dead flag.
+    /// TODO: At present, really presumes that the entity is the player.
+    /// TODO: Add expectation that the entity is something that can be killed.
+    pub fn revive(self, tag: &str) -> RuleBuilder<'a> {
+        let id = self.wb.world.lookup(tag);
+        let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
+        rulec.script.add(Action::Revive(id));
         self
     }
 }

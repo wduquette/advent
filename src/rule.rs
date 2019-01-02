@@ -12,7 +12,7 @@ pub fn allows(world: &mut World, event: &Event) -> bool {
     for id in world.rules.keys().cloned() {
         let rulec = &world.rules[&id];
         if rulec.is_guard && event == &rulec.event {
-            if (rulec.predicate)(world, &rulec.event) {
+            if (rulec.predicate)(world) {
                 // The action is allowed.
                 return true;
             } else {
@@ -47,7 +47,7 @@ pub fn fire_events(world: &mut World, events: &[&Event]) {
         let rulec = &world.rules[&id];
         if !rulec.is_guard
             && events.contains(&&rulec.event)
-            && (rulec.predicate)(world, &rulec.event)
+            && (rulec.predicate)(world)
         {
             fire_rule(world, id);
         }

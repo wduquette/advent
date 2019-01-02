@@ -2,12 +2,12 @@
 
 use crate::entity::ID;
 use crate::types::Dir::*;
-use crate::types::Event::*;
 use crate::types::Flag;
 use crate::types::Flag::*;
 use crate::visual::Buffer;
 use crate::world::World;
-use crate::world_builder::WorldBuilder;
+use crate::world_builder::*;
+use crate::world_builder::WBEvent::*;
 
 // User-defined flags
 // TODO: These constants should only be used in the scenario itself; but at present they
@@ -33,7 +33,7 @@ pub fn build() -> World {
 
     // Rule: Story 1
     wb.rule("rule-story-1")
-        .when(&|w,_| w.clock == 0)
+        .when(&|w| w.clock == 0)
         .print("\
 You don't know where you are.  You don't even know where you want to
 be.  All you know is that your feet are wet, your hands are dirty,
@@ -69,15 +69,15 @@ under the statue in the castle courtyard before nine o'clock tomorrow morning.
          ");
 
     // You can't read the note if it's dirty.
-    wb.allow_read("note")
-        .unless(&|w| w.tag_has("note", DIRTY))
-        .print("You've gotten it too dirty to read.");
+    // wb.allow(Read("note"))
+    //     .unless(&|w| w.tag_has("note", DIRTY))
+    //     .print("You've gotten it too dirty to read.");
 
     // The note gets dirty if the player picks it up with dirty hands.
-    wb.on_get("note")
-        .when(&|w| w.tag_has(PLAYER, DIRTY_HANDS) && !w.tag_has(NOTE, DIRTY))
+    wb.on(&GetThing("note"))
+        .when(&|w| w.tag_has(PLAYER, DIRTY_HANDS) && !w.tag_has("note", DIRTY))
         .print("The dirt from your hands got all over the note.")
-        .set_flag(NOTE, DIRTY);
+        .set_flag("note", DIRTY);
 
     // Room: Grotto
     wb.room("grotto", "A Grotto in the Woods")
@@ -123,16 +123,16 @@ into one side:
         .prose_hook(&|w, id| sword_thing_prose(w, id));  // TODO: Put in-line
 
     // If the player tries to pick up the sword with dirty hands, it kills him.
-    wb.allow_get("sword")
-        .unless(&|w| w.tag_has(PLAYER, DIRTY_HANDS))
-        .print("\
-Oh, you so didn't want to touch the sword with dirty hands.
-Weren't you paying attention? Only the pure may touch this sword.
-        ")
-        .kill_player();
+//     wb.allow(Get("sword"))
+//         .unless(&|w| w.tag_has(PLAYER, DIRTY_HANDS))
+//         .print("\
+// Oh, you so didn't want to touch the sword with dirty hands.
+// Weren't you paying attention? Only the pure may touch this sword.
+//         ")
+//         .kill_player();
 
     // When the player takes the sword successfully, magic stuff happens.
-    wb.on_get("sword")
+    wb.on(&GetThing("sword"))
         .once_only()
         .forget("stone") // Move it to LIMBO
         .set_flag("sword", TAKEN)
@@ -167,15 +167,15 @@ to the east.
         ");
 
     // The player can't enter the cave without the sword.
-    wb.allow_enter("cave-1")
-        .unless(&|w| !w.tag_owns(PLAYER, SWORD))
-        .print("\
-Oh, hell, no, you're not going in there empty handed.  You'd better go back
-and get that sword.
-        ");
+//     wb.allow(Enter("cave-1"))
+//         .unless(&|w| !w.tag_owns(PLAYER, SWORD))
+//         .print("\
+// Oh, hell, no, you're not going in there empty handed.  You'd better go back
+// and get that sword.
+//         ");
 
     // The first time the player enters the cave, magic happens.
-    wb.on_enter("cave-1")
+    wb.on(&EnterRoom("cave-1"))
         .once_only()
         .print("\
 It's an unpleasant place but your sword gives you confidence and warm fuzzies.
@@ -189,7 +189,7 @@ A fairy godmother hovers over your limp body.  She frowns;
 then, apparently against her better judgment, she waves
 her wand.  There's a flash, and she disappears.
         ")
-        .revive_player();
+        .revive(PLAYER);
 
     // NEXT, return the world.
     wb.world()

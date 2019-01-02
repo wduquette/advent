@@ -535,7 +535,7 @@ impl<'a> EBuilder<'a> {
 
     /// Adds an event guard.  If the predicate is true, the event will be allowed to
     /// occur; if it is false, the guard's actions will execute.
-    pub fn before(mut self, event: Event, predicate: EventPredicate) -> EBuilder<'a> {
+    pub fn before(mut self, event: Event, predicate: RulePredicate) -> EBuilder<'a> {
         assert!(
             !self.world.rules.get(&self.id).is_some(),
             "Tried to add rule component twice: [{}] {}",
@@ -558,7 +558,7 @@ impl<'a> EBuilder<'a> {
     }
 
     /// Adds a predicate for a rule that will fire at most once.
-    pub fn always(mut self, event: Event, predicate: EventPredicate) -> EBuilder<'a> {
+    pub fn always(mut self, event: Event, predicate: RulePredicate) -> EBuilder<'a> {
         assert!(
             !self.world.rules.get(&self.id).is_some(),
             "Tried to add rule component twice: [{}] {}",
@@ -576,7 +576,7 @@ impl<'a> EBuilder<'a> {
     }
 
     /// Adds a predicate for a rule that will fire at most once.
-    pub fn once(mut self, event: Event, predicate: EventPredicate) -> EBuilder<'a> {
+    pub fn once(mut self, event: Event, predicate: RulePredicate) -> EBuilder<'a> {
         assert!(
             !self.world.rules.get(&self.id).is_some(),
             "Tried to add rule component twice: [{}] {}",

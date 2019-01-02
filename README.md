@@ -7,6 +7,12 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
+* Complete new WorldBuilder
+  * Add guards
+  * Add expectation checking
+* Distinguish between scenery and portability.
+  * The stone in which the sword is held is not portable, but it isn't
+    scenery either; it should show up in the list of things in the room.
 * The Game
   * Add more story.
   * Main loop should halt if you're dead at the end of it.
