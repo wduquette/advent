@@ -7,10 +7,14 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Move flag methods to flag::has, flag::set, flag::unset, following the
-  component architecture.
 * Ponder how to define custom commands:
   * e.g., "wash hands".
+* Move flag methods to flag::has, flag::set, flag::unset, following the
+  component architecture.
+* Change "stone" to be scenery, and add a prose hook for the hilltop
+  that includes it if present, but not otherwise.
+* Think if there's a smoother way to do the buffering in the
+  player's prose hook.
 * The Game
   * Add more story.
   * Main loop should halt if you're dead at the end of it.

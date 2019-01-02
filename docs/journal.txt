@@ -1,5 +1,27 @@
 Bonaventure Journal
 
+2018-01-02 (Wednesday, Part 2)
+x   Custom Commands
+    x   The only example right now is "wash hands".
+    x   It could probably be implemented as a custom guard and event rule
+        x   The guard says whether you can wash your hands or not.
+    x   The event rule says what happens when you do it.
+    x   But there's probably a cleaner way to do it.
+    x   Perhaps an UnknownCommand rule?
+        x   on(UnknownCommand("wash", "hands"))
+    x   It really needs two sets of actions, one if you can and one if
+        you can't.
+    x   Should "hands" be a bit of Scenery attached to the player?
+        I'm thinking so.
+    x   Can we define normal command handling in the same way?
+        x   I'd like to define a command as:
+            x   A pattern
+            x   A closure that returns Result<(),String>, to determine
+                whether or not it can be done.
+            x   A script to be called when it can't be done, if
+                just returning an error doesn't cover it.
+            x   A script to be called when it can be done.
+
 2018-01-02 (Wednesday)
 x   WorldBuilder progress
     x   Got rules working in a much nicer way.
