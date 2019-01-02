@@ -195,7 +195,7 @@ pub fn enter_room(world: &mut World, pid: ID, room: ID) -> PhysResult {
             visual::room_brief(world, room);
         }
 
-        world.set(pid, Seen(room));
+        world.set_flag(pid, Seen(room));
 
         rule::fire_event(world, &EnterRoom(pid, room));
     }

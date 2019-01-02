@@ -255,7 +255,7 @@ impl WorldBuilder {
     /// necessary.
     fn add_flag(&mut self, id: ID, flag: Flag) {
         self.add_flag_set(id);
-        self.world.set(id, flag);
+        self.world.set_flag(id, flag);
     }
 
     /// Adds a prose component to an entity if it doesn't have one.

@@ -37,19 +37,19 @@ impl Script {
 
                 // Set the flag on the entity's flag set
                 SetFlag(id, flag) => {
-                    world.set(*id, *flag);
+                    world.set_flag(*id, *flag);
                 }
 
                 // Clear the flag on the entity's flag set
                 UnsetFlag(id, flag) => {
-                    world.unset(*id, *flag);
+                    world.unset_flag(*id, *flag);
                 }
 
                 // Moves a thing to a given place.
                 PutIn(thing, inv) => {
                     phys::put_in(world, *thing, *inv);
                 }
-                
+
                 // Player/NPC drops thing into its current location.
                 Drop(pid, thing) => {
                     let loc = phys::loc(world, *pid);
@@ -65,13 +65,13 @@ impl Script {
 
                 // Kill the player/NPC
                 Kill(pid) => {
-                    world.set(*pid, Flag::Dead);
+                    world.set_flag(*pid, Flag::Dead);
                     visual::act("*** You have died. ***");
                 }
 
                 // Revive the player/NPC
                 Revive(pid) => {
-                    world.unset(*pid, Flag::Dead);
+                    world.unset_flag(*pid, Flag::Dead);
                     visual::act("*** You are alive! ***");
                 }
             }

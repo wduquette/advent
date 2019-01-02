@@ -59,5 +59,5 @@ pub fn fire_events(world: &mut World, events: &[&Event]) {
 fn fire_rule(world: &mut World, id: ID) {
     let script = world.rules[&id].script.clone();
     script.execute(world);
-    world.set(id, Fired);
+    world.set_flag(id, Fired);
 }

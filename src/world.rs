@@ -184,6 +184,7 @@ impl World {
     //--------------------------------------------------------------------------------------------
     // Entity types
 
+
     /// Does this entity have a set of flag?
     pub fn has_flags(&self, id: ID) -> bool {
         self.flag_sets.get(&id).is_some()
@@ -285,7 +286,7 @@ impl World {
     }
 
     /// Set the flag on the entity
-    pub fn set(&mut self, id: ID, flag: Flag) {
+    pub fn set_flag(&mut self, id: ID, flag: Flag) {
         assert!(self.has_flags(id) "Not a flag set: [{}]", id);
 
         let fc = self.flag_sets.get_mut(&id).unwrap();
@@ -295,7 +296,7 @@ impl World {
     }
 
     /// Clear the flag from the entity
-    pub fn unset(&mut self, id: ID, flag: Flag) {
+    pub fn unset_flag(&mut self, id: ID, flag: Flag) {
         assert!(self.has_flags(id) "Not a flag set: [{}]", id);
 
         let fc = self.flag_sets.get_mut(&id).unwrap();

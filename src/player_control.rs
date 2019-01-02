@@ -199,7 +199,7 @@ fn cmd_wash_hands(world: &mut World, player: &Player) -> CmdResult {
             "They look much cleaner now.",
         )
         .para();
-    world.unset(player.id, DIRTY_HANDS);
+    world.unset_flag(player.id, DIRTY_HANDS);
 
     Ok(Normal)
 }
