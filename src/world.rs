@@ -107,9 +107,6 @@ impl World {
             synonyms: HashMap::new(),
         };
 
-        // NEXT, add LIMBO, the container for things which aren't anywhere else.
-        let id = world.add("LIMBO").inventory().id();
-        assert!(id == 0);
 
         // NEXT, add the standard verbs and synonyms
         world.add_verb("go");
@@ -159,6 +156,32 @@ impl World {
         world.add_verb("wash");
 
         world
+    }
+
+    //-------------------------------------------------------------------------------------------
+    // World Builder
+
+    /// Allocates a new entity with a given tag, or returns the old one if it
+    /// already existed.
+    pub fn alloc(&mut self, tag: &str) -> ID {
+        if let Some(id) = self.lookup_id(tag) {
+            // We already have it; just return it.
+            id
+        } else {
+            // FIRST, get the next available ID
+            while self.tags.get(&self.next_id).is_some() {
+                self.next_id += 1;
+            }
+            let id = self.next_id;
+
+            // NEXT, associate it with its tag.
+            let tc = TagComponent::new(id, tag);
+            self.tags.insert(id, tc);
+            self.tag_map.insert(tag.into(), id);
+
+            // NEXT, return it.
+            id
+        }
     }
 
     //--------------------------------------------------------------------------------------------

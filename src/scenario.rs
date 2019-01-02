@@ -10,7 +10,8 @@ use crate::types::Flag::*;
 use crate::types::ProseType::*;
 use crate::visual::Buffer;
 use crate::world::World;
-use crate::world::LIMBO;
+use crate::world;
+use crate::world_builder::WorldBuilder;
 
 // Constant entity tags, for lookup
 const NOTE: &str = "note";
@@ -28,8 +29,13 @@ pub const TAKEN: Flag = User("TAKEN");
 
 /// Build the initial state of the game world.
 pub fn build() -> World {
-    // FIRST, make the empty world
-    let mut the_world = World::new();
+    // FIRST, create the world builder
+    let mut wb = WorldBuilder::new();
+
+    // NEXT, retrieve the world.
+    // TODO: Ultimately, this will be at the end of the function, to return the newly
+    // build World.
+    let mut the_world = wb.world();
     let world = &mut the_world;
 
     // Story 1
@@ -187,7 +193,7 @@ into white mist and blows away.
             "
             .into(),
         ))
-        .action(PutIn(stone, LIMBO))
+        .action(PutIn(stone, world::LIMBO))
         .action(SetFlag(sword, TAKEN));
 
     // Room: Mouth of Cave
