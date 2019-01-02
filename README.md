@@ -7,6 +7,10 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
+*   Ponder: Scenery vs Immovable
+    *   At present, Scenery implies Immovable.
+    *   Should they be orthogonal?  Scenery affects the visual system, while
+        Immovable affects the physical system?
 *   Review the world-building API looking for things that can be better done.
     *   Provide a better query object than World for the prose_hooks and rules.
         *   Uses tags only
