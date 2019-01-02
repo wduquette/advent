@@ -3,6 +3,7 @@
 //! It provides builder methods for each kind of entity that the framework supports, with
 //! various aids.
 
+use std::collections::HashSet;
 use crate::entity::ID;
 use crate::entity::flag_set_component::*;
 use crate::entity::inventory_component::*;
@@ -38,6 +39,22 @@ pub enum WBEvent<'a> {
     EnterRoom(&'a str),
 }
 
+/// Expectations, to be checked when world-building is complete.
+#[derive(Eq, PartialEq, Hash)]
+enum Is {
+    /// The entity has readable prose
+    Book(ID),
+
+    /// The entity is the player
+    Player(ID),
+
+    /// The entity is a room.
+    Room(ID),
+
+    /// The entity is a thing.
+    Thing(ID),
+}
+
 //-----------------------------------------------------------------------------------------------
 // The World Builder
 
@@ -59,6 +76,7 @@ pub enum WBEvent<'a> {
 /// or should no longer be visible in the game; and the PLAYER is, of course, the player.
 pub struct WorldBuilder {
     world: World,
+    expectations: HashSet<Is>,
 }
 
 impl WorldBuilder {
@@ -70,6 +88,7 @@ impl WorldBuilder {
         // FIRST, create the new world
         let mut this = Self {
             world: World::new(),
+            expectations: HashSet::new(),
         };
 
         // NEXT, create LIMBO, the container for things which aren't anywhere else.
@@ -158,50 +177,43 @@ impl WorldBuilder {
         self.build_event_rule("on", evt, rulec)
     }
 
-    /// Creates and configures a rule that will be triggered when a specific
-    /// event occurs.
-    fn build_event_rule(&mut self, kind: &str, evt: &WBEvent, mut rulec: RuleComponent) -> RuleBuilder {
-        // FIRST, compute the internal event.
-        let tag = match evt {
-            WBEvent::GetThing(thing_tag) => {
-                let tid = self.world.alloc(thing_tag);
-                rulec.event = Event::GetThing(self.world.pid, tid);
-                // TODO: Add thing expectation for tid.
-                format!("{}-get-{}", kind, thing_tag)
-            }
-            WBEvent::ReadThing(thing_tag) => {
-                let tid = self.world.alloc(thing_tag);
-                rulec.event = Event::ReadThing(self.world.pid, tid);
-                // TODO: Add thing:book expectation for tid.
-                format!("{}-read-{}", kind, thing_tag)
-            }
-            WBEvent::EnterRoom(room_tag) => {
-                let rid = self.world.alloc(room_tag);
-                rulec.event = Event::EnterRoom(self.world.pid, rid);
-                // TODO: Add room expectation for rid.
-                format!("{}-enter-{}", kind, room_tag)
-            }
-        };
 
-        let id = self.world.alloc(&tag);
-        self.world.rules.insert(id, rulec);
-        self.add_flag_set(id);
-
-        RuleBuilder {
-            wb: self,
-            tag: tag,
-            id,
-        }
-    }
-
-    /// Retrieves the created world.
+    /// Completes world-building, after checking that all expectations are met.
     pub fn world(self) -> World {
+        for expectation in self.expectations {
+            match expectation {
+                Is::Book(id) => {
+                    assert!(self.world.has_prose_type(id, ProseType::Book),
+                        "Expected book prose: [{}] {}",
+                        id, self.world.tag(id));
+                }
+                Is::Player(id) => {
+                    assert!(self.world.is_player(id),
+                        "Expected player: [{}] {}",
+                        id, self.world.tag(id));
+                }
+                Is::Room(id) => {
+                    assert!(self.world.is_room(id),
+                        "Expected room: [{}] {}",
+                        id, self.world.tag(id));
+                }
+                Is::Thing(id) => {
+                    assert!(self.world.is_thing(id),
+                        "Expected thing: [{}] {}",
+                        id, self.world.tag(id));
+                }
+            }
+        }
         self.world
     }
 
-
     //-------------------------------------------------------------------------------------------
     // Utility methods
+
+    /// Adds an expectation for later checking.
+    fn expect(&mut self, expectation: Is) {
+        self.expectations.insert(expectation);
+    }
 
     /// Adds a location to an entity if it doesn't have one.  The entity will initially
     /// be in LIMBO.
@@ -270,8 +282,44 @@ impl WorldBuilder {
         let prose = Prose::Hook(ProseHook::new(hook));
         self.world.proses.get_mut(&id).unwrap().types.insert(prose_type, prose);
     }
-}
 
+    /// Creates and configures a rule that will be triggered when a specific
+    /// event occurs.
+    fn build_event_rule(&mut self, kind: &str, evt: &WBEvent, mut rulec: RuleComponent) -> RuleBuilder {
+        // FIRST, compute the internal event.
+        let tag: String = match evt {
+            WBEvent::GetThing(thing_tag) => {
+                let tid = self.world.alloc(thing_tag);
+                rulec.event = Event::GetThing(self.world.pid, tid);
+                self.expect(Is::Thing(tid));
+                format!("{}-get-{}", kind, thing_tag)
+            }
+            WBEvent::ReadThing(thing_tag) => {
+                let tid = self.world.alloc(thing_tag);
+                rulec.event = Event::ReadThing(self.world.pid, tid);
+                self.expect(Is::Thing(tid));
+                self.expect(Is::Book(tid));
+                format!("{}-read-{}", kind, thing_tag)
+            }
+            WBEvent::EnterRoom(room_tag) => {
+                let rid = self.world.alloc(room_tag);
+                rulec.event = Event::EnterRoom(self.world.pid, rid);
+                self.expect(Is::Room(rid));
+                format!("{}-enter-{}", kind, room_tag)
+            }
+        };
+
+        let id = self.world.alloc(&tag);
+        self.world.rules.insert(id, rulec);
+        self.add_flag_set(id);
+
+        RuleBuilder {
+            wb: self,
+            tag: tag,
+            id,
+        }
+    }
+}
 
 /// # PlayerBuilder -- A tool for configuring the player entity.
 ///
@@ -287,8 +335,7 @@ impl<'a> PlayerBuilder<'a> {
         self.wb.set_location(self.wb.world.pid, loc_tag);
         let loc = self.wb.world.lookup(loc_tag);
         self.wb.add_flag(self.wb.world.pid, Flag::Seen(loc));
-
-        // TODO: Add expectation that the location is a room.
+        self.wb.expect(Is::Room(loc));
 
         self
     }
@@ -344,7 +391,7 @@ impl<'a> RoomBuilder<'a> {
     pub fn link(self, dir: Dir, room_tag: &str) -> RoomBuilder<'a> {
         // FIRST, get the id of the destination.
         let dest = self.wb.world.alloc(room_tag);
-        // TODO: Add expectation that the destination is a room.
+        self.wb.expect(Is::Room(dest));
 
         let link = LinkDest::Room(dest);
         self.wb.world.rooms.get_mut(&self.id).unwrap().links.insert(dir, link);
@@ -464,7 +511,7 @@ impl<'a> RuleBuilder<'a> {
     pub fn forget(self, thing_tag: &str) -> RuleBuilder<'a> {
         // FIRST, get the entity which we'll be forgetting.
         let id = self.wb.world.alloc(thing_tag);
-        // TODO: add thing expectation
+        self.wb.expect(Is::Thing(id));
 
         // NEXT, add the action.
         let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
@@ -474,9 +521,11 @@ impl<'a> RuleBuilder<'a> {
 
     /// Kills the tagged entity, i.e., sets the Dead flag.
     /// TODO: At present, really presumes that the entity is the player.
-    /// TODO: Add expectation that the entity is something that can be killed.
+    /// Eventually, we might have NPCs, monsters, etc.  But the script
+    /// action would need to be updated as well, in that case.
     pub fn kill(self, tag: &str) -> RuleBuilder<'a> {
         let id = self.wb.world.lookup(tag);
+        self.wb.expect(Is::Player(id));
         let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
         rulec.script.add(Action::Kill(id));
         self
@@ -484,9 +533,11 @@ impl<'a> RuleBuilder<'a> {
 
     /// Revives the tagged entity, i.e., clears the Dead flag.
     /// TODO: At present, really presumes that the entity is the player.
-    /// TODO: Add expectation that the entity is something that can be killed.
+    /// Eventually, we might have NPCs, monsters, etc.  But the script
+    /// action would need to be updated as well, in that case.
     pub fn revive(self, tag: &str) -> RuleBuilder<'a> {
         let id = self.wb.world.lookup(tag);
+        self.wb.expect(Is::Player(id));
         let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
         rulec.script.add(Action::Revive(id));
         self
