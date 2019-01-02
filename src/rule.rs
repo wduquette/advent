@@ -40,7 +40,7 @@ pub fn fire_events(world: &mut World, events: &[&Event]) {
         .rules
         .keys()
         .cloned()
-        .filter(|id| !world.has(*id, FireOnce) || !world.has(*id, Fired))
+        .filter(|id| !world.has_flag(*id, FireOnce) || !world.has_flag(*id, Fired))
         .collect();
 
     for id in rules {

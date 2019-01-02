@@ -21,6 +21,13 @@ x   Added the Immovable flag.
         having the Immovable flag set.
     x   And so that room descriptions include Immovable but non-scenery things
         in the inventory list.
+x   Easier queries
+    x   Added a WorldQuery trait, that includes only and exactly the World
+        queries needed by the scenario.
+        x   I was going to define a wrapper struct, but this is much
+            better.
+    x   EntityStringHook now takes an entity tag rather than an entity
+        ID.
 
 2018-01-01 (Tuesday)
 x   Began significant work on the new WorldBuilder.

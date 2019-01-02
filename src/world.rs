@@ -16,6 +16,12 @@ use std::collections::HashSet;
 
 pub const LIMBO: ID = 0;
 
+/// WorldQuery: A query interface, for use by scenario hooks
+pub trait WorldQuery {
+    // The given flag is set on the tagged entity.
+    fn has(&self, tag: &str, flag: Flag) -> bool;
+}
+
 /// The game state.  Uses a variant of the Entity-Component-System architecture.
 /// This struct provides many methods for querying and mutating entities.  These methods
 /// constitute a low-level interface for interacting with the world; e.g., `set_location()`
@@ -286,7 +292,7 @@ impl World {
     // Flags
 
     /// Is the flag set on the entity?
-    pub fn has(&self, id: ID, flag: Flag) -> bool {
+    pub fn has_flag(&self, id: ID, flag: Flag) -> bool {
         assert!(self.has_flags(id) "Not a flag set: [{}]", id);
         let fc = &self.flag_sets[&id];
 
@@ -321,4 +327,16 @@ impl World {
         // Consider adding as_flags() to Entity
         fc.unset(flag);
     }
+}
+
+impl WorldQuery for World {
+    /// Is the flag set on the entity?
+    fn has(&self, tag: &str, flag: Flag) -> bool {
+        let id = self.lookup(tag);
+        assert!(self.has_flags(id) "Not a flag set: [{}]", id);
+        let fc = &self.flag_sets[&id];
+
+        fc.has(flag)
+    }
+
 }

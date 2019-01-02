@@ -1,6 +1,5 @@
 //! Scenario definition
 
-use crate::entity::ID;
 use crate::types::Dir::*;
 use crate::types::Flag;
 use crate::types::Flag::*;
@@ -27,7 +26,13 @@ pub fn build() -> World {
     wb.player()
         .location("clearing")
         .flag(DIRTY_HANDS)
-        .prose_hook(&|w, id| player_visual(w, id)); // TODO: put in-line.
+        .prose_hook(&|q,e| {
+        Buffer::new()
+            .add("You've got all the usual bits.")
+            .when(q.has(e, DIRTY_HANDS), "Your hands are kind of dirty, though.")
+            .when(!q.has(e, DIRTY_HANDS), "Plus, they're clean bits!")
+        .get()
+        }); // TODO: put in-line.
 
     // NEXT, create and configure the things in the world.
 
@@ -58,7 +63,13 @@ and that you don't want to go find it again.
     // Thing: A ransom note, found in the clearing
     wb.thing("note", "note", "note")
         .location("clearing")
-        .on_examine_hook(&|world, id| note_thing_prose(world, id))
+        .on_examine_hook(&|q,e| {
+            if q.has(e, DIRTY) {
+"A note, on plain paper.  It looks pretty grubby; someone's been mishandling it.".into()
+            } else {
+                "A note, on plain paper".into()
+            }
+        })
         .on_read("\
 If you ever wish to see your toy aisle alive again, put $10,000 dollars
 under the statue in the castle courtyard before nine o'clock tomorrow morning.
@@ -118,7 +129,18 @@ into one side:
     // Thing: The Sword in the Stone on the Hilltop
     wb.thing("sword", "sword", "sword")
         .location("hilltop")
-        .on_examine_hook(&|w, id| sword_thing_prose(w, id));  // TODO: Put in-line
+        .on_examine_hook(&|q,e| {
+            if q.has(e, TAKEN) {
+                "\
+The sword, if you want to call it that, is a three-foot length of dark hardwood
+with a sharkskin hilt on one end.  It's polished so that it gleams, and it has no
+sharp edges anywhere.  Carved along the length of it are the words
+\"Emotional Support Sword (TM)\".
+                ".into()
+            } else {
+                "All you can really see is the hilt; the rest is embedded in the stone.".into()
+            }
+        });
 
     // If the player tries to pick up the sword with dirty hands, it kills him.
     wb.allow(&GetThing("sword"))
@@ -191,40 +213,4 @@ her wand.  There's a flash, and she disappears.
 
     // NEXT, return the world.
     wb.world()
-}
-
-/// Returns the player's current appearance.
-fn player_visual(world: &World, pid: ID) -> String {
-    Buffer::new()
-        .add("You've got all the usual bits.")
-        .when(
-            world.has(pid, DIRTY_HANDS),
-            "Your hands are kind of dirty, though.",
-        )
-        .when(
-            !world.has(pid, DIRTY_HANDS),
-            "Plus, they're clean bits!",
-        )
-        .get()
-}
-
-fn note_thing_prose(world: &World, id: ID) -> String {
-    if world.has(id, DIRTY) {
-        "A note, on plain paper.  It looks pretty grubby; someone's been mishandling it.".into()
-    } else {
-        "A note, on plain paper".into()
-    }
-}
-
-fn sword_thing_prose(world: &World, id: ID) -> String {
-    if world.has(id, TAKEN) {
-        "\
-The sword, if you want to call it that, is a three-foot length of dark hardwood
-with a sharkskin hilt on one end.  It's polished so that it gleams, and it has no
-sharp edges anywhere.  Carved along the length of it are the words
-\"Emotional Support Sword (TM)\".
-        ".into()
-    } else {
-        "All you can really see is the hilt; the rest is embedded in the stone.".into()
-    }
 }

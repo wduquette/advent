@@ -172,8 +172,8 @@ fn cmd_read(world: &mut World, player: &Player, name: &str) -> CmdResult {
 
         // If he's holding it, or it's scenery, or it's immovable, then he can read it.
         if phys::owns(world, player.id, thing)
-            || world.has(thing, Immovable)
-            || world.has(thing, Scenery)
+            || world.has_flag(thing, Immovable)
+            || world.has_flag(thing, Scenery)
         {
             phys::read_thing(world, player.id, thing)?;
             Ok(Normal)
@@ -189,13 +189,13 @@ fn cmd_read(world: &mut World, player: &Player, name: &str) -> CmdResult {
 // TODO: As currently implemented, this should be a scenario command, not a
 // built-in command.
 fn cmd_wash_hands(world: &mut World, player: &Player) -> CmdResult {
-    if !world.has(player.loc, HAS_WATER) {
+    if !world.has_flag(player.loc, HAS_WATER) {
         return Err("That'd be a neat trick, since there's no water here.".into());
     }
 
     visual::prose("You wash your hands in the water.")
         .when(
-            world.has(player.id, DIRTY_HANDS),
+            world.has_flag(player.id, DIRTY_HANDS),
             "They look much cleaner now.",
         )
         .para();

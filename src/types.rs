@@ -2,6 +2,7 @@
 
 use crate::entity::ID;
 use crate::world::World;
+use crate::world::WorldQuery;
 
 //------------------------------------------------------------------------------------------------
 // Basic Types
@@ -10,7 +11,7 @@ use crate::world::World;
 pub type RulePredicate = &'static Fn(&World) -> bool;
 
 /// A closure to produce a string from an entity
-pub type EntityStringHook = &'static Fn(&World, ID) -> String;
+pub type EntityStringHook = &'static Fn(&WorldQuery, &str) -> String;
 
 /// The time, in game turns
 pub type Time = usize;

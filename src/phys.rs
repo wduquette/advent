@@ -66,7 +66,7 @@ pub fn scenery(world: &World, owner: ID) -> BTreeSet<ID> {
 
     // FIRST, get everything that's flagged as scenery.
     for id in contents(world, owner) {
-        if world.has(id, Scenery) {
+        if world.has_flag(id, Scenery) {
             result.insert(id);
         }
     }
@@ -81,7 +81,7 @@ pub fn non_scenery(world: &World, owner: ID) -> BTreeSet<ID> {
 
     // FIRST, get everything that's flagged as scenery.
     for id in contents(world, owner) {
-        if !world.has(id, Scenery) {
+        if !world.has_flag(id, Scenery) {
             result.insert(id);
         }
     }
@@ -118,7 +118,7 @@ pub fn removable(world: &World, loc: ID) -> BTreeSet<ID> {
     // FIRST, get everything owned by the viewer that isn't flagged
     // as scenario.
     for id in contents(world, loc) {
-        if !world.has(id, Scenery) && !world.has(id, Immovable){
+        if !world.has_flag(id, Scenery) && !world.has_flag(id, Immovable){
             result.insert(id);
         }
     }
@@ -144,7 +144,7 @@ pub fn gettable(world: &World, viewer: ID) -> BTreeSet<ID> {
     // FIRST, get everything in the current location that isn't
     // flagged as "scenery".
     for id in contents(world, loc(world, viewer)) {
-        if !world.has(id, Scenery) && !world.has(id, Immovable) {
+        if !world.has_flag(id, Scenery) && !world.has_flag(id, Immovable) {
             result.insert(id);
         }
     }
@@ -189,7 +189,7 @@ pub fn enter_room(world: &mut World, pid: ID, room: ID) -> PhysResult {
     if rule::allows(world, &EnterRoom(pid, room)) {
         put_in(world, pid, room);
 
-        if !world.has(pid, Seen(room)) {
+        if !world.has_flag(pid, Seen(room)) {
             visual::room(world, room);
         } else {
             visual::room_brief(world, room);

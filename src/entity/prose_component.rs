@@ -22,7 +22,7 @@ impl ProseHook {
 
     /// Call the hook
     pub fn call(&self, world: &World, id: ID) -> String {
-        (self.hook)(world, id)
+        (self.hook)(world, &world.tag(id))
     }
 }
 
