@@ -145,30 +145,46 @@ impl WorldBuilder {
         }
     }
 
-    /// Creates and configures a rule that will be triggered on a specific
-    /// event.
-    pub fn on(&mut self, evt: &WBEvent) -> RuleBuilder {
+    /// Creates and configures a guard that will determined whether a specific
+    /// event can occur.  If the answer is no, then the guard can take some
+    /// actions.
+    pub fn allow(&mut self, evt: &WBEvent) -> RuleBuilder {
         // FIRST, compute the internal event.
+        // TODO: share this with on().
         let mut rulec = RuleComponent::new();
+        rulec.is_guard = true;
+        self.build_event_rule("allow", evt, rulec)
+    }
 
+    /// Creates and configures a rule that will be triggered when a specific
+    /// event occurs.
+    pub fn on(&mut self, evt: &WBEvent) -> RuleBuilder {
+        let rulec = RuleComponent::new();
+        self.build_event_rule("on", evt, rulec)
+    }
+
+    /// Creates and configures a rule that will be triggered when a specific
+    /// event occurs.
+    fn build_event_rule(&mut self, kind: &str, evt: &WBEvent, mut rulec: RuleComponent) -> RuleBuilder {
+        // FIRST, compute the internal event.
         let tag = match evt {
             WBEvent::GetThing(thing_tag) => {
                 let tid = self.world.alloc(thing_tag);
                 rulec.event = Event::GetThing(self.world.pid, tid);
                 // TODO: Add thing expectation for tid.
-                format!("on-get-{}", thing_tag)
+                format!("{}-get-{}", kind, thing_tag)
             }
             WBEvent::ReadThing(thing_tag) => {
                 let tid = self.world.alloc(thing_tag);
                 rulec.event = Event::ReadThing(self.world.pid, tid);
                 // TODO: Add thing:book expectation for tid.
-                format!("on-read-{}", thing_tag)
+                format!("{}-read-{}", kind, thing_tag)
             }
             WBEvent::EnterRoom(room_tag) => {
                 let rid = self.world.alloc(room_tag);
                 rulec.event = Event::EnterRoom(self.world.pid, rid);
                 // TODO: Add room expectation for rid.
-                format!("on-enter-{}", room_tag)
+                format!("{}-enter-{}", kind, room_tag)
             }
         };
 
@@ -403,22 +419,28 @@ pub struct RuleBuilder<'a> {
 }
 
 impl<'a> RuleBuilder<'a> {
-    /// Specifies the triggering event.  If omitted, the rule triggers
-    /// every turn.
-    pub fn on(self, event: Event) -> RuleBuilder<'a> {
-        self.wb.world.rules.get_mut(&self.id).unwrap().event = event;
+    /// Specifies the predicate for normal rules.  If omitted, the rule fires every time it
+    /// is triggered.
+    pub fn when(self, predicate: RulePredicate) -> RuleBuilder<'a> {
+        let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
+        assert!(!rulec.is_guard, "Cannot set 'when' predicate on allow() rule: {}", self.tag);
+        rulec.predicate = predicate;
         self
     }
 
-    /// Specifies the predicate.  If omitted, the rule fires every time it
+    /// Specifies the predicate for guard rules.  If omitted, the guard fires every time it
     /// is triggered.
-    pub fn when(self, predicate: RulePredicate) -> RuleBuilder<'a> {
-        self.wb.world.rules.get_mut(&self.id).unwrap().predicate = predicate;
+    pub fn unless(self, predicate: RulePredicate) -> RuleBuilder<'a> {
+        let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
+        assert!(rulec.is_guard, "Cannot set 'unless' predicate on normal rule: {}", self.tag);
+        rulec.predicate = predicate;
         self
     }
 
     /// Specifies that the rule should execute no more than once.
     pub fn once_only(self) -> RuleBuilder<'a> {
+        let rulec = &self.wb.world.rules[&self.id];
+        assert!(!rulec.is_guard, "Cannot set 'once_only' predicate on allow() rule: {}", self.tag);
         self.wb.add_flag(self.id, Flag::FireOnce);
         self
     }

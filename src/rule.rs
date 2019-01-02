@@ -13,13 +13,13 @@ pub fn allows(world: &mut World, event: &Event) -> bool {
         let rulec = &world.rules[&id];
         if rulec.is_guard && event == &rulec.event {
             if (rulec.predicate)(world) {
-                // The action is allowed.
-                return true;
-            } else {
                 // The action is not allowed; execute the script.
                 let script = rulec.script.clone();
                 script.execute(world);
                 return false;
+            } else {
+                // The action is allowed.
+                return true;
             }
         }
     }

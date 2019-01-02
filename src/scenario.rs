@@ -69,9 +69,9 @@ under the statue in the castle courtyard before nine o'clock tomorrow morning.
          ");
 
     // You can't read the note if it's dirty.
-    // wb.allow(Read("note"))
-    //     .unless(&|w| w.tag_has("note", DIRTY))
-    //     .print("You've gotten it too dirty to read.");
+    wb.allow(&ReadThing("note"))
+        .unless(&|w| w.tag_has("note", DIRTY))
+        .print("You've gotten it too dirty to read.");
 
     // The note gets dirty if the player picks it up with dirty hands.
     wb.on(&GetThing("note"))
@@ -123,13 +123,13 @@ into one side:
         .prose_hook(&|w, id| sword_thing_prose(w, id));  // TODO: Put in-line
 
     // If the player tries to pick up the sword with dirty hands, it kills him.
-//     wb.allow(Get("sword"))
-//         .unless(&|w| w.tag_has(PLAYER, DIRTY_HANDS))
-//         .print("\
-// Oh, you so didn't want to touch the sword with dirty hands.
-// Weren't you paying attention? Only the pure may touch this sword.
-//         ")
-//         .kill_player();
+    wb.allow(&GetThing("sword"))
+        .unless(&|w| w.tag_has(PLAYER, DIRTY_HANDS))
+        .print("\
+Oh, you so didn't want to touch the sword with dirty hands.
+Weren't you paying attention? Only the pure may touch this sword.
+        ")
+        .kill(PLAYER);
 
     // When the player takes the sword successfully, magic stuff happens.
     wb.on(&GetThing("sword"))
@@ -167,12 +167,12 @@ to the east.
         ");
 
     // The player can't enter the cave without the sword.
-//     wb.allow(Enter("cave-1"))
-//         .unless(&|w| !w.tag_owns(PLAYER, SWORD))
-//         .print("\
-// Oh, hell, no, you're not going in there empty handed.  You'd better go back
-// and get that sword.
-//         ");
+    wb.allow(&EnterRoom("cave-1"))
+        .unless(&|w| !w.tag_owns(w.pid, "sword")) // TODO: Use tag for player!
+        .print("\
+Oh, hell, no, you're not going in there empty handed.  You'd better go back
+and get that sword.
+        ");
 
     // The first time the player enters the cave, magic happens.
     wb.on(&EnterRoom("cave-1"))
