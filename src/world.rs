@@ -9,8 +9,6 @@ use crate::entity::rule_component::*;
 use crate::entity::tag_component::*;
 use crate::entity::thing_component::*;
 use crate::entity::ID;
-use crate::phys;
-use crate::types::EntityStringHook;
 use crate::types::*;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -106,8 +104,8 @@ impl World {
             synonyms: HashMap::new(),
         };
 
-
         // NEXT, add the standard verbs and synonyms
+        // TODO: Decide where this should go.  Possibly not here.
         world.add_verb("go");
 
         world.add_verb("north");
@@ -158,7 +156,7 @@ impl World {
     }
 
     //-------------------------------------------------------------------------------------------
-    // World Builder
+    // Entity Creation
 
     /// Allocates a new entity with a given tag, or returns the old one if it
     /// already existed.
@@ -185,25 +183,6 @@ impl World {
 
     //--------------------------------------------------------------------------------------------
     // Entity types
-
-    /// Add a new entity using the builder pattern.  The entity will have the given tag.
-    /// See also EBuilder, below.
-    pub fn add(&mut self, tag: &str) -> EBuilder {
-        while self.tags.get(&self.next_id).is_some() {
-            self.next_id += 1;
-        }
-        let id = self.next_id;
-
-        let tc = TagComponent::new(id, tag);
-        self.tags.insert(id, tc);
-        self.tag_map.insert(tag.into(), id);
-
-        EBuilder {
-            world: self,
-            id,
-            tag: tag.into(),
-        }
-    }
 
     /// Does this entity have a set of flag?
     pub fn has_flags(&self, id: ID) -> bool {
@@ -277,29 +256,6 @@ impl World {
             .unwrap_or_else(|| panic!("No entity with tag: {}", tag))
     }
 
-    /// Links one room to another in the given direction.
-    /// Links are not bidirectional.  If you want links both ways, you
-    /// have to add them.
-    pub fn oneway(&mut self, from: ID, dir: Dir, to: ID) {
-        assert!(self.is_room(from), "Not a room: [{}]", from);
-        assert!(self.is_room(to), "Not a room: [{}]", to);
-
-        let fromc = self.rooms.get_mut(&from).unwrap();
-        fromc.links.insert(dir, LinkDest::Room(to));
-    }
-
-    /// Links two rooms in the given directions.
-    pub fn twoway(&mut self, a: ID, to_b: Dir, to_a: Dir, b: ID) {
-        assert!(self.is_room(a), "Not a room: [{}]", a);
-        assert!(self.is_room(b), "Not a room: [{}]", b);
-
-        let fromc = self.rooms.get_mut(&a).unwrap();
-        fromc.links.insert(to_b, LinkDest::Room(b));
-
-        let toc = self.rooms.get_mut(&b).unwrap();
-        toc.links.insert(to_a, LinkDest::Room(a));
-    }
-
     pub fn tag_owns(&self, owner: ID, thing: &str) -> bool {
         let tid = self.lookup(thing);
         if let Some(inv) = self.inventories.get(&owner) {
@@ -364,254 +320,5 @@ impl World {
 
         // Consider adding as_flags() to Entity
         fc.unset(flag);
-    }
-}
-
-/// # EBuilder -- A tool for building entities
-///
-/// Use World.add() to create an entity and assign it a tag and ID.  This returns an
-/// EBuilder struct.  Use the EBuilder methods to add components to the entity.
-pub struct EBuilder<'a> {
-    pub world: &'a mut World,
-    pub id: ID,
-    pub tag: String,
-}
-
-impl<'a> EBuilder<'a> {
-    /// Adds a location component to the entity if it doesn't already have one.
-    /// It will initially be put in LIMBO.
-    pub fn location(self) -> EBuilder<'a> {
-        if self.world.locations.get(&self.id).is_none() {
-            self.world
-                .locations
-                .insert(self.id, LocationComponent::new());
-            phys::put_in(self.world, self.id, LIMBO);
-        }
-
-        self
-    }
-
-    /// Puts the thing in the given location.
-    pub fn put_in(self, loc: ID) -> EBuilder<'a> {
-        phys::put_in(self.world, self.id, loc);
-
-        self
-    }
-
-    /// Adds an inventory component to the entity if it doesn't already have one.
-    pub fn inventory(self) -> EBuilder<'a> {
-        if self.world.inventories.get(&self.id).is_none() {
-            self.world
-                .inventories
-                .insert(self.id, InventoryComponent::new());
-        }
-
-        self
-    }
-
-    /// Adds a flag set component to the entity if it doesn't already have one.
-    pub fn flag_set(self) -> EBuilder<'a> {
-        if self.world.flag_sets.get(&self.id).is_none() {
-            self.world
-                .flag_sets
-                .insert(self.id, FlagSetComponent::new());
-        }
-
-        self
-    }
-
-    /// Adds a flag to the entity, creating the flag set if needed.
-    pub fn flag(mut self, flag: Flag) -> EBuilder<'a> {
-        self = self.flag_set();
-
-        self.world.flag_sets.get_mut(&self.id).unwrap().set(flag);
-        self
-    }
-
-    /// Adds a prose description of the given type to the entity as a literal string,
-    /// creating the prose component if necessary.
-    pub fn prose(self, prose_type: ProseType, text: &str) -> EBuilder<'a> {
-        if self.world.proses.get(&self.id).is_none() {
-            self.world.proses.insert(self.id, ProseComponent::new());
-        }
-
-        self.world
-            .proses
-            .get_mut(&self.id)
-            .unwrap()
-            .types
-            .insert(prose_type, Prose::Prose(text.into()));
-
-        self
-    }
-
-    /// Adds a prose description of the given type to the entity using a prose hook,
-    /// creating the prose component if necessary.
-    pub fn prose_hook(self, prose_type: ProseType, hook: EntityStringHook) -> EBuilder<'a> {
-        if self.world.proses.get(&self.id).is_none() {
-            self.world.proses.insert(self.id, ProseComponent::new());
-        }
-
-        self.world
-            .proses
-            .get_mut(&self.id)
-            .unwrap()
-            .types
-            .insert(prose_type, Prose::Hook(ProseHook::new(hook)));
-
-        self
-    }
-
-    // /// Adds the essential trimmings for a player to the entity.
-    // pub fn player(mut self) -> EBuilder<'a> {
-    //     assert!(
-    //         !self.world.players.get(&self.id).is_some(),
-    //         "Tried to add player component twice: [{}] {}",
-    //         self.id,
-    //         self.tag
-    //     );
-    //
-    //     self = self.location();
-    //     self = self.inventory();
-    //     self = self.flag(Flag::Scenery);
-    //
-    //     self.world.pid = self.id;
-    //     self.world.players.insert(self.id, PlayerComponent::new());
-    //     self.world
-    //         .things
-    //         .insert(self.id, ThingComponent::new("Yourself", "self"));
-    //
-    //     self
-    // }
-
-    /// Adds the essential trimmings for a room.
-    pub fn room(mut self, name: &str) -> EBuilder<'a> {
-        assert!(
-            !self.world.rooms.get(&self.id).is_some(),
-            "Tried to add room component twice: [{}] {}",
-            self.id,
-            self.tag
-        );
-
-        self.world.rooms.insert(self.id, RoomComponent::new(name));
-        self = self.inventory();
-        self = self.flag_set();
-
-        self
-    }
-
-    /// Adds the essential trimmings for a thing.
-    pub fn thing(mut self, name: &str, noun: &str) -> EBuilder<'a> {
-        assert!(
-            !self.world.things.get(&self.id).is_some(),
-            "Tried to add thing component twice: [{}] {}",
-            self.id,
-            self.tag
-        );
-
-        self = self.location();
-        self = self.flag_set();
-
-        self.world
-            .things
-            .insert(self.id, ThingComponent::new(name, noun));
-
-        self
-    }
-
-    pub fn dead_end(self, dir: Dir, prose: &str) -> EBuilder<'a> {
-        assert!(
-            self.world.rooms.get(&self.id).is_some(),
-            "Tried to a dead end to a non-Room entity: [{}] {}",
-            self.id,
-            self.tag
-        );
-
-        self
-            .world.rooms.get_mut(&self.id).unwrap().links.insert(dir, LinkDest::DeadEnd(prose.into()));
-
-        self
-    }
-
-    /// Adds an event guard.  If the predicate is true, the event will be allowed to
-    /// occur; if it is false, the guard's actions will execute.
-    pub fn before(mut self, event: Event, predicate: RulePredicate) -> EBuilder<'a> {
-        assert!(
-            !self.world.rules.get(&self.id).is_some(),
-            "Tried to add rule component twice: [{}] {}",
-            self.id,
-            self.tag
-        );
-
-        let others: Vec<&RuleComponent> = self.world.rules.values()
-            .filter(|rc| rc.event == event && rc.is_guard)
-            .collect();
-        assert!(others.is_empty(), "Tried to add two guards for event: {:?}", event);
-
-        self = self.flag_set();
-
-        self.world
-            .rules
-            .insert(self.id, RuleComponent::guard(event, predicate));
-
-        self
-    }
-
-    /// Adds a predicate for a rule that will fire at most once.
-    pub fn always(mut self, event: Event, predicate: RulePredicate) -> EBuilder<'a> {
-        assert!(
-            !self.world.rules.get(&self.id).is_some(),
-            "Tried to add rule component twice: [{}] {}",
-            self.id,
-            self.tag
-        );
-
-        self = self.flag_set();
-
-        self.world
-            .rules
-            .insert(self.id, RuleComponent::newx(event, predicate));
-
-        self
-    }
-
-    /// Adds a predicate for a rule that will fire at most once.
-    pub fn once(mut self, event: Event, predicate: RulePredicate) -> EBuilder<'a> {
-        assert!(
-            !self.world.rules.get(&self.id).is_some(),
-            "Tried to add rule component twice: [{}] {}",
-            self.id,
-            self.tag
-        );
-
-        self = self.flag(Flag::FireOnce);
-
-        self.world
-            .rules
-            .insert(self.id, RuleComponent::newx(event, predicate));
-
-        self
-    }
-
-    /// Adds an action to a rule.
-    /// TODO: Probably want to use a closure that returns an ActionScript rather than
-    /// adding individual actions.
-    pub fn action(self, action: Action) -> EBuilder<'a> {
-        assert!(
-            self.world.rules.get(&self.id).is_some(),
-            "Tried to add action to non-rule: [{}] {}",
-            self.id,
-            self.tag
-        );
-
-        let rule = &mut self.world.rules.get_mut(&self.id).unwrap();
-        rule.script.add(action);
-
-        self
-    }
-
-    /// Returns the entity's ID, for use at the end of the chain.
-    pub fn id(self) -> ID {
-        self.id
     }
 }
