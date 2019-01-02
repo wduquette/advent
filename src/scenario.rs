@@ -1,20 +1,13 @@
 //! Scenario definition
 
 use crate::entity::ID;
-use crate::phys;
-use crate::types::Action::*;
 use crate::types::Dir::*;
 use crate::types::Event::*;
 use crate::types::Flag;
 use crate::types::Flag::*;
 use crate::visual::Buffer;
 use crate::world::World;
-use crate::world;
 use crate::world_builder::WorldBuilder;
-
-// Constant entity tags, for lookup
-const NOTE: &str = "note";
-const SWORD: &str = "sword";
 
 // User-defined flags
 // TODO: These constants should only be used in the scenario itself; but at present they
@@ -30,10 +23,22 @@ pub fn build() -> World {
     // FIRST, create the world builder
     let mut wb = WorldBuilder::new();
 
+    // NEXT, configure the player
     wb.player()
         .location("clearing")
         .flag(DIRTY_HANDS)
         .prose_hook(&|w, id| player_visual(w, id)); // TODO: put in-line.
+
+    // NEXT, create and configure the things in the world.
+
+    // Rule: Story 1
+    wb.rule("rule-story-1")
+        .when(&|w,_| w.clock == 0)
+        .print("\
+You don't know where you are.  You don't even know where you want to
+be.  All you know is that your feet are wet, your hands are dirty,
+and gosh, this doesn't look anything like the toy aisle.
+        ");
 
     // Room: Clearing
     wb.room("clearing", "A Dreary Clearing")
@@ -62,6 +67,17 @@ under the statue in the castle courtyard before nine o'clock tomorrow morning.
 ||   -- Your host.
 ||Well.  That's a bit alarming.  Where are you going to find $10,000 at this time of day?
          ");
+
+    // You can't read the note if it's dirty.
+    wb.allow_read("note")
+        .unless(&|w| w.tag_has("note", DIRTY))
+        .print("You've gotten it too dirty to read.");
+
+    // The note gets dirty if the player picks it up with dirty hands.
+    wb.on_get("note")
+        .when(&|w| w.tag_has(PLAYER, DIRTY_HANDS) && !w.tag_has(NOTE, DIRTY))
+        .print("The dirt from your hands got all over the note.")
+        .set_flag(NOTE, DIRTY);
 
     // Room: Grotto
     wb.room("grotto", "A Grotto in the Woods")
@@ -106,6 +122,26 @@ into one side:
         .location("hilltop")
         .prose_hook(&|w, id| sword_thing_prose(w, id));  // TODO: Put in-line
 
+    // If the player tries to pick up the sword with dirty hands, it kills him.
+    wb.allow_get("sword")
+        .unless(&|w| w.tag_has(PLAYER, DIRTY_HANDS))
+        .print("\
+Oh, you so didn't want to touch the sword with dirty hands.
+Weren't you paying attention? Only the pure may touch this sword.
+        ")
+        .kill_player();
+
+    // When the player takes the sword successfully, magic stuff happens.
+    wb.on_get("sword")
+        .once_only()
+        .forget("stone") // Move it to LIMBO
+        .set_flag("sword", TAKEN)
+        .print("\
+The sword almost seems to leap into your hands.  As you marvel at it
+(and, really, there's something odd about it), the marble block dissolves
+into white mist and blows away.
+        ");
+
     // Room: Mouth of Cave
     wb.room("cave-mouth", "The Mouth of a Forbidding Cave")
         .link(West, "hilltop")
@@ -130,113 +166,33 @@ you a light source. The entrance is to the west, and a narrow passage continues
 to the east.
         ");
 
-    // NEXT, retrieve the world.
-    // TODO: Ultimately, this will be at the end of the function, to return the newly
-    // build World.
-    let mut the_world = wb.world();
-    let world = &mut the_world;
+    // The player can't enter the cave without the sword.
+    wb.allow_enter("cave-1")
+        .unless(&|w| !w.tag_owns(PLAYER, SWORD))
+        .print("\
+Oh, hell, no, you're not going in there empty handed.  You'd better go back
+and get that sword.
+        ");
 
-    // Story 1
-    world
-        .add("rule-story-1")
-        .once(Turn, &|w,_| w.clock == 0)
-        .action(Print(
-            "\
-You don't know where you are.  You don't even know where you want to
-be.  All you know is that your feet are wet, your hands are dirty,
-and gosh, this doesn't look anything like the toy aisle.
-        "
-            .into(),
-        ));
+    // The first time the player enters the cave, magic happens.
+    wb.on_enter("cave-1")
+        .once_only()
+        .print("\
+It's an unpleasant place but your sword gives you confidence and warm fuzzies.
+        ");
 
-    crate::debug::list_world(world);
-    crate::debug::dump_world(world);
-
-    // Temporary
-    let pid = world.pid;
-    let clearing = world.lookup("clearing");
-    let note = world.lookup("note");
-    let stone = world.lookup("stone");
-    let sword = world.lookup("sword");
-    let cave_1 = world.lookup("cave-1");
-
-//     world
-//         .add("guard-dirty-note")
-//         .before(ReadThing(pid, note), &|w, _| !w.tag_has(NOTE, DIRTY))
-//         .action(Print("You've gotten it too dirty to read.".into()));
-//
-//     world
-//         .add("rule-dirty-note")
-//         .always(GetThing(pid, note),
-//             &|w, _| w.has(w.pid, DIRTY_HANDS) && !w.tag_has(NOTE, DIRTY))
-//         .action(Print(
-//             "The dirt from your hands got all over the note.".into(),
-//         ))
-//         .action(SetFlag(note, DIRTY));
-//
-//
-//
-//     world
-//         .add("before-sword-get")
-//         .before(GetThing(pid, sword), &|w,_| {
-//             !w.has(w.pid, DIRTY_HANDS)
-//         })
-//         .action(Print(
-//             "\
-// Oh, you so didn't want to touch the sword with dirty hands.
-// Weren't you paying attention? Only the pure may touch this sword.
-//             "
-//             .into(),
-//         ))
-//         .action(Kill(pid));
-//
-//     world
-//         .add("rule-sword-get")
-//         .once(GetThing(pid, sword), &|w,_| !w.tag_has(SWORD, TAKEN))
-//         .action(Print(
-//             "\
-// The sword almost seems to leap into your hands.  As you marvel at it
-// (and, really, there's something odd about it), the marble block dissolves
-// into white mist and blows away.
-//             "
-//             .into(),
-//         ))
-//         .action(PutIn(stone, world::LIMBO))
-//         .action(SetFlag(sword, TAKEN));
-//
-//     world
-//         .add("before-cave-1")
-//         .before(EnterRoom(pid, cave_1), &|w,_| w.tag_owns(w.pid, SWORD))
-//         .action(Print("\
-// Oh, hell, no, you're not going in there empty handed.  You'd better go back
-// and get that sword.
-//         ".into()));
-//
-//     world
-//         .add("rule-enter-cave-1")
-//         .once(EnterRoom(pid, cave_1), &|_,_| true)
-//         .action(Print("\
-// It's an unpleasant place but your sword gives you confidence and warm fuzzies.
-//         ".into()));
-//
-//     // Other Rules
-//
-//     // The fairy-godmother revives you if you die.
-//     world
-//         .add("fairy-godmother-rule")
-//         .always(Turn, &|w, _| w.has(w.pid, Dead))
-//         .action(Print(
-//             "\
-// A fairy godmother hovers over your limp body.  She frowns;
-// then, apparently against her better judgment, she waves
-// her wand.  There's a flash, and she disappears.
-//             "
-//             .into(),
-//         ))
-//         .action(Revive(pid));
+    // If the player dies, the fairy godmother revives him.
+    wb.rule("fairy-godmother-rule")
+        .when(&|w| w.tag_has(PLAYER, Dead))
+        .print("\
+A fairy godmother hovers over your limp body.  She frowns;
+then, apparently against her better judgment, she waves
+her wand.  There's a flash, and she disappears.
+        ")
+        .revive_player();
 
     // NEXT, return the world.
-    the_world
+    wb.world()
 }
 
 /// Returns the player's current appearance.

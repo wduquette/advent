@@ -570,7 +570,7 @@ impl<'a> EBuilder<'a> {
 
         self.world
             .rules
-            .insert(self.id, RuleComponent::new(event, predicate));
+            .insert(self.id, RuleComponent::newx(event, predicate));
 
         self
     }
@@ -588,7 +588,7 @@ impl<'a> EBuilder<'a> {
 
         self.world
             .rules
-            .insert(self.id, RuleComponent::new(event, predicate));
+            .insert(self.id, RuleComponent::newx(event, predicate));
 
         self
     }

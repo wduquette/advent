@@ -14,8 +14,18 @@ pub struct RuleComponent {
 }
 
 impl RuleComponent {
+    /// Creates a new rule
+    pub fn new() -> RuleComponent {
+        RuleComponent {
+            event: Event::Turn,
+            is_guard: false,
+            predicate: &|w,e| true,
+            script: Script::new(),
+        }
+    }
+
     /// Creates a new standard rule, to which actions can be added.
-    pub fn new(event: Event, predicate: EventPredicate) -> RuleComponent {
+    pub fn newx(event: Event, predicate: EventPredicate) -> RuleComponent {
         RuleComponent {
             event,
             is_guard: false,

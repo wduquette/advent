@@ -13,6 +13,7 @@ use crate::entity::location_component::*;
 use crate::entity::player_component::*;
 use crate::entity::prose_component::*;
 use crate::entity::room_component::*;
+use crate::entity::rule_component::*;
 use crate::entity::thing_component::*;
 use crate::phys;
 use crate::types::*;
@@ -111,6 +112,20 @@ impl WorldBuilder {
         }
     }
 
+    /// Creates and configures a rule.
+    pub fn rule(&mut self, tag: &str) -> RuleBuilder {
+        let id = self.world.alloc(tag);
+
+        self.world.rules.insert(id, RuleComponent::new());
+        self.add_flag_set(id);
+
+        RuleBuilder {
+            wb: self,
+            tag: tag.to_string(),
+            id,
+        }
+    }
+
     /// Retrieves the created world.
     pub fn world(self) -> World {
         self.world
@@ -200,10 +215,13 @@ pub struct PlayerBuilder<'a> {
 
 impl<'a> PlayerBuilder<'a> {
     /// Sets the player's initial location given the location's tag
-    pub fn location(self, loc: &str) -> PlayerBuilder<'a> {
-        self.wb.set_location(self.wb.world.pid, loc);
+    pub fn location(self, loc_tag: &str) -> PlayerBuilder<'a> {
+        self.wb.set_location(self.wb.world.pid, loc_tag);
+        let loc = self.wb.world.lookup(loc_tag);
+        self.wb.add_flag(self.wb.world.pid, Flag::Seen(loc));
 
         // TODO: Add expectation that the location is a room.
+
         self
     }
 
@@ -316,6 +334,41 @@ impl<'a> ThingBuilder<'a> {
     /// Sets a flag on the thing.
     pub fn flag(self, flag: Flag) -> ThingBuilder<'a> {
         self.wb.add_flag(self.id, flag);
+        self
+    }
+}
+
+/// # RuleBuilder -- A tool for creating and configuring rules.
+pub struct RuleBuilder<'a> {
+    wb: &'a mut WorldBuilder,
+    tag: String,
+    id: ID,
+}
+
+impl<'a> RuleBuilder<'a> {
+    /// Specifies the triggering event.  If omitted, the rule triggers
+    /// every turn.
+    pub fn on(self, event: Event) -> RuleBuilder<'a> {
+        self.wb.world.rules.get_mut(&self.id).unwrap().event = event;
+        self
+    }
+
+    /// Specifies the predicate.  If omitted, the rule fires every time it
+    /// is triggered.
+    pub fn when(self, predicate: EventPredicate) -> RuleBuilder<'a> {
+        self.wb.world.rules.get_mut(&self.id).unwrap().predicate = predicate;
+        self
+    }
+
+    /// Specifies that the rule should execute no more than once.
+    pub fn once_only(self) -> RuleBuilder<'a> {
+        self.wb.add_flag(self.id, Flag::FireOnce);
+        self
+    }
+    /// Specifies text to print when the rule fires.
+    pub fn print(self, text: &str) -> RuleBuilder<'a> {
+        let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
+        rulec.script.add(Action::Print(text.into()));
         self
     }
 }
