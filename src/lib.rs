@@ -17,6 +17,7 @@ mod script;
 mod types;
 mod visual;
 mod world;
+#[allow(dead_code)] // Games won't use all features.
 mod world_builder;
 
 use crate::types::Event;

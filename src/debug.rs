@@ -12,6 +12,14 @@ pub fn list_world(world: &World) {
     }
 }
 
+/// Dump all entities in the world
+#[allow(dead_code)]
+pub fn dump_world(world: &World) {
+    for id in world.tags.keys() {
+        dump_entity(world, *id);
+    }
+}
+
 /// List just the given entity
 fn list_entity(world: &World, id: ID) {
     let &tc = world.tags.get(&id).as_ref().unwrap();

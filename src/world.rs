@@ -17,7 +17,6 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 pub const LIMBO: ID = 0;
-pub const PLAYER: ID = 1;
 
 /// The game state.  Uses a variant of the Entity-Component-System architecture.
 /// This struct provides many methods for querying and mutating entities.  These methods
@@ -463,27 +462,27 @@ impl<'a> EBuilder<'a> {
         self
     }
 
-    /// Adds the essential trimmings for a player to the entity.
-    pub fn player(mut self) -> EBuilder<'a> {
-        assert!(
-            !self.world.players.get(&self.id).is_some(),
-            "Tried to add player component twice: [{}] {}",
-            self.id,
-            self.tag
-        );
-
-        self = self.location();
-        self = self.inventory();
-        self = self.flag(Flag::Scenery);
-
-        self.world.pid = self.id;
-        self.world.players.insert(self.id, PlayerComponent::new());
-        self.world
-            .things
-            .insert(self.id, ThingComponent::new("Yourself", "self"));
-
-        self
-    }
+    // /// Adds the essential trimmings for a player to the entity.
+    // pub fn player(mut self) -> EBuilder<'a> {
+    //     assert!(
+    //         !self.world.players.get(&self.id).is_some(),
+    //         "Tried to add player component twice: [{}] {}",
+    //         self.id,
+    //         self.tag
+    //     );
+    //
+    //     self = self.location();
+    //     self = self.inventory();
+    //     self = self.flag(Flag::Scenery);
+    //
+    //     self.world.pid = self.id;
+    //     self.world.players.insert(self.id, PlayerComponent::new());
+    //     self.world
+    //         .things
+    //         .insert(self.id, ThingComponent::new("Yourself", "self"));
+    //
+    //     self
+    // }
 
     /// Adds the essential trimmings for a room.
     pub fn room(mut self, name: &str) -> EBuilder<'a> {
