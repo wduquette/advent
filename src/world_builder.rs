@@ -421,27 +421,27 @@ impl<'a> ThingBuilder<'a> {
         self
     }
     /// Adds descriptive prose to the thing.
-    pub fn prose(self, text: &str) -> ThingBuilder<'a> {
+    pub fn on_examine(self, text: &str) -> ThingBuilder<'a> {
         self.wb.add_prose(self.id, ProseType::Thing, text);
         self
     }
 
     /// Adds a prose hook to the thing, to produce descriptive prose
     /// on demand.
-    pub fn prose_hook(self, hook: EntityStringHook) -> ThingBuilder<'a> {
+    pub fn on_examine_hook(self, hook: EntityStringHook) -> ThingBuilder<'a> {
         self.wb.add_prose_hook(self.id, ProseType::Thing, hook);
         self
     }
 
     /// Adds readable prose to the thing.
-    pub fn book_prose(self, text: &str) -> ThingBuilder<'a> {
+    pub fn on_read(self, text: &str) -> ThingBuilder<'a> {
         self.wb.add_prose(self.id, ProseType::Book, text);
         self
     }
 
     /// Adds a prose hook to the thing, to produce readable prose
     /// on demand.
-    pub fn book_hook(self, hook: EntityStringHook) -> ThingBuilder<'a> {
+    pub fn on_read_hook(self, hook: EntityStringHook) -> ThingBuilder<'a> {
         self.wb.add_prose_hook(self.id, ProseType::Book, hook);
         self
     }

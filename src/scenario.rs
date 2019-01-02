@@ -56,12 +56,10 @@ and that you don't want to go find it again.
         .link(South, "hilltop");
 
     // Thing: A ransom note, found in the clearing
-    // TODO: the method names prose_hook and book_prose can be better named.
-    // examine(), read(), examine_hook(), read_hook()?
     wb.thing("note", "note", "note")
         .location("clearing")
-        .prose_hook(&|world, id| note_thing_prose(world, id))
-        .book_prose("\
+        .on_examine_hook(&|world, id| note_thing_prose(world, id))
+        .on_read("\
 If you ever wish to see your toy aisle alive again, put $10,000 dollars
 under the statue in the castle courtyard before nine o'clock tomorrow morning.
 ||   -- Your host.
@@ -92,7 +90,7 @@ A path leads west.
     wb.thing("pool", "pool", "pool")
         .location("grotto")
         .flag(Scenery)
-        .prose("\
+        .on_examine("\
 Moss grows on the stones around the edge, but the water is clear and
 deep and cold.
         ");
@@ -110,7 +108,7 @@ space.  Trails lead to the north and south.
     wb.thing("stone", "stone", "stone")
         .location("hilltop")
         .flag(Scenery)
-        .prose("\
+        .on_examine("\
 It's a massive block of marble, four feet wide and three feet high.  The top is flat, and the
 four sides slope inward.  There's a sword sticking out of the top.  These words are chiseled
 into one side:
@@ -120,7 +118,7 @@ into one side:
     // Thing: The Sword in the Stone on the Hilltop
     wb.thing("sword", "sword", "sword")
         .location("hilltop")
-        .prose_hook(&|w, id| sword_thing_prose(w, id));  // TODO: Put in-line
+        .on_examine_hook(&|w, id| sword_thing_prose(w, id));  // TODO: Put in-line
 
     // If the player tries to pick up the sword with dirty hands, it kills him.
     wb.allow(&GetThing("sword"))

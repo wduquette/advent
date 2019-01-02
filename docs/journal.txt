@@ -12,6 +12,7 @@ x   To do next:
     x   Provide better query object than World for the prose_hooks and rules.
 x   Removed obsolete entity-building code from world.rs.
 x   Added expectation checking.
+x   Improved the prose methods for ThingBuilder.
 
 2018-01-01 (Tuesday)
 x   Began significant work on the new WorldBuilder.
