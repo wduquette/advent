@@ -1,14 +1,13 @@
 //! Type definitions for this app.
 
 use crate::entity::ID;
-use crate::world::World;
 use crate::world::WorldQuery;
 
 //------------------------------------------------------------------------------------------------
 // Basic Types
 
 /// A closure that's a predicate on the World.
-pub type RulePredicate = &'static Fn(&World) -> bool;
+pub type RulePredicate = &'static Fn(&WorldQuery) -> bool;
 
 /// A closure to produce a string from an entity
 pub type EntityStringHook = &'static Fn(&WorldQuery, &str) -> String;

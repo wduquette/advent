@@ -26,19 +26,19 @@ pub fn build() -> World {
     wb.player()
         .location("clearing")
         .flag(DIRTY_HANDS)
-        .prose_hook(&|q,e| {
+        .prose_hook(&|w,e| {
         Buffer::new()
             .add("You've got all the usual bits.")
-            .when(q.has(e, DIRTY_HANDS), "Your hands are kind of dirty, though.")
-            .when(!q.has(e, DIRTY_HANDS), "Plus, they're clean bits!")
+            .when(w.has(e, DIRTY_HANDS), "Your hands are kind of dirty, though.")
+            .when(!w.has(e, DIRTY_HANDS), "Plus, they're clean bits!")
         .get()
-        }); // TODO: put in-line.
+        });
 
     // NEXT, create and configure the things in the world.
 
     // Rule: Story 1
     wb.rule("rule-story-1")
-        .when(&|w| w.clock == 0)
+        .when(&|w| w.clock() == 0)
         .print("\
 You don't know where you are.  You don't even know where you want to
 be.  All you know is that your feet are wet, your hands are dirty,
@@ -63,8 +63,8 @@ and that you don't want to go find it again.
     // Thing: A ransom note, found in the clearing
     wb.thing("note", "note", "note")
         .location("clearing")
-        .on_examine_hook(&|q,e| {
-            if q.has(e, DIRTY) {
+        .on_examine_hook(&|w,e| {
+            if w.has(e, DIRTY) {
 "A note, on plain paper.  It looks pretty grubby; someone's been mishandling it.".into()
             } else {
                 "A note, on plain paper".into()
@@ -79,12 +79,12 @@ under the statue in the castle courtyard before nine o'clock tomorrow morning.
 
     // You can't read the note if it's dirty.
     wb.allow(&ReadThing("note"))
-        .unless(&|w| w.tag_has("note", DIRTY))
+        .unless(&|w| w.has("note", DIRTY))
         .print("You've gotten it too dirty to read.");
 
     // The note gets dirty if the player picks it up with dirty hands.
     wb.on(&GetThing("note"))
-        .when(&|w| w.tag_has(PLAYER, DIRTY_HANDS) && !w.tag_has("note", DIRTY))
+        .when(&|w| w.has(PLAYER, DIRTY_HANDS) && !w.has("note", DIRTY))
         .print("The dirt from your hands got all over the note.")
         .set_flag("note", DIRTY);
 
@@ -129,8 +129,8 @@ into one side:
     // Thing: The Sword in the Stone on the Hilltop
     wb.thing("sword", "sword", "sword")
         .location("hilltop")
-        .on_examine_hook(&|q,e| {
-            if q.has(e, TAKEN) {
+        .on_examine_hook(&|w,e| {
+            if w.has(e, TAKEN) {
                 "\
 The sword, if you want to call it that, is a three-foot length of dark hardwood
 with a sharkskin hilt on one end.  It's polished so that it gleams, and it has no
@@ -144,7 +144,7 @@ sharp edges anywhere.  Carved along the length of it are the words
 
     // If the player tries to pick up the sword with dirty hands, it kills him.
     wb.allow(&GetThing("sword"))
-        .unless(&|w| w.tag_has(PLAYER, DIRTY_HANDS))
+        .unless(&|w| w.has(PLAYER, DIRTY_HANDS))
         .print("\
 Oh, you so didn't want to touch the sword with dirty hands.
 Weren't you paying attention? Only the pure may touch this sword.
@@ -188,7 +188,7 @@ to the east.
 
     // The player can't enter the cave without the sword.
     wb.allow(&EnterRoom("cave-1"))
-        .unless(&|w| !w.tag_owns(w.pid, "sword")) // TODO: Use tag for player!
+        .unless(&|w| !w.owns(PLAYER, "sword"))
         .print("\
 Oh, hell, no, you're not going in there empty handed.  You'd better go back
 and get that sword.
@@ -203,7 +203,7 @@ It's an unpleasant place but your sword gives you confidence and warm fuzzies.
 
     // If the player dies, the fairy godmother revives him.
     wb.rule("fairy-godmother-rule")
-        .when(&|w| w.tag_has(PLAYER, Dead))
+        .when(&|w| w.has(PLAYER, Dead))
         .print("\
 A fairy godmother hovers over your limp body.  She frowns;
 then, apparently against her better judgment, she waves

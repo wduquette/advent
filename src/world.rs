@@ -16,12 +16,6 @@ use std::collections::HashSet;
 
 pub const LIMBO: ID = 0;
 
-/// WorldQuery: A query interface, for use by scenario hooks
-pub trait WorldQuery {
-    // The given flag is set on the tagged entity.
-    fn has(&self, tag: &str, flag: Flag) -> bool;
-}
-
 /// The game state.  Uses a variant of the Entity-Component-System architecture.
 /// This struct provides many methods for querying and mutating entities.  These methods
 /// constitute a low-level interface for interacting with the world; e.g., `set_location()`
@@ -262,15 +256,6 @@ impl World {
             .unwrap_or_else(|| panic!("No entity with tag: {}", tag))
     }
 
-    pub fn tag_owns(&self, owner: ID, thing: &str) -> bool {
-        let tid = self.lookup(thing);
-        if let Some(inv) = self.inventories.get(&owner) {
-            inv.has(tid)
-        } else {
-            false
-        }
-    }
-
     //--------------------------------------------------------------------------------------------
     // Verbs
 
@@ -299,15 +284,6 @@ impl World {
         fc.has(flag)
     }
 
-    /// Is the flag set on the entity?
-    pub fn tag_has(&self, tag: &str, flag: Flag) -> bool {
-        let id = self.lookup(tag);
-        assert!(self.has_flags(id) "Not a flag set: [{}]", id);
-        let fc = &self.flag_sets[&id];
-
-        fc.has(flag)
-    }
-
     /// Set the flag on the entity
     pub fn set(&mut self, id: ID, flag: Flag) {
         assert!(self.has_flags(id) "Not a flag set: [{}]", id);
@@ -329,7 +305,26 @@ impl World {
     }
 }
 
+/// WorldQuery: A query interface, for use by scenario hooks
+pub trait WorldQuery {
+    // Gets the value of the turn clock
+    fn clock(&self) -> usize;
+
+    // Returns true if the given flag is set on the tagged entity, and false
+    // otherwise.
+    fn has(&self, tag: &str, flag: Flag) -> bool;
+
+    // Returns true if the tagged owner owns the tagged thing, and
+    // false otherwise
+    fn owns(&self, owner: &str, thing: &str) -> bool;
+}
+
 impl WorldQuery for World {
+    // Gets the value of the turn clock
+    fn clock(&self) -> usize {
+        self.clock
+    }
+
     /// Is the flag set on the entity?
     fn has(&self, tag: &str, flag: Flag) -> bool {
         let id = self.lookup(tag);
@@ -339,4 +334,15 @@ impl WorldQuery for World {
         fc.has(flag)
     }
 
+    // Returns true if the tagged owner owns the tagged thing, and
+    // false otherwise
+    fn owns(&self, owner: &str, thing: &str) -> bool {
+        let oid = self.lookup(owner);
+        let tid = self.lookup(thing);
+        if let Some(inv) = self.inventories.get(&oid) {
+            inv.has(tid)
+        } else {
+            false
+        }
+    }
 }

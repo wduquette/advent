@@ -8,7 +8,6 @@ mod conmark;
 mod console;
 mod debug;
 mod entity;
-#[allow(dead_code)] // Temporary
 mod phys;
 mod player_control;
 mod rule;
