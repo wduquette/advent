@@ -7,9 +7,14 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Distinguish between scenery and portability.
-  * The stone in which the sword is held is not portable, but it isn't
-    scenery either; it should show up in the list of things in the room.
+*   Review the world-building API looking for things that can be better done.
+    *   Provide a better query object than World for the prose_hooks and rules.
+        *   Uses tags only
+        *   A simple wrapper around World, created when needed and thrown
+            away after.
+        *   Provides a clean query interface without providing full access
+            to the world.
+    *   Redefine prose hooks to use tags rather than IDs
 * The Game
   * Add more story.
   * Main loop should halt if you're dead at the end of it.

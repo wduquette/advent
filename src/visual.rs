@@ -85,7 +85,7 @@ fn print_room(world: &World, id: ID, detail: Detail) {
 
     // NEXT, list any "removable" objects in the room's inventory.  (We don't list
     // scenary; presumably that's in the description.)
-    let list = invent_list(world, &phys::removable(world, id));
+    let list = invent_list(world, &phys::non_scenery(world, id));
 
     if !list.is_empty() {
         para!("You see: {}.", list);

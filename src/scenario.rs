@@ -107,7 +107,7 @@ space.  Trails lead to the north and south.
     // Thing: The Stone on the Hilltop
     wb.thing("stone", "stone", "stone")
         .location("hilltop")
-        .flag(Scenery)
+        .flag(Immovable)
         .on_examine("\
 It's a massive block of marble, four feet wide and three feet high.  The top is flat, and the
 four sides slope inward.  There's a sword sticking out of the top.  These words are chiseled

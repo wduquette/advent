@@ -8,11 +8,19 @@ x   To do next:
     x   Remove the obsolete EBuilder code from World.
     x   Add expectation checking.
     x   Revise the name of the prose methods for ThingBuilder.
+    x   Distinguish between portability and scenery.
+        x   Scenery isn't listed in the room's inventory
+        x   Immovable things can't be taken.
     x   Redefine prose hooks to use tags rather than IDs?
     x   Provide better query object than World for the prose_hooks and rules.
 x   Removed obsolete entity-building code from world.rs.
 x   Added expectation checking.
 x   Improved the prose methods for ThingBuilder.
+x   Added the Immovable flag.
+    x   Updated the code so that Scenery is assumed to be immovable without
+        having the Immovable flag set.
+    x   And so that room descriptions include Immovable but non-scenery things
+        in the inventory list.
 
 2018-01-01 (Tuesday)
 x   Began significant work on the new WorldBuilder.

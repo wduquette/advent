@@ -58,7 +58,13 @@ pub enum Flag {
     /// Has this entity been seen by the player?  Used mostly for locations.
     Seen(ID),
 
-    /// Is the thing Scenery?
+    /// Is the thing immovable?  I.e., something that cannot be picked up?
+    Immovable,
+
+    /// Is the thing scenery, i.e., something that appears in an entity
+    /// description but doesn't usually appear in printed inventory
+    /// lists?  Scenery is also assumed to be immovable, but isn't
+    /// explicitly flagged as such.
     Scenery,
 
     /// A generic flag type for use by users

@@ -74,6 +74,21 @@ pub fn scenery(world: &World, owner: ID) -> BTreeSet<ID> {
     result
 }
 
+pub fn non_scenery(world: &World, owner: ID) -> BTreeSet<ID> {
+    assert_has_inventory(world, owner);
+
+    let mut result: BTreeSet<ID> = BTreeSet::new();
+
+    // FIRST, get everything that's flagged as scenery.
+    for id in contents(world, owner) {
+        if !world.has(id, Scenery) {
+            result.insert(id);
+        }
+    }
+
+    result
+}
+
 /// Finds all things in the viewer's location that are visible to
 /// the viewer.  This includes things owned by the viewer, present
 /// in the viewer's location, or (ultimately) visible in open containers.
@@ -103,7 +118,7 @@ pub fn removable(world: &World, loc: ID) -> BTreeSet<ID> {
     // FIRST, get everything owned by the viewer that isn't flagged
     // as scenario.
     for id in contents(world, loc) {
-        if !world.has(id, Scenery) {
+        if !world.has(id, Scenery) && !world.has(id, Immovable){
             result.insert(id);
         }
     }
@@ -120,7 +135,7 @@ pub fn droppable(world: &World, viewer: ID) -> BTreeSet<ID> {
 
 /// Finds all things in the viewer's location that he could, in theory,
 /// move to his own inventory, i.e., all things that aren't flagged
-/// scenery.
+/// scenery or immovable.
 pub fn gettable(world: &World, viewer: ID) -> BTreeSet<ID> {
     assert_has_location(world, viewer);
 
@@ -129,7 +144,7 @@ pub fn gettable(world: &World, viewer: ID) -> BTreeSet<ID> {
     // FIRST, get everything in the current location that isn't
     // flagged as "scenery".
     for id in contents(world, loc(world, viewer)) {
-        if !world.has(id, Scenery) {
+        if !world.has(id, Scenery) && !world.has(id, Immovable) {
             result.insert(id);
         }
     }

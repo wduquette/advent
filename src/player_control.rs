@@ -170,8 +170,11 @@ fn cmd_read(world: &mut World, player: &Player, name: &str) -> CmdResult {
             return Err("You can't read that.".into());
         }
 
-        // If he's holding it, or it's scenery, then he can read it.
-        if phys::owns(world, player.id, thing) || world.has(thing, Scenery) {
+        // If he's holding it, or it's scenery, or it's immovable, then he can read it.
+        if phys::owns(world, player.id, thing)
+            || world.has(thing, Immovable)
+            || world.has(thing, Scenery)
+        {
             phys::read_thing(world, player.id, thing)?;
             Ok(Normal)
         } else {
