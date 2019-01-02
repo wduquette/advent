@@ -10,7 +10,7 @@ Also, see docs/journal.txt.
 * Move flag methods to flag::has, flag::set, flag::unset, following the
   component architecture.
 * Ponder how to define custom commands:
-  * e.g., "wash hands". 
+  * e.g., "wash hands".
 * The Game
   * Add more story.
   * Main loop should halt if you're dead at the end of it.
@@ -54,8 +54,8 @@ the same problems more cleanly.  It's a brilliant paper, and got
 me headed the right direction.
 
 As a text adventure, Bonaventure is (at present) dirt simple.  It doesn't
-have a fancy natural language parser; it has only a very few rooms
-(and few objects); and there are few puzzles and no way to win the game.
+have a fancy natural language parser; it has only a few rooms, and
+objects, and a couple of puzzles; and there's no way to win the game.
 
 What it does have is a data model that would support a real game and
 could be extended cleanly in all sorts of ways. At present, the player can:
@@ -63,57 +63,67 @@ could be extended cleanly in all sorts of ways. At present, the player can:
 * Move from room to room
 * Pick up and drop objects
 * Query his inventory
-* Examine the room he's in
+* Examine the room he's in and the things he sees.
 
-There are also a couple of debugging commands.
+The engine also includes a WorldBuilder API that allows the scenario author
+to add rooms, things, etc., easily, and to customize their behavior
+and visuals using hooks.  See scenario.rs for the example.
 
 ## The Internals
 
 The game world consists of entities, each of which is made up of
-components.  Each entity has an integer ID; an entity's components are
-stored in a set of hash tables.  An entity may have the following
-components:
+components.  Each entity has a text tag and an integer ID; an
+entity's components are stored in a set of hash tables index on the
+ID.  An entity may have the following components:
 
-* The TagComponent, which contains the entity's ID and a string tag
-  used for lookups and as a debugging aid.  Every entity has a
-  TagComponent
+* The TagComponent, which contains the entity's tag and ID.
+  Every entity has a TagComponent
 * A PlayerComponent, for the player entity
 * A RoomComponent, for places a player can be
 * A ThingComponent, for things a player can interact with
-* Etc.
+* A RuleComponent, for rules that change the default behavior
+* A LocationComponent, for where a thing or player is
+* An InventoryComponent, for things that a room or player contains.
+* A FlagSetComponent, for flags that can be set on the entity
+* A ProseComponent, for prose (or hooks) used to describe the entity
 
-We build up complex
-entity types not by class-based inheritance, but by composing the entity
-out of components, e.g., a vehicle is a thing in a room AND a room the
-player can be in; it will have both a ThingComponent and a RoomComponent.
+We build up complex entity types not by class-based inheritance, but by
+composing the entity out of components, e.g., a vehicle is a thing in a
+room AND a room the player can be in; it will have both a ThingComponent
+and a RoomComponent.
 
 The entities themselves have very little logic attached to them.
+The bulk of the logic is in the game's "systems":
 
-* The World struct (which contains the entities) provides convenience
-  methods for querying and mutating the game world at a very low level.
-
-* The bulk of the logic is in the game's "systems":
-  * The `visual` system, which controls how entities appear to the
-    player, along with other visual output.
-  * The `phys` (physical) system, which is responsible for managing how
-    entities are related to each other (i.e., where they are located
-    and moved)
-  * The `rule` system, which allows the scenario to define special
-    rules that are triggered by various events.
-  * The `player_control` system which processes the player's commands.
+* The `visual` system, which controls how entities appear to the
+  player, along with other visual output.
+* The `phys` (physical) system, which is responsible for managing how
+  entities are related to each other (i.e., where they are located
+  and moved)
+* The `rule` system, which allows the scenario to define special
+  rules that are triggered by various events.
+* The `player_control` system which processes the player's commands.
 
 ## Ideas for the Future
 
-### Clean Scenario API
+### Multiple Commands
 
-The framework should be implemented as a library crate with a clean public API
-for defining games.  The game API should have two parts: one for building
-the scenario, and one for use by hooks, etc., while the game is running.
+A command line can have multiple commands separated by periods.  Since
+commands should have durations, we need to manage that carefully.
+Probably entered commands should get pushed into a queue; and the
+player_control::system() should process commands until it hits an error
+or time has passed.
 
-**Current Status**: The World struct is _de facto_ the public API for the
-scenario.  But the scenario still refers to the phys:: system (at least),
-and the World includes methods for use at both build and run time, and
-also methods for use by the framework itself.
+Of course, once we add monsters/NPCs it's possible that they can interrupt
+the command queue as well.
+
+### Commands with duration
+
+At present the clock increments for each user input, regardless of what it
+is.  Ideally, different commands should have different durations.  Errors
+should have no duration.  Some commands, like checking your inventory,
+should have no duration as well.  In principle, it's possible that some
+commands should take longer than one turn.
 
 ### Ambient Sound
 
@@ -127,20 +137,6 @@ if you "listen".
 To do this properly we would need a notion of the distance between two rooms;
 just because they are adjacent in the link map doesn't mean they are close
 to each other.  A link could be a long road, for example.
-
-### Fancy Undo
-
-At present Bonaventure supports undoing the very last command.  This is
-problematic, as it doesn't distinguish between commands that mutate the world
-and commands that don't; and in fact, it's difficult to distinguish between
-the two.  Even "look" takes time and so updates the clock; and a rule might
-fire or an NPC move during that time.
-
-Consequently, we may want a multi-level undo; and if so, we certainly need to
-tell the user what was undone.
-
-Alternatively, we can design the game so that undo isn't needed.  And for
-some games, undo is undesirable (i.e., if combat is a real thing)
 
 ### NPCs and Monsters
 
@@ -160,44 +156,19 @@ enum Behavior {
 }
 ```
 
-### Commands with duration
+### Fancy Undo
 
-At present the clock increments for each user input, regardless of what it
-is.  Ideally, different commands should have different durations.  Errors
-should have no duration.  Some commands, like checking your inventory,
-should have no duration as well.  In principle, it's possible that some
-commands should take longer than one turn.
+At present Bonaventure supports undoing the very last command.  This is
+problematic, as it doesn't distinguish between commands that mutate the world
+and commands that don't; and in fact, it's difficult to distinguish between
+the two.  Even "look" takes time and so updates the clock; and a rule might
+fire or an NPC move during that time.
 
-### Multiple Commands
+Consequently, we may want a multi-level undo; and if so, we certainly need to
+tell the user what was undone.
 
-A command line can have multiple commands separated by periods.  Since
-commands should have durations, we need to manage that carefully.
-Probably entered commands should get pushed into a queue; and the
-player_control::system() should process commands until it hits an error
-or time has passed.
-
-Of course, once we add monsters/NPCs it's possible that they can interrupt
-the command queue as well.
-
-### Fancy Destinations
-
-Consider making the links map be `HashMap<Dir,Dest>` instead of
-`HashMap<Dir,ID>`, where `Dest` is an Enum:
-
-```
-enum Dest {
-    Go(location_entity_id),
-    DeadEnd(prose_entity_id),
-    Guarded(location_entity_id, predicate, prose_entity_id),
-    ...
-}
-```
-
-Here, `Go` means just link there; `DeadEnd` means you can't go that way,
-but there's a special message; `Guarded` means you can only go there if
-a predicate condition is met, and you'll get a `DeadEnd` message otherwise.
-
-The Guarded destination is probably better handled by an event guard.
+Alternatively, we can design the game so that undo isn't needed.  And for
+some games, undo is undesirable (i.e., if combat is a real thing)
 
 ### Dictionary Content
 
@@ -210,12 +181,10 @@ for, e.g., Prof. Plum's mail slot is number 47.
 
 ### Expression Syntax
 
-At present Rules take a closure |&World| -> bool as the predicate.  If
+At present rules take a closure |&WorldQuery| -> bool as the predicate.  If
 I were reading the game from a scenario file, though, I'd need some
-kind of expression Syntax, probably translated to a syntax tree
-represented by enum values.  It could be useful anyway.
-
-There might be some crate that provides this.
+kind of expression syntax, probably translated to a syntax tree
+represented by enum values.
 
 * There doesn't seem to be any good crate providing basic boolean/arithmetic
   expression parsing and evaluation.
