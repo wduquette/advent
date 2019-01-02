@@ -2,9 +2,6 @@
 //!
 //! It provides builder methods for each kind of entity that the framework supports, with
 //! various aids.
-//!
-//! TODO: Some features of World will move into this module.  World should be primarily a
-//! runtime object, not a scenario-building object.
 
 use crate::entity::ID;
 use crate::entity::flag_set_component::*;
@@ -149,8 +146,6 @@ impl WorldBuilder {
     /// event can occur.  If the answer is no, then the guard can take some
     /// actions.
     pub fn allow(&mut self, evt: &WBEvent) -> RuleBuilder {
-        // FIRST, compute the internal event.
-        // TODO: share this with on().
         let mut rulec = RuleComponent::new();
         rulec.is_guard = true;
         self.build_event_rule("allow", evt, rulec)

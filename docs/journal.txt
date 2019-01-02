@@ -1,5 +1,20 @@
 Bonaventure Journal
 
+2018-01-02 (Wednesday)
+x   WorldBuilder progress
+    x   Got rules working in a much nicer way.
+    x   The entire current scenario now uses the WorldBuilder API.
+x   To do next:
+    x   Remove the obsolete EBuilder code from World.
+    x   Add expectation checking.
+    x   Revise the name of the prose methods for ThingBuilder.
+    x   Redefine prose hooks to use tags rather than IDs?
+    x   Provide better query object than World for the prose_hooks and rules.
+
+2018-01-01 (Tuesday)
+x   Began significant work on the new WorldBuilder.
+    x   Got everything working except rules.
+
 2018-12-31 (Monday) Part II
 x   Problems with Scenario Definitions
     x   Problems:
