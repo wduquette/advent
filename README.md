@@ -7,18 +7,10 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-*   Ponder: Scenery vs Immovable
-    *   At present, Scenery implies Immovable.
-    *   Should they be orthogonal?  Scenery affects the visual system, while
-        Immovable affects the physical system?
-*   Review the world-building API looking for things that can be better done.
-    *   Provide a better query object than World for the prose_hooks and rules.
-        *   Uses tags only
-        *   A simple wrapper around World, created when needed and thrown
-            away after.
-        *   Provides a clean query interface without providing full access
-            to the world.
-    *   Redefine prose hooks to use tags rather than IDs
+* Move flag methods to flag::has, flag::set, flag::unset, following the
+  component architecture.
+* Ponder how to define custom commands:
+  * e.g., "wash hands". 
 * The Game
   * Add more story.
   * Main loop should halt if you're dead at the end of it.

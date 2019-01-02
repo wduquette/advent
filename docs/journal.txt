@@ -26,8 +26,20 @@ x   Easier queries
         queries needed by the scenario.
         x   I was going to define a wrapper struct, but this is much
             better.
-    x   EntityStringHook now takes an entity tag rather than an entity
-        ID.
+    x   EntityStringHook now takes WorldQuery and an entity tag rather
+        than an entity ID.
+    x   RulePredicate now takes WorldQuery
+        x   Added owns() and clock() methods.
+    x   World::{has,set,unset}() are now has_flag, set_flag, and unset_flag
+        once again.
+x   The scenario API is now much cleaner.
+    x   It uses the Buffer type from visual::, which should probably be
+        moved to types::.
+    x   Internal events are still in types::, and should probably be
+        moved out.
+    x   The WorldQuery trait should probably be moved to types::.
+    x   Basically, the scenario should have access to types:: and
+        world_builder::
 
 2018-01-01 (Tuesday)
 x   Began significant work on the new WorldBuilder.
