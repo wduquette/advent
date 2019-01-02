@@ -211,7 +211,7 @@ fn cmd_get(world: &mut World, player: &Player, noun: &str) -> CmdResult {
         return Err("You already have that.".into());
     }
 
-    if find_noun(world, phys::scenery(world, player.loc), noun).is_some() {
+    if find_noun(world, phys::immovable(world, player.loc), noun).is_some() {
         return Err("You can't take that!".into());
     }
 
