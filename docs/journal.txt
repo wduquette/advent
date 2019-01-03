@@ -17,6 +17,13 @@ x   Replaced the visual::Buffer struct with a new types::ProseBuffer struct.
 x   Replaced EntityStringHook with EntityProseHook, which takes a third
     argument, a mutable ProseBuffer.  The hook writes the relevant text
     strings into the buffer.
+x   Lovely idea:
+    x   Add methods to Script struct that add specific actions to the
+        script.  The RuleBuilder will call these directly.
+    x   Add a ScriptHook that takes a WorldQuery and a Script.
+    x   Add a ScriptHook field to the RuleComponent.
+    x   If the ScriptHook is given, it is called when the rule fires to
+        extend the script.
 
 2018-01-02 (Wednesday, Part 2)
 x   Custom Commands

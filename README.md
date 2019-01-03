@@ -8,7 +8,31 @@ using something like the ECS architecture.
 Also, see docs/journal.txt.
 
 * Ponder how to define custom commands:
-  * e.g., "wash hands".
+    *   E.g., "wash hands".
+    *   The custom command must define:
+        *   A command pattern.  The custom command is triggered when the
+            user enters a command that matches the pattern.
+        *   A command hook.
+            *   It receives the WorldQuery struct and the command pattern.
+            *   It returns Result<Script,String>.
+        *   Alternatively,
+            *   Pass in an empty mutable script, for convenience.
+            *   Return Result<(),String>.  
+        *   When triggered, the command pattern is passed to the hook.
+            *   Any resulting script is executed.
+            *   Any resulting error is printed.
+*   Let rules use script hooks:
+    *   Add methods to Script struct that add specific actions to the
+        script.  The RuleBuilder will call these directly.
+        *   We will want this for custom commands as well.
+    *   Add a ScriptHook that takes a WorldQuery and a Script.
+    *   Add a ScriptHook field to the RuleComponent.
+    *   If the ScriptHook is given, it is called when the rule fires to
+        extend the script.
+    *   Option A: Either a hook, or a specific set of pre-defined actions.
+    *   Option B: The hook extends the pre-defined actions, if any.
+    *   A is probably fine; B is more likely confusing.  So probably
+        option A.
 * Move flag methods to flag::has, flag::set, flag::unset, following the
   component architecture.
 * Change "stone" to be scenery, and add a prose hook for the hilltop
