@@ -9,8 +9,10 @@ use crate::world::WorldQuery;
 /// A closure that's a predicate on the World.
 pub type RulePredicate = &'static Fn(&WorldQuery) -> bool;
 
-/// A closure to produce a string from an entity
-pub type EntityStringHook = &'static Fn(&WorldQuery, &str) -> String;
+/// A closure to produce a string from an entity.  The first argument should be
+/// the query object, the second the entity's tag, and the third the buffer to
+/// receive the string.
+pub type EntityProseHook = &'static Fn(&WorldQuery, &str, &mut ProseBuffer);
 
 /// The time, in game turns
 pub type Time = usize;

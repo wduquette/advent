@@ -1,8 +1,9 @@
 //! The prose component.  It stores the entity's prose visuals.
 
 use crate::entity::ID;
-use crate::types::EntityStringHook;
+use crate::types::EntityProseHook;
 use crate::types::ProseType;
+use crate::types::ProseBuffer;
 use crate::world::World;
 use std::collections::HashMap;
 use std::fmt;
@@ -11,18 +12,20 @@ use std::fmt;
 /// We define this struct because we can't add traits to EntityStringHook.
 #[derive(Clone)]
 pub struct ProseHook {
-    hook: EntityStringHook,
+    hook: EntityProseHook,
 }
 
 impl ProseHook {
     /// Creates the hook
-    pub fn new(hook: EntityStringHook) -> Self {
+    pub fn new(hook: EntityProseHook) -> Self {
         Self { hook }
     }
 
     /// Call the hook
     pub fn call(&self, world: &World, id: ID) -> String {
-        (self.hook)(world, &world.tag(id))
+        let buff = &mut ProseBuffer::new();
+        (self.hook)(world, &world.tag(id), buff);
+        buff.get()
     }
 }
 

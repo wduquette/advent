@@ -3,7 +3,6 @@
 use crate::types::Dir::*;
 use crate::types::Flag;
 use crate::types::Flag::*;
-use crate::types::ProseBuffer;
 use crate::world::World;
 use crate::world_builder::*;
 use crate::world_builder::WBEvent::*;
@@ -26,15 +25,13 @@ pub fn build() -> World {
     wb.player()
         .location("clearing")
         .flag(DIRTY_HANDS)
-        .prose_hook(&|w,e| {
-            let mut buff = ProseBuffer::new();
+        .prose_hook(&|w,e,buff| {
             buff.puts("You've got all the usual bits.");
             if w.has(e, DIRTY_HANDS) {
                 buff.puts("Your hands are kind of dirty, though.");
             } else {
                 buff.puts("Plus, they're clean bits!");
             }
-            buff.get()
         });
 
     // NEXT, create and configure the things in the world.
@@ -66,11 +63,10 @@ and that you don't want to go find it again.
     // Thing: A ransom note, found in the clearing
     wb.thing("note", "note", "note")
         .location("clearing")
-        .on_examine_hook(&|w,e| {
+        .on_examine_hook(&|w,e,buff| {
+            buff.puts("A note, on plain paper.");
             if w.has(e, DIRTY) {
-"A note, on plain paper.  It looks pretty grubby; someone's been mishandling it.".into()
-            } else {
-                "A note, on plain paper".into()
+                buff.puts("It looks pretty grubby; someone's been mishandling it.");
             }
         })
         .on_read("\
@@ -132,16 +128,16 @@ into one side:
     // Thing: The Sword in the Stone on the Hilltop
     wb.thing("sword", "sword", "sword")
         .location("hilltop")
-        .on_examine_hook(&|w,e| {
+        .on_examine_hook(&|w,e,buff| {
             if w.has(e, TAKEN) {
-                "\
+                buff.puts("\
 The sword, if you want to call it that, is a three-foot length of dark hardwood
 with a sharkskin hilt on one end.  It's polished so that it gleams, and it has no
 sharp edges anywhere.  Carved along the length of it are the words
 \"Emotional Support Sword (TM)\".
-                ".into()
+                ");
             } else {
-                "All you can really see is the hilt; the rest is embedded in the stone.".into()
+                buff.puts("All you can really see is the hilt; the rest is embedded in the stone.");
             }
         });
 

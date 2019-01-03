@@ -1,5 +1,23 @@
 Bonaventure Journal
 
+2018-01-03 (Thursday)
+x   Weird RLS problem
+    x   The RLS kept crashing with a stack overflow in Atom.
+        x   Atom said that the RLS had been restarted too many times.
+        x   Per the ide-rust package instructions, open the Electron JS
+            console (Option-Command-I) and in the console enter
+            "atom.config.set('core.debugLSP', true)"
+        x   Make sure no rust files are open.
+        x   Restart Atom.
+        x   Open the console, and then open a .rs file.
+    x   This is a known bug in RLS.
+    x   It seems the quick fix is to delete the target/ folder from the
+        project.
+x   Replaced the visual::Buffer struct with a new types::ProseBuffer struct.
+x   Replaced EntityStringHook with EntityProseHook, which takes a third
+    argument, a mutable ProseBuffer.  The hook writes the relevant text
+    strings into the buffer.
+
 2018-01-02 (Wednesday, Part 2)
 x   Custom Commands
     x   The only example right now is "wash hands".

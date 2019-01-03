@@ -276,7 +276,7 @@ impl WorldBuilder {
 
     /// Adds a prose hook of a given type to an entity's prose component,
     /// creating the component if necessary.
-    fn add_prose_hook(&mut self, id: ID, prose_type: ProseType, hook: EntityStringHook) {
+    fn add_prose_hook(&mut self, id: ID, prose_type: ProseType, hook: EntityProseHook) {
         self.add_prose_component(id);
 
         let prose = Prose::Hook(ProseHook::new(hook));
@@ -348,7 +348,7 @@ impl<'a> PlayerBuilder<'a> {
 
     /// Adds a prose hook to the player, to produce descriptive prose
     /// on demand.
-    pub fn prose_hook(self, hook: EntityStringHook) -> PlayerBuilder<'a> {
+    pub fn prose_hook(self, hook: EntityProseHook) -> PlayerBuilder<'a> {
         self.wb.add_prose_hook(self.wb.world.pid, ProseType::Thing, hook);
         self
     }
@@ -375,7 +375,7 @@ impl<'a> RoomBuilder<'a> {
 
     /// Adds a prose hook to the room, to produce descriptive prose
     /// on demand.
-    pub fn prose_hook(self, hook: EntityStringHook) -> RoomBuilder<'a> {
+    pub fn prose_hook(self, hook: EntityProseHook) -> RoomBuilder<'a> {
         self.wb.add_prose_hook(self.id, ProseType::Room, hook);
         self
     }
@@ -428,7 +428,7 @@ impl<'a> ThingBuilder<'a> {
 
     /// Adds a prose hook to the thing, to produce descriptive prose
     /// on demand.
-    pub fn on_examine_hook(self, hook: EntityStringHook) -> ThingBuilder<'a> {
+    pub fn on_examine_hook(self, hook: EntityProseHook) -> ThingBuilder<'a> {
         self.wb.add_prose_hook(self.id, ProseType::Thing, hook);
         self
     }
@@ -441,7 +441,7 @@ impl<'a> ThingBuilder<'a> {
 
     /// Adds a prose hook to the thing, to produce readable prose
     /// on demand.
-    pub fn on_read_hook(self, hook: EntityStringHook) -> ThingBuilder<'a> {
+    pub fn on_read_hook(self, hook: EntityProseHook) -> ThingBuilder<'a> {
         self.wb.add_prose_hook(self.id, ProseType::Book, hook);
         self
     }
