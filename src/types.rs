@@ -131,3 +131,65 @@ pub enum LinkDest {
     /// the user.
     DeadEnd(String)
 }
+
+/// ProseBuffer: A buffer for building up strings of prose.
+///
+/// Output prose is structured as sentences with block paragraphs.
+/// This struct allows the client to build up output prose using
+/// natural semantics.  The built-up string uses "conmark" syntax,
+/// e.g., it is intended to be reformatted for display on a
+/// console terminal.  See the "conmark" module for details.
+
+#[derive(Default)]
+pub struct ProseBuffer {
+    buff: String,
+}
+
+impl ProseBuffer {
+    /// Creates an empty buffer.  Prefer visual::prose().
+    pub fn new() -> Self {
+        Self {
+            buff: String::new(),
+        }
+    }
+
+    /// Adds a sentence to the buffer, separating it from previous text
+    /// with a blank space if necessary.
+    pub fn puts(&mut self, text: &str) {
+        self.add_white_space_if_needed();
+        self.put_raw(text);
+    }
+
+    /// Adds a paragraph break to the buffer.
+    pub fn para(&mut self) {
+        if self.buff.ends_with("||") {
+            // Do nothing
+        } else if self.buff.ends_with("|") {
+            self.buff.push_str("|");
+        } else {
+            self.buff.push_str("||");
+        }
+    }
+
+    /// Adds text to the buffer, with no special handling.
+    pub fn put_raw(&mut self, text: &str) {
+        self.buff.push_str(text);
+    }
+
+    /// Converts the buffer to a string.
+    pub fn get(&self) -> String {
+        self.buff.clone()
+    }
+
+    /// Adds white space before a new sentence, if needed.
+    fn add_white_space_if_needed(&mut self) {
+        let len = self.buff.len();
+
+        if len > 0 {
+            let last_char: char = self.buff.chars().nth(len - 1).unwrap();
+            if !last_char.is_whitespace() && last_char != '|' {
+                self.buff.push('\n');
+            }
+        }
+    }
+}
