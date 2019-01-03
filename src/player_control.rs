@@ -193,12 +193,12 @@ fn cmd_wash_hands(world: &mut World, player: &Player) -> CmdResult {
         return Err("That'd be a neat trick, since there's no water here.".into());
     }
 
-    visual::prose("You wash your hands in the water.")
-        .when(
-            world.has_flag(player.id, DIRTY_HANDS),
-            "They look much cleaner now.",
-        )
-        .para();
+    let mut buff = ProseBuffer::new();
+    buff.puts("You wash your hands in the water.");
+    if world.has_flag(player.id, DIRTY_HANDS) {
+        buff.puts("They look much cleaner now.");
+    }
+    visual::act(&buff.get());
     world.unset_flag(player.id, DIRTY_HANDS);
 
     Ok(Normal)

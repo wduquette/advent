@@ -161,11 +161,12 @@ impl ProseBuffer {
     }
 
     /// Adds a paragraph break to the buffer.
+    #[allow(dead_code)]
     pub fn para(&mut self) {
         if self.buff.ends_with("||") {
             // Do nothing
-        } else if self.buff.ends_with("|") {
-            self.buff.push_str("|");
+        } else if self.buff.ends_with('|') {
+            self.buff.push('|');
         } else {
             self.buff.push_str("||");
         }

@@ -13,6 +13,7 @@ use crate::console::para;
 use crate::entity::ID;
 use crate::phys;
 use crate::types::ProseType;
+use crate::types::ProseBuffer;
 use crate::world::World;
 use std::collections::BTreeSet;
 
@@ -45,10 +46,6 @@ pub fn error(msg: &str) {
 /// Outputs information (e.g., help)
 pub fn info(msg: &str) {
     para(msg);
-}
-
-pub fn prose(text: &str) -> Buffer {
-    Buffer::new().add(text)
 }
 
 //-----------------------------------------------------------------------------
@@ -111,12 +108,12 @@ pub fn can_read(world: &World, thing: ID) -> bool {
 
 /// Outputs the content of a book.
 pub fn read(world: &World, book: ID) {
-    Buffer::new()
-        .add("The")
-        .add(&world.things[&book].noun)
-        .add("reads:")
-        .add(&get_prose(world, book, ProseType::Book))
-        .para();
+    let mut buff = ProseBuffer::new();
+    buff.puts("The");
+    buff.puts(&world.things[&book].noun);
+    buff.puts("reads:");
+    buff.puts(&get_prose(world, book, ProseType::Book));
+    act(&buff.get());
 }
 
 //-----------------------------------------------------------------------------
@@ -171,47 +168,5 @@ pub fn get_prose(world: &World, id: ID, prose_type: ProseType) -> String {
         prose.as_string(world, id)
     } else {
         "You don't see anything special.".to_string()
-    }
-}
-
-/// A buffer for building up text strings for output.
-pub struct Buffer {
-    buff: String,
-}
-
-impl Buffer {
-    /// Creates an empty buffer.  Prefer visual::prose().
-    pub fn new() -> Buffer {
-        Buffer {
-            buff: String::new(),
-        }
-    }
-
-    /// Adds a text string to the buffer, adding a blank if necessary.
-    pub fn add(mut self, text: &str) -> Buffer {
-        if !self.buff.is_empty() {
-            self.buff.push(' ');
-        }
-        self.buff.push_str(text);
-        self
-    }
-
-    /// Adds a text string only if the flag is true
-    pub fn when(self, flag: bool, text: &str) -> Buffer {
-        if flag {
-            self.add(text)
-        } else {
-            self
-        }
-    }
-
-    /// Converts the buffer to a string.
-    pub fn get(self) -> String {
-        self.buff
-    }
-
-    /// Outputs the constructed message as a para.
-    pub fn para(self) {
-        para(&self.buff);
     }
 }

@@ -3,7 +3,7 @@
 use crate::types::Dir::*;
 use crate::types::Flag;
 use crate::types::Flag::*;
-use crate::visual::Buffer;
+use crate::types::ProseBuffer;
 use crate::world::World;
 use crate::world_builder::*;
 use crate::world_builder::WBEvent::*;
@@ -27,11 +27,14 @@ pub fn build() -> World {
         .location("clearing")
         .flag(DIRTY_HANDS)
         .prose_hook(&|w,e| {
-        Buffer::new()
-            .add("You've got all the usual bits.")
-            .when(w.has(e, DIRTY_HANDS), "Your hands are kind of dirty, though.")
-            .when(!w.has(e, DIRTY_HANDS), "Plus, they're clean bits!")
-        .get()
+            let mut buff = ProseBuffer::new();
+            buff.puts("You've got all the usual bits.");
+            if w.has(e, DIRTY_HANDS) {
+                buff.puts("Your hands are kind of dirty, though.");
+            } else {
+                buff.puts("Plus, they're clean bits!");
+            }
+            buff.get()
         });
 
     // NEXT, create and configure the things in the world.
