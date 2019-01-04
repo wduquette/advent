@@ -8,7 +8,8 @@ use crate::visual;
 use crate::world::World;
 use crate::world;
 
-/// A script of actions to be executed at a later time.
+/// A script of actions for execution.  Scripts can be pre-defined and executed
+/// later, or created and executed immediately.
 #[derive(Clone, Debug, Default)]
 pub struct Script {
     pub actions: Vec<Action>,
@@ -80,13 +81,19 @@ impl Script {
     }
 }
 
-/// A buffer for creating scripts
-pub struct ScriptBuffer<'a> {
+/// A builder for scripts, for use especially in rule and command hooks.
+/// Create a ScriptBuilder, add actions, and then call get() to retrieve the
+/// script.
+pub struct ScriptBuilder<'a> {
     world: &'a World,
     script: Script
 }
 
-impl<'a> ScriptBuffer<'a> {
+impl<'a> ScriptBuilder<'a> {
+    //------------------------------------------------------------------------------------------
+    // Script Management
+
+    /// Creates a new script builder relative to the given world.
     pub fn new(world: &'a World) -> Self {
         Self {
             world,
@@ -94,17 +101,66 @@ impl<'a> ScriptBuffer<'a> {
         }
     }
 
+    /// Retrieves the finished script.
+    pub fn get(self) -> Script {
+        self.script
+    }
+
+    //------------------------------------------------------------------------------------------
+    // Script Actions
+
+    /// Adds an action to print the given text string.
     pub fn print(&mut self, text: &str) {
         self.script.add(Print(text.into()));
     }
 
+    /// Adds an action to set the given flag on the tagged entity.
+    /// Panics if the entity does not exist or doesn't allow flags.
     pub fn set_flag(&mut self, tag: &str, flag: Flag) {
-        let id = self.world.lookup(tag);
-        self.script.add(SetFlag(id, flag));
+        if let Some(id) = self.world.lookup_id(tag) {
+            if self.world.has_flags(id) {
+                self.script.add(SetFlag(id, flag));
+            }
+        } else {
+            panic!("set_flag: not an entity with a flag set: {}", tag);
+        }
     }
 
+    /// Adds an action to move the tagged entity to LIMBO.
+    /// Panics if the entity does not exist or has no location component.
     pub fn forget(&mut self, tag: &str) {
-        let id = self.world.lookup(tag);
-        self.script.add(PutIn(id, world::LIMBO));
+        if let Some(id) = self.world.lookup_id(tag) {
+            if self.world.has_location(id) {
+                self.script.add(PutIn(id, world::LIMBO));
+            }
+        } else {
+            panic!("forget: not an entity with location: {}", tag);
+        }
+    }
+
+    /// Adds an action to kill the given entity (i.e., set its Dead flag).
+    /// At present the only thing that can be killed is the player, so
+    /// this call panics if it is called for anything but the player.
+    pub fn kill(&mut self, tag: &str) {
+        if let Some(id) = self.world.lookup_id(tag) {
+            if self.world.is_player(id) {
+                self.script.add(Action::Kill(id));
+            }
+        } else {
+            panic!("forget: not the player: {}", tag);
+        }
+    }
+
+    /// Adds an action to revive the given entity (i.e., clear its Dead flag).
+    /// At present the only thing that can be killed is the player, so
+    /// this call panics if it is called for anything but the player.
+    pub fn revive(&mut self, tag: &str) {
+        if let Some(id) = self.world.lookup_id(tag) {
+            if self.world.is_player(id) {
+                self.script.add(Action::Revive(id));
+            }
+        } else {
+            panic!("forget: not the player: {}", tag);
+        }
     }
 }

@@ -1,5 +1,16 @@
 Bonaventure Journal
 
+2018-01-04 (Friday)
+x   Script Creation
+    x   I think the ScriptBuilder idea (Option D) makes the most sense.
+        x   Both WorldBuilder and hooks use ScriptBuilder to build the script
+            for execution.
+        x   WorldBuilder does the extra work to create the needed entities
+            (as it does now) then uses ScriptBuilder to add the action to
+            the script.
+        x   Hooks at runtime just use ScriptBuilder; the entities have to
+            already be there.
+
 2018-01-03 (Thursday)
 x   Weird RLS problem
     x   The RLS kept crashing with a stack overflow in Atom.
