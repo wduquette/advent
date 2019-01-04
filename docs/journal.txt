@@ -24,6 +24,38 @@ x   Lovely idea:
     x   Add a ScriptHook field to the RuleComponent.
     x   If the ScriptHook is given, it is called when the rule fires to
         extend the script.
+x   Issue with ScriptHooks: scenarios deal with tags; Actions deal with IDs.
+x   The question is, when to do the lookup from tags to IDs?
+    x   Option A: Never
+        x   The scenario needs to build scripts in terms of IDs, or do
+            explicit lookups.
+        x   NOPE.  Not going to happen.
+    x   Option B: Always
+        x   Instead of using numeric IDs, always use the tags.
+            x   Big change, since tags are not "Copy".
+            x   Need to clone strings a lot, which is annoying.
+    x   Option C: When adding actions to the script
+        x   Implies:
+            x   The object compiling method calls into actions is doing the
+                lookup, and therefore needs the World.
+            x   Which means we need a ScriptBuilder, which will produce
+                the finished script.
+            x   The entities need to be there to be looked up, and need to
+                have the relevant components (if we're going to check that)
+                when the script is built.
+                x   But this won't always be true during scenario
+                    construction, which makes this a different mechanism
+                    that the WorldBuilder's RuleBuilder.  Which is
+                    annoying.
+    x   Option D: When executing the script
+        x   I.e., change the Actions to take tags rather than IDs.
+        x   The WorldBuilder can check components when building the
+            actions at scenario build time, then use the
+            Script/ScriptBuilder to assemble the actual script.
+        x   At runtime, any assembled script will be run immediately
+            x   Error checking can be done at that time.
+    x   Not sure which of these is better.
+
 
 2018-01-02 (Wednesday, Part 2)
 x   Custom Commands

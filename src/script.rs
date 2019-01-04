@@ -6,6 +6,7 @@ use crate::types::Action::*;
 use crate::types::Flag;
 use crate::visual;
 use crate::world::World;
+use crate::world;
 
 /// A script of actions to be executed at a later time.
 #[derive(Clone, Debug, Default)]
@@ -76,5 +77,34 @@ impl Script {
                 }
             }
         }
+    }
+}
+
+/// A buffer for creating scripts
+pub struct ScriptBuffer<'a> {
+    world: &'a World,
+    script: Script
+}
+
+impl<'a> ScriptBuffer<'a> {
+    pub fn new(world: &'a World) -> Self {
+        Self {
+            world,
+            script: Script::new(),
+        }
+    }
+
+    pub fn print(&mut self, text: &str) {
+        self.script.add(Print(text.into()));
+    }
+
+    pub fn set_flag(&mut self, tag: &str, flag: Flag) {
+        let id = self.world.lookup(tag);
+        self.script.add(SetFlag(id, flag));
+    }
+
+    pub fn forget(&mut self, tag: &str) {
+        let id = self.world.lookup(tag);
+        self.script.add(PutIn(id, world::LIMBO));
     }
 }
