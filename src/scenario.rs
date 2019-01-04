@@ -3,18 +3,16 @@
 use crate::types::Dir::*;
 use crate::types::Flag;
 use crate::types::Flag::*;
+use crate::types::ProseBuffer;
 use crate::world::World;
 use crate::world_builder::*;
 use crate::world_builder::WBEvent::*;
 
 // User-defined flags
-// TODO: These constants should only be used in the scenario itself; but at present they
-// are still used by the "wash hands" command code in player_control.rs.  Once that's
-// implemented clearly, they should no longer be "pub".
 const DIRTY: Flag = User("DIRTY");
-pub const DIRTY_HANDS: Flag = User("DIRTY_HANDS");
-pub const HAS_WATER: Flag = User("HAS_WATER");
-pub const TAKEN: Flag = User("TAKEN");
+const DIRTY_HANDS: Flag = User("DIRTY_HANDS");
+const HAS_WATER: Flag = User("HAS_WATER");
+const TAKEN: Flag = User("TAKEN");
 
 /// Build the initial state of the game world.
 pub fn build() -> World {
@@ -209,6 +207,33 @@ then, apparently against her better judgment, she waves
 her wand.  There's a flash, and she disappears.
         ")
         .revive(PLAYER);
+
+    // NEXT, add custom commands.
+    // NOTE: Order is important!
+
+    wb.verb_noun("wash", "hands", &|w,_,script| {
+        if !w.has(&w.loc(PLAYER), HAS_WATER) {
+            return Err("That'd be a neat trick, since there's no water here.".into());
+        }
+
+        // TODO: Provide actions that build up paragraphs?
+        let mut buff = ProseBuffer::new();
+        buff.puts("You wash your hands in the water.");
+        if w.has(PLAYER, DIRTY_HANDS) {
+            buff.puts("They look much cleaner now.");
+        }
+
+        script.print(&buff.get());
+        script.unset_flag(PLAYER, DIRTY_HANDS);
+
+        Ok(())
+    });
+
+    wb.verb_visible("wash", &|_,_,script| {
+        script.print("You can't wash that.");
+        Ok(())
+    });
+
 
     // NEXT, return the world.
     wb.world()

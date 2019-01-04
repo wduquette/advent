@@ -10,20 +10,6 @@ Also, see docs/journal.txt.
 * Reconsider crate module layout, given "pub" rule:
     *   A submodule can see everything in its parent modules, but only
         "pub" things from any other module.
-* Ponder how to define custom commands:
-    *   E.g., "wash hands".
-    *   The custom command must define:
-        *   A command pattern.  The custom command is triggered when the
-            user enters a command that matches the pattern.
-        *   A command hook.
-            *   It receives the WorldQuery struct and the command pattern.
-            *   It returns Result<Script,String>.
-        *   Alternatively,
-            *   Pass in an empty mutable script, for convenience.
-            *   Return Result<(),String>.  
-        *   When triggered, the command pattern is passed to the hook.
-            *   Any resulting script is executed.
-            *   Any resulting error is printed.
 *   Let rules use script hooks:
     *   Add methods to Script struct that add specific actions to the
         script.  The RuleBuilder will call these directly.
@@ -40,8 +26,6 @@ Also, see docs/journal.txt.
   component architecture.
 * Change "stone" to be scenery, and add a prose hook for the hilltop
   that includes it if present, but not otherwise.
-* Think if there's a smoother way to do the buffering in the
-  player's prose hook.
 * The Game
   * Add more story.
   * Main loop should halt if you're dead at the end of it.

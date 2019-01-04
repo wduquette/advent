@@ -1,9 +1,6 @@
 //! The Player Control System
 
-use crate::world_builder::PLAYER;
 use crate::script::Script;
-use crate::scenario::DIRTY_HANDS;
-use crate::scenario::HAS_WATER;
 use self::Status::*;
 use crate::command;
 use crate::command::Command;
@@ -75,49 +72,22 @@ fn handle_input(game: &mut Game, player: &Player, input: &str) -> StatusResult {
 }
 
 fn handle_normal_command(game: &mut Game, player: &Player, cmd: &Command) -> StatusResult {
-    let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
     let world = &mut game.world;
+    let the_words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
+    let words = the_words.as_slice();
 
-    // TODO: Temporary, just trying out CommandHandler
-    let mut handlers: Vec<CommandHandler> = Vec::new();
-    handlers.push(CommandHandler::verb("help", &|_,_,script| {
-        script.print("Oh, help!");
-        Ok(())
-    }));
-
-    handlers.push(CommandHandler::verb_noun("wash", "hands", &|w,_,script| {
-        if !w.has(&w.loc(PLAYER), HAS_WATER) {
-            return Err("That'd be a neat trick, since there's no water here.".into());
-        }
-
-        // TODO: Provide actions that build up paragraphs?
-        let mut buff = ProseBuffer::new();
-        buff.puts("You wash your hands in the water.");
-        if w.has(PLAYER, DIRTY_HANDS) {
-            buff.puts("They look much cleaner now.");
-        }
-
-        script.print(&buff.get());
-        script.unset_flag(PLAYER, DIRTY_HANDS);
-
-        Ok(())
-    }));
-
-    handlers.push(CommandHandler::verb_visible("wash", &|_,_,script| {
-        script.print("You can't wash that.");
-        Ok(())
-    }));
-
-
-    for handler in handlers {
-        if handler.matches(words.as_slice()) {
-            handler.execute(world, player, words.as_slice())?;
+    // FIRST, handle custom commands.
+    // TODO: Possible better way to handle this: write function that matches the words
+    // and clones the specific handler.
+    for handler in world.command_handlers.clone() {
+        if handler.matches(words) {
+            handler.execute(&mut game.world, player, words)?;
             return Ok(Normal);
         }
     }
 
-    // TODO: parser should handle two-word verb synonyms.
-    match words.as_slice() {
+    // NEXT, handle built-in commands
+    match words {
         ["go", "north"] => cmd_go(world, player, North),
         ["north"] => cmd_go(world, player, North),
         ["go", "south"] => cmd_go(world, player, South),
@@ -391,6 +361,7 @@ fn find_noun(world: &World, ids: BTreeSet<ID>, noun: &str) -> Option<ID> {
 //-------------------------------------------------------------------------
 // Command Handler
 
+#[derive(Debug,Clone)]
 enum CommandPattern {
     /// Match any single arbitrary word
     Verb(String),
@@ -402,6 +373,7 @@ enum CommandPattern {
     VerbVisible(String),
 }
 
+#[derive(Clone)]
 pub struct CommandHandler {
     pattern: CommandPattern,
     hook: CommandHook,

@@ -1,4 +1,5 @@
 //! The game world
+use crate::player_control::CommandHandler;
 use crate::entity::flag_set_component::*;
 use crate::entity::inventory_component::*;
 use crate::entity::location_component::*;
@@ -73,6 +74,8 @@ pub struct World {
     //--------------------------------------------------------------------------------------------
     // Resources
 
+    pub command_handlers: Vec<CommandHandler>,
+
     // The valid verbs
     pub verbs: HashSet<String>,
 
@@ -100,6 +103,7 @@ impl World {
             rooms: HashMap::new(),
             things: HashMap::new(),
             rules: BTreeMap::new(),
+            command_handlers: Vec::new(),
             verbs: HashSet::new(),
             synonyms: HashMap::new(),
         };

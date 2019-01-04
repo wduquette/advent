@@ -1,13 +1,5 @@
 Bonaventure Journal
 
-2018-01-04 (Friday, Part 2)
-x   Command Patterns
-    x   What's the simplest thing that could possibly work?
-        x   I have two "wash" commands, ["wash","hands"] and
-            ["wash",_].
-        x   The simplest thing is a pattern ["wash","*"] that triggers a
-            method that looks at the "*".
-
 2018-01-04 (Friday)
 x   Script Creation
     x   I think the ScriptBuilder idea (Option D) makes the most sense.
@@ -61,6 +53,7 @@ x   Script Creation
                     vs. &strs is handled all in there, not more generally.
 x   Option E now seems like the simplest method
     x   And indeed, it appears to work just fine.
+x   Implemented custom command handlers.
 
 2018-01-03 (Thursday)
 x   Weird RLS problem

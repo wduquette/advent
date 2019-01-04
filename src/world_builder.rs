@@ -14,6 +14,7 @@ use crate::entity::room_component::*;
 use crate::entity::rule_component::*;
 use crate::entity::thing_component::*;
 use crate::phys;
+use crate::player_control::CommandHandler;
 use crate::types::*;
 use crate::world::World;
 
@@ -107,6 +108,25 @@ impl WorldBuilder {
         this.add_flag(pid, Flag::Scenery);
 
         this
+    }
+
+    /// Adds a custom command consisting of a single verb.
+    pub fn verb(&mut self, word: &str, hook: CommandHook) {
+        // TODO: Add to list of verbs
+        self.world.command_handlers.push(CommandHandler::verb(word, hook));
+    }
+
+    /// Adds a custom command triggered by a specific verb and noun.
+    pub fn verb_noun(&mut self, verb: &str, noun: &str, hook: CommandHook) {
+        // TODO: Add to list of verbs
+        self.world.command_handlers.push(CommandHandler::verb_noun(verb, noun, hook));
+    }
+
+    /// Adds a custom command triggered by a specific verb and a noun representing
+    /// a thing that's visible to the player.
+    pub fn verb_visible(&mut self, verb: &str, hook: CommandHook) {
+        // TODO: Add to list of verbs
+        self.world.command_handlers.push(CommandHandler::verb_visible(verb, hook));
     }
 
     /// Configures the player.
