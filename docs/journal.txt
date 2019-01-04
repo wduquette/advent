@@ -10,6 +10,49 @@ x   Script Creation
             the script.
         x   Hooks at runtime just use ScriptBuilder; the entities have to
             already be there.
+    x   Multiple Borrow problem (in RuleBuilder):
+        x   My goals:
+            x   Translate action methods to enums in one place, in script.rs.
+            x   To use tags rather than IDs in the action methods.
+        x   My problem:
+            x   RuleBuilder has a mutable borrow of World.
+            x   ScriptBuilder needs an immutable borrow of World so that it
+                can convert tags to IDs.
+        x   I've tried and rejected the following things for implementing
+            RuleBuilder:
+            x   Failure A: Give RuleBuilder an instance of ScriptBuilder.
+                x   This doesn't work, because ScriptBuilder holds an immutable
+                    borrow of World, but RuleBuilder already has a mutable
+                    borrow of World.
+                x   There might be a way to finesse this using lifetimes, but
+                    I don't know what it is.
+            x   Failure B: Give Script action-creation methods that take &World
+                as an argument, and just update the script in place, rather than
+                using ScriptBuilder.
+                x   This still amounts to a multiple borrow.
+                x   The RuleBuilder set_flag() method acquires a reference
+                    to the RuleComponent, and then tries to update the
+                    script, passing World to the script. Borrow checker
+                    hates it; the reference to the RuleComponent depends on
+                    World.
+            x   Rejected C: RuleBuilder returns ScriptBuilder.
+                x   Add .script() and .script_hook() methods to RuleBuilder.
+                x   .script() returns a ScriptBuilder; the RuleBuilder is gone.
+                x   But RuleBuilder's version of the action definition methods
+                    are special: they make sure that the entities exist and
+                    have special characteristics.  ScriptBuilder can't do
+                    that.
+            x   Option D: RuleBuilder owns a Script
+                x   Add .script() and .script_hook() methods to RuleBuilder.
+                x   The RuleBuilder owns its own script.
+                x   When the build is built, call "build()" method to
+                    move the script into the RuleComponent.
+            x   Option E: Use tags in the Action enums.
+                x   Where I'm moving is that the Action enums are known only
+                    in script.rs; so dealing with the nuisance of Strings
+                    vs. &strs is handled all in there, not more generally.
+x   Option E now seems like the simplest method
+    x   And indeed, it appears to work just fine.
 
 2018-01-03 (Thursday)
 x   Weird RLS problem

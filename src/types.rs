@@ -76,36 +76,6 @@ pub enum Flag {
     UserId(&'static str, ID)
 }
 
-/// Actions taken by rules (and maybe other things)
-/// TODO: Move this to types, and define ActionScript.
-#[allow(dead_code)]
-#[derive(Clone, Debug)]
-pub enum Action {
-    /// Print the entity's visual
-    Print(String),
-
-    /// Set the flag for the entity with the given ID
-    SetFlag(ID, Flag),
-
-    /// Unset the flag on the entity with the given ID.
-    UnsetFlag(ID, Flag),
-
-    /// PutIn(thing, inv)
-    PutIn(ID, ID),
-
-    /// Swap an item in the world for one in LIMBO
-    Swap(ID, ID),
-
-    /// Drop(player,thing): Drop a held item into the current location.
-    Drop(ID, ID),
-
-    /// Kill the player/NPC with the given ID
-    Kill(ID),
-
-    /// Revie the player/NPC with the given ID
-    Revive(ID),
-}
-
 /// Things that can happen in the game, to which rules, guards, and hooks can be attached
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum Event {

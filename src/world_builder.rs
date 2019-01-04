@@ -16,7 +16,6 @@ use crate::entity::thing_component::*;
 use crate::phys;
 use crate::types::*;
 use crate::world::World;
-use crate::world;
 
 //-----------------------------------------------------------------------------------------------
 // Constants
@@ -490,7 +489,8 @@ impl<'a> RuleBuilder<'a> {
     /// Specifies text to print when the rule fires.
     pub fn print(self, text: &str) -> RuleBuilder<'a> {
         let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
-        rulec.script.add(Action::Print(text.into()));
+        rulec.script.print(text);
+
         self
     }
 
@@ -503,19 +503,19 @@ impl<'a> RuleBuilder<'a> {
 
         // NEXT, add the action.
         let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
-        rulec.script.add(Action::SetFlag(id, flag));
+        rulec.script.set_flag(tag, flag);
         self
     }
 
     /// Moves a thing to LIMBO
-    pub fn forget(self, thing_tag: &str) -> RuleBuilder<'a> {
+    pub fn forget(self, thing: &str) -> RuleBuilder<'a> {
         // FIRST, get the entity which we'll be forgetting.
-        let id = self.wb.world.alloc(thing_tag);
+        let id = self.wb.world.alloc(thing);
         self.wb.expect(Is::Thing(id));
 
         // NEXT, add the action.
         let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
-        rulec.script.add(Action::PutIn(id, world::LIMBO));
+        rulec.script.forget(thing);
         self
     }
 
@@ -527,7 +527,7 @@ impl<'a> RuleBuilder<'a> {
         let id = self.wb.world.lookup(tag);
         self.wb.expect(Is::Player(id));
         let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
-        rulec.script.add(Action::Kill(id));
+        rulec.script.kill(tag);
         self
     }
 
@@ -539,7 +539,7 @@ impl<'a> RuleBuilder<'a> {
         let id = self.wb.world.lookup(tag);
         self.wb.expect(Is::Player(id));
         let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
-        rulec.script.add(Action::Revive(id));
+        rulec.script.revive(tag);
         self
     }
 }
