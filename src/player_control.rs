@@ -1,5 +1,7 @@
 //! The Player Control System
 
+use crate::world_builder::PLAYER;
+use crate::script::Script;
 use crate::scenario::DIRTY_HANDS;
 use crate::scenario::HAS_WATER;
 use self::Status::*;
@@ -29,8 +31,8 @@ enum Status {
     Undo,
 }
 
-/// An error result
-type CmdResult = Result<Status, String>;
+/// A status result, used for special commands
+type StatusResult = Result<Status, String>;
 
 /// Player Context: ID and initial location.
 struct Player {
@@ -61,7 +63,7 @@ pub fn system(game: &mut Game, input: &str) {
     }
 }
 
-fn handle_input(game: &mut Game, player: &Player, input: &str) -> CmdResult {
+fn handle_input(game: &mut Game, player: &Player, input: &str) -> StatusResult {
     // FIRST, parse the input.
     let cmd = command::parse(&game.world, input)?;
 
@@ -72,9 +74,47 @@ fn handle_input(game: &mut Game, player: &Player, input: &str) -> CmdResult {
     }
 }
 
-fn handle_normal_command(game: &mut Game, player: &Player, cmd: &Command) -> CmdResult {
+fn handle_normal_command(game: &mut Game, player: &Player, cmd: &Command) -> StatusResult {
     let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
     let world = &mut game.world;
+
+    // TODO: Temporary, just trying out CommandHandler
+    let mut handlers: Vec<CommandHandler> = Vec::new();
+    handlers.push(CommandHandler::verb("help", &|_,_,script| {
+        script.print("Oh, help!");
+        Ok(())
+    }));
+
+    handlers.push(CommandHandler::verb_noun("wash", "hands", &|w,_,script| {
+        if !w.has(&w.loc(PLAYER), HAS_WATER) {
+            return Err("That'd be a neat trick, since there's no water here.".into());
+        }
+
+        // TODO: Provide actions that build up paragraphs?
+        let mut buff = ProseBuffer::new();
+        buff.puts("You wash your hands in the water.");
+        if w.has(PLAYER, DIRTY_HANDS) {
+            buff.puts("They look much cleaner now.");
+        }
+
+        script.print(&buff.get());
+        script.unset_flag(PLAYER, DIRTY_HANDS);
+
+        Ok(())
+    }));
+
+    handlers.push(CommandHandler::verb_visible("wash", &|_,_,script| {
+        script.print("You can't wash that.");
+        Ok(())
+    }));
+
+
+    for handler in handlers {
+        if handler.matches(words.as_slice()) {
+            handler.execute(world, player, words.as_slice())?;
+            return Ok(Normal);
+        }
+    }
 
     // TODO: parser should handle two-word verb synonyms.
     match words.as_slice() {
@@ -94,8 +134,6 @@ fn handle_normal_command(game: &mut Game, player: &Player, cmd: &Command) -> Cmd
         ["get", name] => cmd_get(world, player, name),
         ["pick", "up", name] => cmd_get(world, player, name),
         ["drop", name] => cmd_drop(world, player, name),
-        ["wash", "hands"] => cmd_wash_hands(world, player),
-        ["wash", _] => Err("Whatever for?".into()),
         ["undo"] => cmd_undo(game),
         ["restart"] => cmd_restart(),
         ["quit"] => cmd_quit(),
@@ -107,8 +145,9 @@ fn handle_normal_command(game: &mut Game, player: &Player, cmd: &Command) -> Cmd
 
 // User Commands
 
+
 /// Display basic help, i.e., what commands are available.
-fn cmd_help() -> CmdResult {
+fn cmd_help() -> StatusResult {
     visual::info(
         "\
 You've got the usual commands: n, s, e, w, look, get, drop, quit.
@@ -120,7 +159,7 @@ You know.  Like that.
 }
 
 /// Move the player in the given direction
-fn cmd_go(world: &mut World, player: &Player, dir: Dir) -> CmdResult {
+fn cmd_go(world: &mut World, player: &Player, dir: Dir) -> StatusResult {
     match phys::follow_link(world, player.loc, dir) {
         Some(LinkDest::Room(dest)) => {
             phys::enter_room(world, player.id, dest)?;
@@ -137,19 +176,19 @@ fn cmd_go(world: &mut World, player: &Player, dir: Dir) -> CmdResult {
 }
 
 /// Re-describe the current location.
-fn cmd_look(world: &World, player: &Player) -> CmdResult {
+fn cmd_look(world: &World, player: &Player) -> StatusResult {
     visual::room(world, player.loc);
     Ok(Normal)
 }
 
 /// Display the player's inventory.
-fn cmd_inventory(world: &World, player: &Player) -> CmdResult {
+fn cmd_inventory(world: &World, player: &Player) -> StatusResult {
     visual::player_inventory(world, player.id);
     Ok(Normal)
 }
 
 /// Describe a thing in the current location.
-fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
+fn cmd_examine(world: &World, player: &Player, name: &str) -> StatusResult {
     if let Some(thing) = find_noun(world, phys::visible(world, player.id), name) {
         if thing == player.id {
             visual::player(world, player.id);
@@ -163,7 +202,7 @@ fn cmd_examine(world: &World, player: &Player, name: &str) -> CmdResult {
 }
 
 /// Read a thing in the current location.
-fn cmd_read(world: &mut World, player: &Player, name: &str) -> CmdResult {
+fn cmd_read(world: &mut World, player: &Player, name: &str) -> StatusResult {
     if let Some(thing) = find_noun(world, phys::visible(world, player.id), name) {
         // If it has no prose, it can't be read
         if !visual::can_read(world, thing) {
@@ -186,26 +225,8 @@ fn cmd_read(world: &mut World, player: &Player, name: &str) -> CmdResult {
     }
 }
 
-// TODO: As currently implemented, this should be a scenario command, not a
-// built-in command.
-fn cmd_wash_hands(world: &mut World, player: &Player) -> CmdResult {
-    if !world.has_flag(player.loc, HAS_WATER) {
-        return Err("That'd be a neat trick, since there's no water here.".into());
-    }
-
-    let mut buff = ProseBuffer::new();
-    buff.puts("You wash your hands in the water.");
-    if world.has_flag(player.id, DIRTY_HANDS) {
-        buff.puts("They look much cleaner now.");
-    }
-    visual::act(&buff.get());
-    world.unset_flag(player.id, DIRTY_HANDS);
-
-    Ok(Normal)
-}
-
 /// Gets a thing from the location's inventory.
-fn cmd_get(world: &mut World, player: &Player, noun: &str) -> CmdResult {
+fn cmd_get(world: &mut World, player: &Player, noun: &str) -> StatusResult {
     // Does he already have it?
     if find_noun(world, phys::contents(world, player.id), noun).is_some() {
         return Err("You already have that.".into());
@@ -225,7 +246,7 @@ fn cmd_get(world: &mut World, player: &Player, noun: &str) -> CmdResult {
 }
 
 /// Drops a thing you're carrying
-fn cmd_drop(world: &mut World, player: &Player, noun: &str) -> CmdResult {
+fn cmd_drop(world: &mut World, player: &Player, noun: &str) -> StatusResult {
     if let Some(thing) = find_noun(world, phys::droppable(world, player.id), noun) {
         // Drop the thing
         phys::put_in(world, thing, player.loc);
@@ -241,7 +262,7 @@ fn cmd_drop(world: &mut World, player: &Player, noun: &str) -> CmdResult {
 }
 
 /// Undo the last command the game
-fn cmd_undo(game: &mut Game) -> CmdResult {
+fn cmd_undo(game: &mut Game) -> StatusResult {
     if game.has_undo() {
         visual::act("Undone.");
         Ok(Undo)
@@ -251,13 +272,13 @@ fn cmd_undo(game: &mut Game) -> CmdResult {
 }
 
 /// Restart the game
-fn cmd_restart() -> CmdResult {
+fn cmd_restart() -> StatusResult {
     visual::act("Restarting...");
     Ok(Restart)
 }
 
 /// Quit the game.
-fn cmd_quit() -> CmdResult {
+fn cmd_quit() -> StatusResult {
     visual::act("Bye, then.");
     ::std::process::exit(0);
 }
@@ -266,7 +287,7 @@ fn cmd_quit() -> CmdResult {
 // Debugging commands
 
 /// Handle debugging commands.
-fn handle_debug_command(game: &mut Game, player: &Player, cmd: &Command) -> CmdResult {
+fn handle_debug_command(game: &mut Game, player: &Player, cmd: &Command) -> StatusResult {
     let words: Vec<&str> = cmd.words.iter().map(|s| s.as_ref()).collect();
     let world = &mut game.world;
 
@@ -283,20 +304,20 @@ fn handle_debug_command(game: &mut Game, player: &Player, cmd: &Command) -> CmdR
 }
 
 /// List all of the available entities.
-fn cmd_debug_list(world: &World) -> CmdResult {
+fn cmd_debug_list(world: &World) -> StatusResult {
     debug::list_world(world);
     Ok(Normal)
 }
 
 /// Dump information about the given entity, provided the ID string is valid.
-fn cmd_debug_dump(world: &World, id_arg: &str) -> CmdResult {
+fn cmd_debug_dump(world: &World, id_arg: &str) -> StatusResult {
     let id = parse_id(world, id_arg)?;
     debug::dump_entity(world, id);
     Ok(Normal)
 }
 
 /// Describe the room as though the player were in it.
-fn cmd_debug_look(world: &World, id_arg: &str) -> CmdResult {
+fn cmd_debug_look(world: &World, id_arg: &str) -> StatusResult {
     let id = parse_id(world, id_arg)?;
     if world.is_room(id) {
         visual::room(world, id);
@@ -307,7 +328,7 @@ fn cmd_debug_look(world: &World, id_arg: &str) -> CmdResult {
 }
 
 /// Examine the thing fully, as though the player could see it.
-fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
+fn cmd_debug_examine(world: &World, id_arg: &str) -> StatusResult {
     let id = parse_id(world, id_arg)?;
     if world.is_thing(id) {
         visual::thing(world, id);
@@ -318,7 +339,7 @@ fn cmd_debug_examine(world: &World, id_arg: &str) -> CmdResult {
 }
 
 /// Take the player to the room.
-fn cmd_debug_go(world: &mut World, player: &Player, id_arg: &str) -> CmdResult {
+fn cmd_debug_go(world: &mut World, player: &Player, id_arg: &str) -> StatusResult {
     let loc = parse_id(world, id_arg)?;
     if world.is_room(loc) {
         phys::put_in(world, player.id, loc);
@@ -365,4 +386,77 @@ fn find_noun(world: &World, ids: BTreeSet<ID>, noun: &str) -> Option<ID> {
     }
 
     None
+}
+
+//-------------------------------------------------------------------------
+// Command Handler
+
+enum CommandPattern {
+    /// Match any single arbitrary word
+    Verb(String),
+
+    /// Match any pair of arbitrary words
+    VerbNoun(String,String),
+
+    /// Match any arbitrary word with a visible thing
+    VerbVisible(String),
+}
+
+pub struct CommandHandler {
+    pattern: CommandPattern,
+    hook: CommandHook,
+}
+
+impl CommandHandler {
+    pub fn verb(word: &str, hook: CommandHook) -> Self {
+        Self {
+            pattern: CommandPattern::Verb(word.into()),
+            hook
+        }
+    }
+
+    pub fn verb_noun(word1: &str, word2: &str, hook: CommandHook) -> Self {
+        Self {
+            pattern: CommandPattern::VerbNoun(word1.into(), word2.into()),
+            hook
+        }
+    }
+
+    pub fn verb_visible(word: &str, hook: CommandHook) -> Self {
+        Self {
+            pattern: CommandPattern::VerbVisible(word.into()),
+            hook
+        }
+    }
+
+    /// Determines whether the words match the command's pattern.
+    fn matches(&self, words: &[&str]) -> bool {
+        match &self.pattern {
+            CommandPattern::Verb(verb) => words.len() == 1 && words[0] == verb,
+            CommandPattern::VerbNoun(verb,noun) => words.len() == 2 && words[0] == verb && words[1] == noun,
+            CommandPattern::VerbVisible(verb) => words.len() == 2 && words[0] == verb,
+        }
+    }
+
+    /// Executes the command
+    fn execute(&self, world: &mut World, player: &Player, words: &[&str]) -> CommandResult {
+        // FIRST, do special checks
+        match &self.pattern {
+            CommandPattern::VerbVisible(_) => {
+                if find_noun(world, phys::visible(world, player.id), words[1]).is_none() {
+                    return Err("You don't see any such thing.".into());
+                }
+            }
+            _ => ()
+        }
+
+        // NEXT, compute the script, returning any error message
+        let script = &mut Script::new();
+        (self.hook)(world, words, script)?;
+
+        // NEXT, execute the script
+        script.execute(world);
+
+        Ok(())
+    }
 }

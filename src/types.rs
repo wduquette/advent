@@ -1,5 +1,6 @@
 //! Type definitions for this app.
 
+use crate::script::Script;
 use crate::entity::ID;
 use crate::world::WorldQuery;
 
@@ -13,6 +14,14 @@ pub type RulePredicate = &'static Fn(&WorldQuery) -> bool;
 /// the query object, the second the entity's tag, and the third the buffer to
 /// receive the string.
 pub type EntityProseHook = &'static Fn(&WorldQuery, &str, &mut ProseBuffer);
+
+/// The normal command handler result.
+pub type CommandResult = Result<(), String>;
+
+/// A closure that determines whether a command is valid, then builds a script
+/// to execute it.  The hook may query the world and the command words, and
+/// return an Err(String) if there's a problem, and Ok(()) otherwise.
+pub type CommandHook = &'static Fn(&WorldQuery, &[&str], &mut Script) -> CommandResult;
 
 /// The time, in game turns
 pub type Time = usize;

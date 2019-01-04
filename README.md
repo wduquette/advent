@@ -7,6 +7,9 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
+* Reconsider crate module layout, given "pub" rule:
+    *   A submodule can see everything in its parent modules, but only
+        "pub" things from any other module.
 * Ponder how to define custom commands:
     *   E.g., "wash hands".
     *   The custom command must define:

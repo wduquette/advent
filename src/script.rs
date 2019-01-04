@@ -132,6 +132,11 @@ impl Script {
         self.add(SetFlag(tag.into(), flag));
     }
 
+    /// Adds an action to unset the given flag on the tagged entity.
+    pub fn unset_flag(&mut self, tag: &str, flag: Flag) {
+        self.add(UnsetFlag(tag.into(), flag));
+    }
+    
     /// Adds an action to move the tagged entity to LIMBO.
     pub fn forget(&mut self, thing: &str) {
         self.add(PutIn(thing.into(), world_builder::LIMBO.into()));

@@ -315,6 +315,9 @@ pub trait WorldQuery {
     // otherwise.
     fn has(&self, tag: &str, flag: Flag) -> bool;
 
+    // Returns the tag of the tagged entity's location.
+    fn loc(&self, tag: &str) -> String;
+
     // Returns true if the tagged owner owns the tagged thing, and
     // false otherwise
     fn owns(&self, owner: &str, thing: &str) -> bool;
@@ -335,6 +338,12 @@ impl WorldQuery for World {
         fc.has(flag)
     }
 
+    // Returns the tag of the tagged entity's location.
+    fn loc(&self, tag: &str) -> String {
+        let id = self.lookup(tag);
+        self.tag(self.locations[&id].id)
+    }
+
     // Returns true if the tagged owner owns the tagged thing, and
     // false otherwise
     fn owns(&self, owner: &str, thing: &str) -> bool {
@@ -346,4 +355,5 @@ impl WorldQuery for World {
             false
         }
     }
+
 }
