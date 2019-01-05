@@ -151,6 +151,15 @@ impl WorldBuilder {
         }
     }
 
+    /// Creates or configures a feature, i.e., a thing that's a part of its container:
+    /// the player's hands, a pool of water, a big machine.  Features are things that
+    /// have their Scenery and Immovable flags set.
+    pub fn feature(&mut self, tag: &str, name: &str, noun: &str) -> ThingBuilder {
+        self.thing(tag, name, noun)
+            .flag(Flag::Immovable)
+            .flag(Flag::Scenery)
+    }
+
     /// Creates or configures a thing.
     pub fn thing(&mut self, tag: &str, name: &str, noun: &str) -> ThingBuilder {
         let id = self.world.alloc(tag);

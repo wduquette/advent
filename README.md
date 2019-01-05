@@ -9,14 +9,6 @@ Also, see docs/journal.txt.
 
 *   `visual::player()` should include descriptions of player scenery (e.g.,
     hands) as Scenery prose.
-*   Scenery and Immovable should be distinct flags.
-    *   "Scenery" indicates that the item doesn't appear in inventory lists,
-        and that it might have Scenery prose for inclusion in "look" or
-        "examine" output.
-    *   "Immovable" indicates that the item can't be moved from the current
-        location by normal means.
-    *   Consider adding a "feature()" method to WorldBuilder to add a thing
-        that is both Scenery and Immovable.
 *   A room description should include exits, but those should appear after
     any scenery descriptions.
 *   Support multiple commands on a command line.

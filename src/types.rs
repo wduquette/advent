@@ -77,8 +77,10 @@ pub enum Flag {
 
     /// Is the thing scenery, i.e., something that appears in an entity
     /// description but doesn't usually appear in printed inventory
-    /// lists?  Scenery is also assumed to be immovable, but isn't
-    /// explicitly flagged as such.
+    /// lists? Scenery can appear in the containing entity's description
+    /// in two ways: by simply being mentioned there, or by providing
+    /// "Scenery" prose for automatic inclusion.  NOTE: Most Scenery
+    /// should also be Immovable.
     Scenery,
 
     /// A generic flag type for use by users

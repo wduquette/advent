@@ -94,10 +94,9 @@ A path leads west.
         ")
         .flag(HAS_WATER);
 
-    // Thing: Pool, a pool in the Grotto
-    wb.thing("pool", "pool", "pool")
+    // Feature: Pool, a pool in the Grotto
+    wb.feature("pool", "pool", "pool")
         .location("grotto")
-        .flag(Scenery)
         .on_examine("\
 Moss grows on the stones around the edge, but the water is clear and
 deep and cold.
@@ -113,10 +112,8 @@ space.  Trails lead to the north and south.
         ");
 
     // Thing: The Stone on the Hilltop
-    wb.thing("stone", "stone", "stone")
+    wb.feature("stone", "stone", "stone")
         .location("hilltop")
-        .flag(Immovable)
-        .flag(Scenery)
         .on_scenery("\
 A massive block of stone squats on the crest of the hill.  There seems to be a sword hilt
 poking out of the top, and there's something on one of the sides.
@@ -131,6 +128,7 @@ into one side:
     // Thing: The Sword in the Stone on the Hilltop
     wb.thing("sword", "sword", "sword")
         .location("hilltop")
+        .flag(Scenery) // It will appear as part of the stone until removed.
         .on_examine_hook(&|w,e,buff| {
             if w.has(e, TAKEN) {
                 buff.puts("\

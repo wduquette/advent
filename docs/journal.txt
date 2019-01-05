@@ -1,5 +1,12 @@
 Bonaventure Journal
 
+2018-01-05 (Saturday)
+x   Revised Scenery and Immovable flags.  Scenery affects visuals only;
+    Immovable affects phys only.
+x   Added WorldBuilder::feature().  A feature is a thing that's both
+    Scenery and Immovable (which is the normal way, but there are exceptions).
+    x   Just a convenience.
+
 2018-01-04 (Friday)
 x   Script Creation
     x   I think the ScriptBuilder idea (Option D) makes the most sense.

@@ -94,9 +94,9 @@ pub fn immovable(world: &World, owner: ID) -> BTreeSet<ID> {
 
     let mut result: BTreeSet<ID> = BTreeSet::new();
 
-    // FIRST, get everything that's flagged as scenery or immovable.
+    // FIRST, get everything that's flagged as immovable.
     for id in contents(world, owner) {
-        if world.has_flag(id, Scenery) || world.has_flag(id, Immovable) {
+        if world.has_flag(id, Immovable) {
             result.insert(id);
         }
     }
@@ -125,16 +125,16 @@ pub fn visible(world: &World, viewer: ID) -> BTreeSet<ID> {
 }
 
 /// Finds all things in the location's inventory that can be removed,
-/// i.e., that isn't flagged as Scenery.
+/// i.e., that isn't flagged as Immovable.
 pub fn removable(world: &World, loc: ID) -> BTreeSet<ID> {
     assert_has_inventory(world, loc);
 
     let mut result: BTreeSet<ID> = BTreeSet::new();
 
     // FIRST, get everything owned by the viewer that isn't flagged
-    // as scenario.
+    // as Immovable.
     for id in contents(world, loc) {
-        if !world.has_flag(id, Scenery) && !world.has_flag(id, Immovable){
+        if !world.has_flag(id, Immovable){
             result.insert(id);
         }
     }
@@ -151,16 +151,16 @@ pub fn droppable(world: &World, viewer: ID) -> BTreeSet<ID> {
 
 /// Finds all things in the viewer's location that he could, in theory,
 /// move to his own inventory, i.e., all things that aren't flagged
-/// scenery or immovable.
+/// as immovable.
 pub fn gettable(world: &World, viewer: ID) -> BTreeSet<ID> {
     assert_has_location(world, viewer);
 
     let mut result: BTreeSet<ID> = BTreeSet::new();
 
     // FIRST, get everything in the current location that isn't
-    // flagged as "scenery".
+    // flagged as Immovable.
     for id in contents(world, loc(world, viewer)) {
-        if !world.has_flag(id, Scenery) && !world.has_flag(id, Immovable) {
+        if !world.has_flag(id, Immovable) {
             result.insert(id);
         }
     }
