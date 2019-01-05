@@ -6,6 +6,12 @@ x   Revised Scenery and Immovable flags.  Scenery affects visuals only;
 x   Added WorldBuilder::feature().  A feature is a thing that's both
     Scenery and Immovable (which is the normal way, but there are exceptions).
     x   Just a convenience.
+x   The player now has "hands" which are DIRTY.
+    x   "hands" are a feature of the player.
+    x   All dirty hands logic is no done in terms of the player's "hands".
+    x   Removed the DIRTY_HANDS flag.
+    x   Also, the PlayerBuilder prose method names now match ThingBuilder's:
+        on_examine() and on_examine_hook(), etc.
 
 2018-01-04 (Friday)
 x   Script Creation

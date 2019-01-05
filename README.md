@@ -7,14 +7,14 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-*   `visual::player()` should include descriptions of player scenery (e.g.,
-    hands) as Scenery prose.
 *   A room description should include exits, but those should appear after
     any scenery descriptions.
 *   Support multiple commands on a command line.
     *   Needs to include better handling for the clock.
     *   Debug commands shouldn't advance the clock.
 *   The stone on the hill should be accessible via the nouns "block" and "stone".
+    *   Things should allow synonyms that are specific to that thing.
+        *   Not every "stone" is a "block".
 *   Reconsider crate module layout, given "pub" rule:
     *   A submodule can see everything in its parent modules, but only
         "pub" things from any other module.
