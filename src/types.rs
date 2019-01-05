@@ -51,6 +51,9 @@ pub enum ProseType {
 
     /// The prose contents of a book, note, etc.
     Book,
+
+    /// The prose description of a thing as scenery in a container
+    Scenery,
 }
 
 #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
@@ -141,16 +144,14 @@ impl ProseBuffer {
         self.put_raw(text);
     }
 
+    pub fn newline(&mut self) {
+        self.buff.push_str("|");
+    }
+
     /// Adds a paragraph break to the buffer.
     #[allow(dead_code)]
     pub fn para(&mut self) {
-        if self.buff.ends_with("||") {
-            // Do nothing
-        } else if self.buff.ends_with('|') {
-            self.buff.push('|');
-        } else {
-            self.buff.push_str("||");
-        }
+        self.buff.push_str("||");
     }
 
     /// Adds text to the buffer, with no special handling.

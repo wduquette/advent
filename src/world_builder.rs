@@ -289,7 +289,7 @@ impl WorldBuilder {
     fn add_prose(&mut self, id: ID, prose_type: ProseType, text: &str) {
         self.add_prose_component(id);
 
-        let prose = Prose::Prose(text.into());
+        let prose = Prose::Prose(text.trim().into());
         self.world.proses.get_mut(&id).unwrap().types.insert(prose_type, prose);
     }
 
@@ -465,6 +465,19 @@ impl<'a> ThingBuilder<'a> {
         self
     }
 
+    /// Adds scenery prose to the thing.
+    pub fn on_scenery(self, text: &str) -> ThingBuilder<'a> {
+        self.wb.add_prose(self.id, ProseType::Scenery, text);
+        self
+    }
+
+    /// Adds a prose hook to the thing, to produce readable prose
+    /// on demand.
+    pub fn on_scenery_hook(self, hook: EntityProseHook) -> ThingBuilder<'a> {
+        self.wb.add_prose_hook(self.id, ProseType::Scenery, hook);
+        self
+    }
+
     /// Sets a flag on the thing.
     pub fn flag(self, flag: Flag) -> ThingBuilder<'a> {
         self.wb.add_flag(self.id, flag);
@@ -524,6 +537,19 @@ impl<'a> RuleBuilder<'a> {
         // NEXT, add the action.
         let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
         rulec.script.set_flag(tag, flag);
+        self
+    }
+
+    /// Unsets a flag on the entity.
+    pub fn unset_flag(self, tag: &str, flag: Flag) -> RuleBuilder<'a> {
+        // FIRST, get the entity on which we'll be adding the flag, and
+        // make sure it's the kind of thing we can set a flag on.
+        let id = self.wb.world.alloc(tag);
+        self.wb.add_flag_set(id);
+
+        // NEXT, add the action.
+        let rulec = &mut self.wb.world.rules.get_mut(&self.id).unwrap();
+        rulec.script.unset_flag(tag, flag);
         self
     }
 

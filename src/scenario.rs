@@ -116,6 +116,11 @@ space.  Trails lead to the north and south.
     wb.thing("stone", "stone", "stone")
         .location("hilltop")
         .flag(Immovable)
+        .flag(Scenery)
+        .on_scenery("\
+A massive block of stone squats on the crest of the hill.  There seems to be a sword hilt
+poking out of the top, and there's something on one of the sides.
+        ")
         .on_examine("\
 It's a massive block of marble, four feet wide and three feet high.  The top is flat, and the
 four sides slope inward.  There's a sword sticking out of the top.  These words are chiseled
@@ -153,6 +158,7 @@ Weren't you paying attention? Only the pure may touch this sword.
         .once_only()
         .forget("stone") // Move it to LIMBO
         .set_flag("sword", TAKEN)
+        .unset_flag("sword", Scenery)
         .print("\
 The sword almost seems to leap into your hands.  As you marvel at it
 (and, really, there's something odd about it), the marble block dissolves

@@ -75,7 +75,16 @@ fn print_room(world: &World, id: ID, detail: Detail) {
 
     // FIRST, display the room's description
     if detail == Detail::Full {
-        para!("{}|{}", roomc.name, get_prose(world, id, ProseType::Room))
+        let mut buff = ProseBuffer::new();
+        buff.puts(&roomc.name);
+        buff.newline();
+        buff.puts(&get_prose(world, id, ProseType::Room));
+        for sid in phys::scenery(world, id) {
+            if world.has_prose_type(sid, ProseType::Scenery) {
+                buff.puts(&get_prose(world, sid, ProseType::Scenery));
+            }
+        }
+        para(&buff.get());
     } else {
         para(&roomc.name);
     }
