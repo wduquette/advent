@@ -130,7 +130,19 @@ pub fn read(world: &World, book: ID) {
 
 /// Outputs a visual of the player.
 pub fn player(world: &World, pid: ID) {
-    para(&get_prose(world, pid, ProseType::Thing));
+    // FIRST, display the player's description
+    let mut buff = ProseBuffer::new();
+    buff.puts(&get_prose(world, pid, ProseType::Thing));
+    for sid in phys::scenery(world, pid) {
+        if world.has_prose_type(sid, ProseType::Scenery) {
+            let prose = &get_prose(world, sid, ProseType::Scenery);
+            // With a prose hook, result could be empty.
+            if !prose.is_empty() {
+                buff.puts(prose);
+            }
+        }
+    }
+    para(&buff.get());
 
     // TODO: Could add inventory.
 }

@@ -369,14 +369,14 @@ impl<'a> PlayerBuilder<'a> {
     }
 
     /// Adds descriptive prose to the player.
-    pub fn prose(self, text: &str) -> PlayerBuilder<'a> {
+    pub fn on_examine(self, text: &str) -> PlayerBuilder<'a> {
         self.wb.add_prose(self.wb.world.pid, ProseType::Thing, text);
         self
     }
 
     /// Adds a prose hook to the player, to produce descriptive prose
     /// on demand.
-    pub fn prose_hook(self, hook: EntityProseHook) -> PlayerBuilder<'a> {
+    pub fn on_examine_hook(self, hook: EntityProseHook) -> PlayerBuilder<'a> {
         self.wb.add_prose_hook(self.wb.world.pid, ProseType::Thing, hook);
         self
     }

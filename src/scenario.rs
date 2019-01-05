@@ -10,7 +10,6 @@ use crate::world_builder::WBEvent::*;
 
 // User-defined flags
 const DIRTY: Flag = User("DIRTY");
-const DIRTY_HANDS: Flag = User("DIRTY_HANDS");
 const HAS_WATER: Flag = User("HAS_WATER");
 const TAKEN: Flag = User("TAKEN");
 
@@ -22,13 +21,21 @@ pub fn build() -> World {
     // NEXT, configure the player
     wb.player()
         .location("clearing")
-        .flag(DIRTY_HANDS)
-        .prose_hook(&|w,e,buff| {
-            buff.puts("You've got all the usual bits.");
-            if w.has(e, DIRTY_HANDS) {
-                buff.puts("Your hands are kind of dirty, though.");
+        .on_examine("You've got all the usual bits.");
+
+    wb.feature("hands", "hands", "hands")
+        .location(PLAYER)
+        .flag(DIRTY)
+        .on_examine_hook(&|w,e,buff| {
+            if w.has(e, DIRTY) {
+                buff.puts("You don't remember what you were doing, but it must have been messy.");
             } else {
-                buff.puts("Plus, they're clean bits!");
+                buff.puts("Fresh and clean.");
+            }
+        })
+        .on_scenery_hook(&|w,e,buff| {
+            if w.has(e, DIRTY) {
+                buff.puts("Your hands are kind of dirty, though.");
             }
         });
 
@@ -81,7 +88,7 @@ under the statue in the castle courtyard before nine o'clock tomorrow morning.
 
     // The note gets dirty if the player picks it up with dirty hands.
     wb.on(&GetThing("note"))
-        .when(&|w| w.has(PLAYER, DIRTY_HANDS) && !w.has("note", DIRTY))
+        .when(&|w| w.has("hands", DIRTY) && !w.has("note", DIRTY))
         .print("The dirt from your hands got all over the note.")
         .set_flag("note", DIRTY);
 
@@ -144,7 +151,7 @@ sharp edges anywhere.  Carved along the length of it are the words
 
     // If the player tries to pick up the sword with dirty hands, it kills him.
     wb.allow(&GetThing("sword"))
-        .unless(&|w| w.has(PLAYER, DIRTY_HANDS))
+        .unless(&|w| w.has("hands", DIRTY))
         .print("\
 Oh, you so didn't want to touch the sword with dirty hands.
 Weren't you paying attention? Only the pure may touch this sword.
@@ -223,12 +230,12 @@ her wand.  There's a flash, and she disappears.
         // TODO: Provide actions that build up paragraphs?
         let mut buff = ProseBuffer::new();
         buff.puts("You wash your hands in the water.");
-        if w.has(PLAYER, DIRTY_HANDS) {
+        if w.has("hands", DIRTY) {
             buff.puts("They look much cleaner now.");
         }
 
         script.print(&buff.get());
-        script.unset_flag(PLAYER, DIRTY_HANDS);
+        script.unset_flag("hands", DIRTY);
 
         Ok(())
     });
