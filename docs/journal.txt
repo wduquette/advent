@@ -1,5 +1,67 @@
 Bonaventure Journal
 
+2018-01-05 (Saturday) Module architecture
+x   Public API
+    x   crate (i.e., src/lib.rs)
+        x   Game
+    x   crate::world_builder (i.e., src/world_builder.rs)
+    x   crate::types (i.e., src/types.rs)
+        x   Basic types used in building scenarios
+        x   ProseBuffer might be a different module.
+x   Private Code
+    x   crate::util::{conmark,console}
+    x   crate::engine::{debug,world}
+    x   create::engine::system?
+x   Realizing here that I have no idea how I want to do this.
+
+2018-01-05 (Saturday) Buttons/Dials/Switches/Gadgets
+x   Need to support buttons, etc.
+    x   Scenery in a thing's inventory.
+    x   Button: "push X"
+    x   Dial: "turn X to Y"
+    x   Switch "turn X on", "turn X off", "turn on X", "turn off X",
+        "switch X on", "switch X off".
+x   NOTE: Need a mechanism to help people identify verbs.
+    x   Maybe a "hint X" command?
+
+2018-01-05 (Saturday) Agents=NPCs/Monsters
+x   An NPC/Monster is a thing that can move by itself.
+    x   AgentComponent
+    x   It's a thing: you can see it and interact with it.
+    x   It's likely Immovable; you probably can't take it.
+        x   But maybe you can.
+    x   Its presence is indicated as part of the room description.
+        x   There is a goblin here.
+    x   It has prose
+        x   Thing prose, for "examine"
+        x   Agent prose, for display in the room.
+            x   Not Scenery prose, since it's displayed differently.
+            x   An agent should get its own paragraph.
+    x   It has behavior
+        x   Each turn, it gets a chance to do something.  Something like
+            a CommandHook, with all of the actions available to it.
+        x   It might also have responses to specific things.
+    x   Need commands for interaction with NPCs
+
+2018-01-05 (Saturday) Containers
+x   A container is a thing in a room that can contain other things.
+    x   A table can have things on top of it.
+    x   A chest can have things in it.
+    x   A desk can have things on top of it AND things in it.
+    x   Things "ON" something are always visible.
+    x   Things "IN" something are visible only if the thing is "open".
+    x   The language used to describe the container's contents are
+        different depending on which.
+x   Might want different inventory lists in the InventoryComponent, just as
+    we have different prose types in the ProseComponent.
+x   Might just use flags on the thing contained: "On", "In"
+    x   Could use this for equipment vs. backpack on the player?
+x   Verbs:
+    x   put X in Y, put X on Y.
+    x   get X
+    x   open Y, close Y
+    x   lock Y, unlock Y
+
 2018-01-05 (Saturday)
 x   Revised Scenery and Immovable flags.  Scenery affects visuals only;
     Immovable affects phys only.
