@@ -54,6 +54,8 @@ x   Script Creation
 x   Option E now seems like the simplest method
     x   And indeed, it appears to work just fine.
 x   Implemented custom command handlers.
+x   Added Scenery prose.  When describing a room, the description includes
+    any Scenery prose for the Scenery within the room.
 
 2018-01-03 (Thursday)
 x   Weird RLS problem

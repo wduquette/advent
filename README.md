@@ -7,7 +7,23 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
-* Reconsider crate module layout, given "pub" rule:
+*   `visual::player()` should include descriptions of player scenery (e.g.,
+    hands) as Scenery prose.
+*   Scenery and Immovable should be distinct flags.
+    *   "Scenery" indicates that the item doesn't appear in inventory lists,
+        and that it might have Scenery prose for inclusion in "look" or
+        "examine" output.
+    *   "Immovable" indicates that the item can't be moved from the current
+        location by normal means.
+    *   Consider adding a "feature()" method to WorldBuilder to add a thing
+        that is both Scenery and Immovable.
+*   A room description should include exits, but those should appear after
+    any scenery descriptions.
+*   Support multiple commands on a command line.
+    *   Needs to include better handling for the clock.
+    *   Debug commands shouldn't advance the clock.
+*   The stone on the hill should be accessible via the nouns "block" and "stone".
+*   Reconsider crate module layout, given "pub" rule:
     *   A submodule can see everything in its parent modules, but only
         "pub" things from any other module.
 *   Let rules use script hooks:
@@ -23,9 +39,7 @@ Also, see docs/journal.txt.
     *   A is probably fine; B is more likely confusing.  So probably
         option A.
 * Move flag methods to flag::has, flag::set, flag::unset, following the
-  component architecture.
-* Change "stone" to be scenery, and add a prose hook for the hilltop
-  that includes it if present, but not otherwise.
+  component architecture?
 * The Game
   * Add more story.
   * Main loop should halt if you're dead at the end of it.
@@ -33,7 +47,6 @@ Also, see docs/journal.txt.
     * Maybe less of a standard text adventure, more of a text-based
       RPG?
   * Add winning condition.
-* Debug commands shouldn't advance the clock.
 * Add save/restore
 * Improve vocabulary and grammar management
   * Consider design where verbs (operations) depend on
@@ -41,17 +54,16 @@ Also, see docs/journal.txt.
     used on it.
   * Support inputs containing multiple commands, with command queue.
   * Allow two-word synonyms for verbs as part of basic parsing.
-  * Allow scenario to define verbs and custom command handlers.
   * Support simple patterns, e.g.,
     * ["drop", noun]
     * ["give", noun,"to", npc]
     * ["hit", npc, "with", noun]
-  * Possibly, compile commands to action lists.
 * Extend `visual` system
-  * `visual::room()` should include descriptions of portable things as
-    prose in the basic description, and maybe of some scenery items as
-    well.
-    * Need articles for things.
+  * `visual::room()` should maybe include descriptions of portable things as
+    prose in the basic description.
+    * Would need articles for things.
+    * Would need to take the location of things in the room into account,
+      i.e., "in the open drawer", "on the table".
 
 ## Background
 
