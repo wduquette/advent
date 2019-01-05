@@ -7,6 +7,11 @@ using something like the ECS architecture.
 
 Also, see docs/journal.txt.
 
+*   Consider how to implement containers, e.g., desks, chests of drawers.
+*   Consider how to implement NPCs/Monsters.
+*   Reconsider crate module layout, given "pub" rule:
+    *   A submodule can see everything in its parent modules, but only
+        "pub" things from any other module.
 *   A room description should include exits, but those should appear after
     any scenery descriptions.
 *   Support multiple commands on a command line.
@@ -15,9 +20,6 @@ Also, see docs/journal.txt.
 *   The stone on the hill should be accessible via the nouns "block" and "stone".
     *   Things should allow synonyms that are specific to that thing.
         *   Not every "stone" is a "block".
-*   Reconsider crate module layout, given "pub" rule:
-    *   A submodule can see everything in its parent modules, but only
-        "pub" things from any other module.
 *   Let rules use script hooks:
     *   Add methods to Script struct that add specific actions to the
         script.  The RuleBuilder will call these directly.
@@ -30,8 +32,6 @@ Also, see docs/journal.txt.
     *   Option B: The hook extends the pre-defined actions, if any.
     *   A is probably fine; B is more likely confusing.  So probably
         option A.
-* Move flag methods to flag::has, flag::set, flag::unset, following the
-  component architecture?
 * The Game
   * Add more story.
   * Main loop should halt if you're dead at the end of it.
@@ -144,6 +144,30 @@ should have no duration.  Some commands, like checking your inventory,
 should have no duration as well.  In principle, it's possible that some
 commands should take longer than one turn.
 
+### Library Architecture
+
+Redefine as a multi-crate project, with the framework in one crate and
+the scenario in another crate. This will involve reconsidering the
+module hierarchy.
+
+### Game compilation
+
+The Holy Grail would be compiling a game to a story file, and playing the
+game in a story player.  There are several ways this could be done.
+
+1. Target the Z-machine, and compile to Z-machine code.
+
+2. Compile to a Bonaventure-specific data format.
+
+The first is pointless unless I provide a "game definition language" that
+gets compiled, and then the compiler can be in Rust.  (Of course, all of
+this is fairly pointless anyway, except as an exercise.)
+
+Either one requires that scenario logic (i.e., logic in hooks of various
+kinds) be represented in something other than Rust code, so it can be
+saved to the file and loaded again.  That really implies that we use
+an embedded language for the hooks; see below.
+
 ### Ambient Sound
 
 It would be cool to manage sources of sound (conveyed, as always, by prose).
@@ -156,6 +180,9 @@ if you "listen".
 To do this properly we would need a notion of the distance between two rooms;
 just because they are adjacent in the link map doesn't mean they are close
 to each other.  A link could be a long road, for example.
+
+Note, though, that most of this can be handled by rules, provided that
+the WorldQuery trait provides an easy way to handle distance.
 
 ### NPCs and Monsters
 
