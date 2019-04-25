@@ -283,7 +283,7 @@ impl World {
 
     /// Is the flag set on the entity?
     pub fn has_flag(&self, id: ID, flag: Flag) -> bool {
-        assert!(self.has_flags(id) "Not a flag set: [{}]", id);
+        assert!(self.has_flags(id), "Not a flag set: [{}]", id);
         let fc = &self.flag_sets[&id];
 
         fc.has(flag)
@@ -291,7 +291,7 @@ impl World {
 
     /// Set the flag on the entity
     pub fn set_flag(&mut self, id: ID, flag: Flag) {
-        assert!(self.has_flags(id) "Not a flag set: [{}]", id);
+        assert!(self.has_flags(id), "Not a flag set: [{}]", id);
 
         let fc = self.flag_sets.get_mut(&id).unwrap();
 
@@ -301,7 +301,7 @@ impl World {
 
     /// Clear the flag from the entity
     pub fn unset_flag(&mut self, id: ID, flag: Flag) {
-        assert!(self.has_flags(id) "Not a flag set: [{}]", id);
+        assert!(self.has_flags(id), "Not a flag set: [{}]", id);
 
         let fc = self.flag_sets.get_mut(&id).unwrap();
 
@@ -336,7 +336,7 @@ impl WorldQuery for World {
     /// Is the flag set on the entity?
     fn has(&self, tag: &str, flag: Flag) -> bool {
         let id = self.lookup(tag);
-        assert!(self.has_flags(id) "Not a flag set: [{}]", id);
+        assert!(self.has_flags(id), "Not a flag set: [{}]", id);
         let fc = &self.flag_sets[&id];
 
         fc.has(flag)
